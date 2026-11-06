@@ -2,544 +2,804 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#101827">
 <title>IEGH DocuHub</title>
 <style>
 :root {
+  font-family: system-ui, -apple-system, sans-serif;
   color-scheme: dark;
-  font-family: system-ui,-apple-system,sans-serif;
-  background:#101827;
-  color:#eef4ff;
+  background: #101827;
+  color: #edf4ff;
 }
-* {box-sizing:border-box}
-body {margin:0;min-height:100vh}
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; }
 header {
-  background:#17243a;
-  border-bottom:1px solid #344b69;
-  padding:16px 5%;
+  background: #192942;
+  border-bottom: 1px solid #39516e;
+  padding: 18px 4%;
 }
-header h1 {margin:0;font-size:clamp(1.5rem,5vw,2rem)}
-header p {margin:5px 0 0;color:#a9bfdb;font-size:.85rem}
-main {width:94%;max-width:950px;margin:24px auto}
+header h1 { margin: 0; font-size: clamp(1.6rem, 5vw, 2.4rem); }
+header p { margin: 5px 0; color: #adc5e4; }
+main { max-width: 1050px; margin: auto; padding: 16px; }
 .panel {
-  background:#1b2b43;
-  border:1px solid #344b69;
-  border-radius:15px;
-  padding:clamp(15px,4vw,25px);
-  margin-bottom:18px;
+  background: #1c2c44;
+  border: 1px solid #3a526e;
+  border-radius: 15px;
+  padding: clamp(15px, 3vw, 25px);
+  margin-bottom: 16px;
 }
-h2 {margin:0 0 15px;font-size:1.3rem}
-h3 {margin:18px 0 10px}
-label {display:block;margin:13px 0 6px;color:#c5d7ed}
-input,select,textarea,button {
-  font:inherit;
-  border-radius:9px;
+h2 { margin: 0 0 15px; font-size: 1.3rem; }
+h3 { margin: 15px 0 10px; }
+p { line-height: 1.5; }
+label { display: block; margin: 12px 0 5px; color: #c7d9f0; }
+input, select, textarea, button { font: inherit; border-radius: 9px; }
+input, select, textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px;
+  background: #101b2e;
+  color: white;
+  border: 1px solid #526b8a;
 }
-input,select,textarea {
-  width:100%;
-  padding:13px;
-  color:white;
-  background:#101b2d;
-  border:1px solid #526985;
-  min-height:48px;
-}
-textarea {min-height:85px;resize:vertical}
+textarea { min-height: 90px; resize: vertical; }
 button {
-  border:0;
-  color:white;
-  background:#386ab0;
-  padding:13px 16px;
-  min-height:48px;
-  font-weight:650;
-  cursor:pointer;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 0;
+  background: #396caa;
+  color: white;
+  font-weight: 650;
+  cursor: pointer;
 }
-button:disabled {opacity:.5;cursor:not-allowed}
-button.secondary {background:#344963}
-button.selected {background:#177c9e;outline:2px solid #8ae3f3}
-button.danger {background:#84404c}
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.secondary { background: #344c69; }
+button.selected { background: #1684a2; outline: 2px solid #9de8ff; }
 .grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr));
-  gap:10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: 10px;
 }
-.grid button {min-height:76px;overflow-wrap:anywhere}
-.actions {display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-.actions button {flex:1 1 130px}
-.hidden {display:none!important}
-.muted {color:#a9bfdb}
-.small {font-size:.85rem}
-.status {color:#93e6b8}
-.warning {color:#ffcf83}
-.error {color:#ff9da8}
+.grid button { min-height: 72px; overflow-wrap: anywhere; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.actions button { flex: 1 1 130px; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.tabs button { flex: 1 1 125px; }
 .item {
-  padding:14px;
-  border:1px solid #3c5473;
-  border-radius:10px;
-  margin-top:10px;
+  border: 1px solid #405b79;
+  border-radius: 11px;
+  padding: 15px;
+  margin: 10px 0;
 }
-.item button {width:100%;margin-top:10px}
-.marker {
-  font-size:1.2rem;
-  font-weight:700;
-  color:#9ee7fa;
+.item p { margin: 6px 0; }
+.item .actions { margin-top: 10px; }
+.muted { color: #b3c7e1; }
+.good { color: #91e5b2; }
+.warn { color: #ffcc83; }
+.bad { color: #ff9ba7; }
+.hidden { display: none !important; }
+.marker { color: #9ce8fa; font-weight: 700; font-size: 1.15rem; }
+#message { white-space: pre-wrap; }
+.checkrow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #344963;
 }
-#message {white-space:pre-wrap}
-@media(max-width:420px) {
-  main {width:95%;margin:12px auto}
-  .grid {grid-template-columns:repeat(2,minmax(0,1fr))}
-  .grid button {font-size:.93rem}
+.checkrow input { width: 22px; min-height: 22px; height: 22px; }
+.checkrow label { margin: 0; flex: 1; }
+@media(max-width:440px) {
+  main { padding: 10px; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid button { font-size: .92rem; }
 }
 </style>
 </head>
 <body>
 <header>
-  <h1>IEGH DocuHub</h1>
-  <p>Investigation Documentation & Evidence Hub</p>
+<h1>IEGH DocuHub</h1>
+<p>Investigation Documentation & Evidence Hub</p>
 </header>
-
 <main>
-  <section class="panel" id="setup">
-    <h2>Connection Setup</h2>
-    <p class="muted">Supabase connection details are not configured yet.</p>
-    <p class="small">Only the public project URL and publishable key belong in this application. Never enter a secret or service-role key.</p>
-  </section>
 
-  <section class="panel hidden" id="login">
-    <h2>Investigator Login</h2>
-    <form id="loginForm">
-      <label for="email">Email</label>
-      <input id="email" type="email" autocomplete="username" required>
-      <label for="password">Password</label>
-      <input id="password" type="password" autocomplete="current-password" required>
-      <div class="actions">
-        <button type="submit">Sign In</button>
-      </div>
-    </form>
-  </section>
+<section class="panel" id="loginPanel">
+<h2>Member Login</h2>
+<form id="loginForm">
+<label for="email">Email</label>
+<input id="email" type="email" autocomplete="username" required>
+<label for="password">Password</label>
+<input id="password" type="password" autocomplete="current-password" required>
+<div class="actions"><button type="submit">Sign In</button></div>
+</form>
+</section>
 
-  <section class="panel hidden" id="dashboard">
-    <div class="actions">
-      <div style="flex:3">
-        <h2>Investigation Dashboard</h2>
-        <p id="memberInfo" class="muted"></p>
-      </div>
-      <button class="secondary" id="logout">Sign Out</button>
-    </div>
-    <p id="networkStatus" class="small"></p>
-    <p id="queueStatus" class="small"></p>
-    <button id="syncButton" class="secondary">Sync Pending Events</button>
-  </section>
+<section class="panel hidden" id="accountPanel">
+<h2>Investigation Dashboard</h2>
+<p id="accountInfo" class="muted"></p>
+<p id="connectionInfo" class="muted"></p>
+<div class="actions">
+<button class="secondary" id="syncButton">Sync Pending Events</button>
+<button class="secondary" id="logoutButton">Sign Out</button>
+</div>
+</section>
 
-  <section class="panel hidden" id="investigationsPanel">
-    <h2>Investigations</h2>
-    <p class="muted small">Choose an investigation to begin documenting activity.</p>
-    <div id="investigationList"></div>
-    <button class="secondary" id="refreshButton" style="margin-top:15px">
-      Refresh Investigations
-    </button>
-  </section>
+<section class="panel hidden" id="navigation">
+<div class="tabs" id="tabs">
+<button data-page="investigationsPage">Investigations</button>
+<button data-page="locationsPage">Locations</button>
+<button data-page="eventsPage">Event Logger</button>
+<button data-page="adminPage" id="adminTab">Admin</button>
+</div>
+</section>
 
-  <section class="panel hidden" id="logger">
-    <h2 id="investigationTitle">Event Logger</h2>
-    <p class="muted">Tap an event to capture its time immediately.</p>
-    <h3>Quick Event</h3>
-    <div class="grid" id="eventButtons"></div>
+<section class="panel hidden page" id="locationsPage">
+<h2>Location Directory</h2>
+<p class="muted">One editable profile for each investigation site.</p>
+<div id="locationList"></div>
+<div id="locationEditor" class="hidden">
+<h3 id="locationEditorTitle">Location Profile</h3>
+<form id="locationForm">
+<label for="locName">Location Name *</label>
+<input id="locName" required>
+<label for="locAddress">Street Address</label>
+<input id="locAddress">
+<label for="locCity">City</label>
+<input id="locCity">
+<label for="locState">State</label>
+<input id="locState" value="CA">
+<label for="locZip">ZIP Code</label>
+<input id="locZip">
+<label for="locDescription">Property Description</label>
+<textarea id="locDescription"></textarea>
+<label for="locHistory">Location History</label>
+<textarea id="locHistory"></textarea>
+<label for="locActivity">Reported Paranormal Activity</label>
+<textarea id="locActivity"></textarea>
+<label for="locRooms">Floors and Rooms</label>
+<textarea id="locRooms"></textarea>
+<label for="locExterior">Exterior Areas</label>
+<textarea id="locExterior"></textarea>
+<label for="locAccess">Access Notes</label>
+<textarea id="locAccess"></textarea>
+<div class="actions">
+<button type="submit">Save Location</button>
+<button type="button" class="secondary" id="cancelLocation">Cancel</button>
+</div>
+</form>
+</div>
+</section>
 
-    <div id="eventDetails" class="hidden">
-      <p class="marker" id="capturedTime"></p>
-      <label for="area">Room / Area (optional)</label>
-      <input id="area" placeholder="Example: Upstairs hallway">
-      <label for="notes">Description (optional)</label>
-      <textarea id="notes" placeholder="What happened?"></textarea>
-      <div class="actions">
-        <button id="saveEvent">Log Event</button>
-        <button class="secondary" id="cancelEvent">Cancel</button>
-      </div>
-    </div>
-  </section>
+<section class="panel hidden page" id="investigationsPage">
+<h2>Investigations</h2>
+<p class="muted">Choose an investigation to view or document.</p>
+<div id="investigationList"></div>
+<div class="actions">
+<button class="secondary" id="refreshInvestigations">Refresh</button>
+</div>
+</section>
 
-  <section class="panel hidden" id="recentPanel">
-    <h2>Recent Event Markers</h2>
-    <div id="recentEvents"></div>
-  </section>
+<section class="panel hidden page" id="eventsPage">
+<h2>Quick Event Logger</h2>
+<label for="eventInvestigation">Investigation</label>
+<select id="eventInvestigation"></select>
+<p class="muted">Tap a button to capture a general time marker immediately.</p>
+<div class="grid" id="eventButtons"></div>
+<div id="eventEntry" class="hidden">
+<p id="eventTime" class="marker"></p>
+<label for="eventArea">Room / Area (optional)</label>
+<input id="eventArea" placeholder="Example: Upstairs hallway">
+<label for="eventNotes">Description (optional)</label>
+<textarea id="eventNotes" placeholder="What happened?"></textarea>
+<div class="actions">
+<button id="saveEvent">Log Event</button>
+<button class="secondary" id="cancelEvent">Cancel</button>
+</div>
+</div>
+<h3>Pending Local Markers</h3>
+<div id="pendingEvents"></div>
+</section>
 
-  <section class="panel">
-    <p id="message" class="muted" role="status" aria-live="polite">Initializing DocuHub...</p>
-  </section>
+<section class="panel hidden page" id="adminPage">
+<h2>Admin Headquarters</h2>
+<p class="muted">Manage investigation locations, schedules, and assignments.</p>
+<div class="actions">
+<button id="newLocation">Add Location</button>
+<button id="newInvestigation">Schedule Investigation</button>
+</div>
+
+<div id="investigationEditor" class="hidden">
+<h3 id="investigationEditorTitle">Investigation Details</h3>
+<form id="investigationForm">
+<label for="invLocation">Location *</label>
+<select id="invLocation" required></select>
+<label for="invDate">Investigation Date *</label>
+<input id="invDate" type="date" required>
+<label for="invTime">Start Time *</label>
+<input id="invTime" type="time" required>
+<label for="invStatus">Status</label>
+<select id="invStatus">
+<option value="scheduled">Scheduled</option>
+<option value="active">Active</option>
+<option value="completed">Completed</option>
+<option value="cancelled">Cancelled</option>
+</select>
+<label for="invNotes">Investigation Notes</label>
+<textarea id="invNotes"></textarea>
+<div class="actions">
+<button type="submit">Save Investigation</button>
+<button type="button" class="secondary" id="cancelInvestigation">Cancel</button>
+</div>
+</form>
+</div>
+
+<div id="assignmentEditor" class="hidden">
+<h3>Assign Investigators</h3>
+<p id="assignmentTitle" class="muted"></p>
+<div id="memberChecklist"></div>
+<div class="actions">
+<button id="saveAssignments">Save Assignments</button>
+<button class="secondary" id="cancelAssignments">Cancel</button>
+</div>
+</div>
+
+<h3>Member Directory</h3>
+<div id="memberList"></div>
+<p class="muted">New member accounts must be created or invited through Supabase Authentication.</p>
+</section>
+
+<section class="panel">
+<p id="message" class="muted" role="status" aria-live="polite">Starting DocuHub...</p>
+</section>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 "use strict";
 
-// CONFIGURATION
-// We will enter these values in the next step.
-const SUPABASE_URL = "https://wuhshzfxdhsxpehbhuvn.supabase.co";
+// INSERT YOUR EXISTING WORKING SUPABASE VALUES HERE
+const SUPABASE_URL = "https://wuhshzfxdhsxpehbhuvn.supabase.co/";
 const SUPABASE_KEY = "sb_publishable__-GbvBCUDmSBlyVOMijkFA_M8tWiUEQ";
 
 const $ = id => document.getElementById(id);
-const show = (id,visible) =>
-  $(id).classList.toggle("hidden",!visible);
+const show = (id,yes) => $(id).classList.toggle("hidden",!yes);
+const db = window.supabase &&
+ !SUPABASE_URL.startsWith("YOUR_") &&
+ !SUPABASE_KEY.startsWith("YOUR_")
+ ? window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
+ : null;
 
-const EVENT_TYPES = [
-  "Unexplained Sound",
-  "Voice / Whisper",
-  "Footsteps",
-  "Movement",
-  "Shadow / Figure",
-  "Light Anomaly",
-  "Temperature Change",
-  "EMF Activity",
-  "REM Pod",
-  "Equipment Activity",
-  "Physical Sensation",
-  "Other"
+const TYPES = [
+ "Unexplained Sound","Voice / Whisper","Footsteps",
+ "Movement","Shadow / Figure","Light Anomaly",
+ "Temperature Change","EMF Activity","REM Pod",
+ "Equipment Activity","Physical Sensation","Other"
 ];
 
 const QUEUE_KEY = "iegh_docuhub_pending_v1";
+let user=null,role=null,locations=[],investigations=[],members=[];
+let editingLocation=null,editingInvestigation=null;
+let assigningInvestigation=null,pending=null;
 
-let db = null;
-let currentUser = null;
-let currentRole = null;
-let selectedInvestigation = null;
-let pendingEvent = null;
-let investigations = [];
-
-function message(text,type="muted") {
-  $("message").textContent=text;
-  $("message").className=type;
+function msg(text,kind="muted") {
+ $("message").textContent=text;
+ $("message").className=kind;
 }
-
-function formatTime(iso) {
-  return new Date(iso).toLocaleString(undefined,{
-    month:"short",day:"numeric",year:"numeric",
-    hour:"numeric",minute:"2-digit",second:"2-digit"
-  });
-}
-
 function queueRead() {
-  try {
-    const data=JSON.parse(localStorage.getItem(QUEUE_KEY)||"[]");
-    return Array.isArray(data)?data:[];
-  } catch {
-    return [];
+ try {
+  const v=JSON.parse(localStorage.getItem(QUEUE_KEY)||"[]");
+  return Array.isArray(v)?v:[];
+ } catch {return []}
+}
+function queueWrite(v) {
+ localStorage.setItem(QUEUE_KEY,JSON.stringify(v));
+ renderPending();
+}
+function timeLabel(iso) {
+ return new Date(iso).toLocaleString(undefined,{
+  month:"short",day:"numeric",year:"numeric",
+  hour:"numeric",minute:"2-digit",second:"2-digit"
+ });
+}
+function addText(parent,tag,value,cls) {
+ const el=document.createElement(tag);
+ el.textContent=value;
+ if(cls)el.className=cls;
+ parent.append(el);
+ return el;
+}
+function addButton(parent,label,fn,cls="secondary") {
+ const b=document.createElement("button");
+ b.textContent=label;
+ b.className=cls;
+ b.type="button";
+ b.addEventListener("click",fn);
+ parent.append(b);
+ return b;
+}
+function option(select,value,label) {
+ const el=document.createElement("option");
+ el.value=value;
+ el.textContent=label;
+ select.append(el);
+}
+function locationName(id) {
+ return locations.find(x=>x.id===id)?.name||"Unknown location";
+}
+function memberName(m) {
+ return m.display_name||"Member "+m.id.slice(0,8);
+}
+function setPage(id) {
+ document.querySelectorAll(".page").forEach(p=>show(p.id,p.id===id));
+ document.querySelectorAll("#tabs button").forEach(b=>{
+  b.classList.toggle("selected",b.dataset.page===id);
+ });
+}
+
+async function loadData() {
+ const [l,i,m]=await Promise.all([
+  db.from("locations").select("*").order("name"),
+  db.from("investigations").select("*").order("investigation_date",{ascending:false}),
+  db.from("members").select("id,display_name,role")
+ ]);
+ if(l.error||i.error||m.error) {
+  msg("Loading error: "+(l.error||i.error||m.error).message,"bad");
+  return;
+ }
+ locations=l.data||[];
+ investigations=i.data||[];
+ members=m.data||[];
+ renderLocations();
+ renderInvestigations();
+ renderMembers();
+ renderVisitOptions();
+ renderPending();
+ msg("DocuHub ready.","good");
+}
+
+function renderLocations() {
+ const box=$("locationList");
+ box.replaceChildren();
+ if(!locations.length)addText(box,"p","No locations added yet.","muted");
+ locations.forEach(loc=>{
+  const card=document.createElement("div");
+  card.className="item";
+  addText(card,"strong",loc.name);
+  addText(card,"p",[loc.address,loc.city,loc.state].filter(Boolean).join(", "),"muted");
+  if(loc.property_description)addText(card,"p",loc.property_description);
+  if(role==="admin") {
+   const actions=document.createElement("div");
+   actions.className="actions";
+   addButton(actions,"Edit Profile",()=>openLocation(loc));
+   card.append(actions);
   }
+  box.append(card);
+ });
+}
+function openLocation(loc=null) {
+ editingLocation=loc?.id||null;
+ const fields={
+  locName:"name",locAddress:"address",locCity:"city",
+  locState:"state",locZip:"postal_code",
+  locDescription:"property_description",
+  locHistory:"location_history",locActivity:"reported_activity",
+  locRooms:"floors_and_rooms",locExterior:"exterior_areas",
+  locAccess:"access_notes"
+ };
+ Object.entries(fields).forEach(([id,key])=>{
+  $(id).value=loc?.[key]??(id==="locState"?"CA":"");
+ });
+ $("locationEditorTitle").textContent=loc?"Edit Location":"Add Location";
+ show("locationEditor",true);
+ setPage("locationsPage");
+ $("locationEditor").scrollIntoView({behavior:"smooth"});
+}
+async function saveLocation(e) {
+ e.preventDefault();
+ if(role!=="admin")return;
+ const data={
+  name:$("locName").value.trim(),
+  address:$("locAddress").value.trim(),
+  city:$("locCity").value.trim(),
+  state:$("locState").value.trim(),
+  postal_code:$("locZip").value.trim(),
+  property_description:$("locDescription").value.trim(),
+  location_history:$("locHistory").value.trim(),
+  reported_activity:$("locActivity").value.trim(),
+  floors_and_rooms:$("locRooms").value.trim(),
+  exterior_areas:$("locExterior").value.trim(),
+  access_notes:$("locAccess").value.trim()
+ };
+ if(!data.name) {
+  msg("Location name required.","bad");
+  return;
+ }
+ const r=editingLocation
+  ?await db.from("locations").update(data).eq("id",editingLocation).select()
+  :await db.from("locations").insert(data).select();
+ if(r.error) {
+  msg(r.error.message,"bad");
+  return;
+ }
+ show("locationEditor",false);
+ await loadData();
+ msg("Location saved.","good");
 }
 
-function queueWrite(items) {
-  localStorage.setItem(QUEUE_KEY,JSON.stringify(items));
-  queueStatus();
+function renderInvestigations() {
+ const box=$("investigationList");
+ box.replaceChildren();
+ if(!investigations.length)addText(box,"p","No investigations scheduled yet.","muted");
+ investigations.forEach(inv=>{
+  const card=document.createElement("div");
+  card.className="item";
+  addText(card,"strong",locationName(inv.location_id));
+  addText(card,"p",inv.investigation_date+" | "+inv.start_time+" | "+inv.status,"muted");
+  if(inv.notes)addText(card,"p",inv.notes);
+  const actions=document.createElement("div");
+  actions.className="actions";
+  if(inv.status==="active") {
+   addButton(actions,"Open Event Logger",()=>{
+    $("eventInvestigation").value=inv.id;
+    setPage("eventsPage");
+   },"");
+  }
+  if(role==="admin") {
+   addButton(actions,"Edit",()=>openInvestigation(inv));
+   addButton(actions,"Assign Members",()=>openAssignments(inv));
+  }
+  card.append(actions);
+  box.append(card);
+ });
+}
+function openInvestigation(inv=null) {
+ editingInvestigation=inv?.id||null;
+ const select=$("invLocation");
+ select.replaceChildren();
+ locations.forEach(loc=>option(select,loc.id,loc.name));
+ $("invDate").value=inv?.investigation_date||"";
+ $("invTime").value=inv?.start_time?.slice(0,5)||"";
+ $("invStatus").value=inv?.status||"scheduled";
+ $("invNotes").value=inv?.notes||"";
+ if(inv)select.value=inv.location_id;
+ $("investigationEditorTitle").textContent=inv?"Edit Investigation":"Schedule Investigation";
+ show("investigationEditor",true);
+ setPage("adminPage");
+ $("investigationEditor").scrollIntoView({behavior:"smooth"});
+}
+async function saveInvestigation(e) {
+ e.preventDefault();
+ if(role!=="admin")return;
+ const data={
+  location_id:$("invLocation").value,
+  investigation_date:$("invDate").value,
+  start_time:$("invTime").value,
+  status:$("invStatus").value,
+  notes:$("invNotes").value.trim()
+ };
+ if(!data.location_id||!data.investigation_date||!data.start_time) {
+  msg("Location, date and start time required.","bad");
+  return;
+ }
+ const r=editingInvestigation
+  ?await db.from("investigations").update(data).eq("id",editingInvestigation).select()
+  :await db.from("investigations").insert(data).select();
+ if(r.error) {
+  msg(r.error.message,"bad");
+  return;
+ }
+ show("investigationEditor",false);
+ await loadData();
+ msg("Investigation saved.","good");
+}
+async function openAssignments(inv) {
+ if(role!=="admin")return;
+ assigningInvestigation=inv.id;
+ $("assignmentTitle").textContent=locationName(inv.location_id)+" | "+inv.investigation_date;
+ const {data,error}=await db.from("investigation_members")
+  .select("member_id").eq("investigation_id",inv.id);
+ if(error) {
+  msg(error.message,"bad");
+  return;
+ }
+ const assigned=new Set((data||[]).map(x=>x.member_id));
+ const box=$("memberChecklist");
+ box.replaceChildren();
+ [...members].sort((a,b)=>memberName(a).localeCompare(memberName(b)))
+ .forEach(m=>{
+  const row=document.createElement("div");
+  row.className="checkrow";
+  const input=document.createElement("input");
+  input.type="checkbox";
+  input.value=m.id;
+  input.checked=assigned.has(m.id);
+  input.id="member_"+m.id;
+  const label=document.createElement("label");
+  label.htmlFor=input.id;
+  label.textContent=memberName(m)+" ("+m.role+")";
+  row.append(input,label);
+  box.append(row);
+ });
+ show("assignmentEditor",true);
+ setPage("adminPage");
+ $("assignmentEditor").scrollIntoView({behavior:"smooth"});
+}
+async function saveAssignments() {
+ if(!assigningInvestigation||role!=="admin")return;
+ const id=assigningInvestigation;
+ const selected=new Set(
+  [...$("memberChecklist").querySelectorAll("input:checked")].map(x=>x.value)
+ );
+ const {data,error}=await db.from("investigation_members")
+  .select("member_id").eq("investigation_id",id);
+ if(error) {
+  msg(error.message,"bad");
+  return;
+ }
+ const current=new Set((data||[]).map(x=>x.member_id));
+ const add=[...selected].filter(x=>!current.has(x))
+  .map(member_id=>({investigation_id:id,member_id}));
+ const remove=[...current].filter(x=>!selected.has(x));
+ if(add.length) {
+  const r=await db.from("investigation_members").insert(add);
+  if(r.error) {
+   msg(r.error.message,"bad");
+   return;
+  }
+ }
+ for(const member_id of remove) {
+  const r=await db.from("investigation_members").delete()
+   .eq("investigation_id",id).eq("member_id",member_id);
+  if(r.error) {
+   msg(r.error.message,"bad");
+   return;
+  }
+ }
+ show("assignmentEditor",false);
+ assigningInvestigation=null;
+ msg("Assignments saved.","good");
+}
+function renderMembers() {
+ const box=$("memberList");
+ box.replaceChildren();
+ [...members].sort((a,b)=>memberName(a).localeCompare(memberName(b)))
+ .forEach(m=>{
+  const div=document.createElement("div");
+  div.className="item";
+  addText(div,"strong",memberName(m));
+  addText(div,"p",m.role.toUpperCase(),"muted");
+  box.append(div);
+ });
+}
+function renderVisitOptions() {
+ const select=$("eventInvestigation");
+ const previous=select.value;
+ select.replaceChildren();
+ option(select,"","Select an active investigation");
+ investigations.filter(x=>x.status==="active").forEach(inv=>{
+  option(select,inv.id,locationName(inv.location_id)+" | "+inv.investigation_date);
+ });
+ if(investigations.some(x=>x.id===previous&&x.status==="active")) {
+  select.value=previous;
+ }
 }
 
-function queueStatus() {
-  const n=queueRead().length;
-  $("queueStatus").textContent=n+
-    " event(s) waiting to synchronize";
+function renderEventButtons() {
+ const box=$("eventButtons");
+ box.replaceChildren();
+ TYPES.forEach(type=>addButton(box,type,()=>captureEvent(type),""));
 }
-
-function networkStatus() {
-  $("networkStatus").textContent=navigator.onLine
-    ?"Network available":"Offline mode";
-  $("networkStatus").className=navigator.onLine
-    ?"small status":"small warning";
-}
-
-function renderButtons() {
-  const box=$("eventButtons");
-  box.replaceChildren();
-  EVENT_TYPES.forEach(type=>{
-    const button=document.createElement("button");
-    button.textContent=type;
-    button.addEventListener("click",()=>captureEvent(type));
-    box.appendChild(button);
-  });
-}
-
 function captureEvent(type) {
-  if (!selectedInvestigation || !currentUser) return;
-  pendingEvent={
-    id:crypto.randomUUID(),
-    investigation_id:selectedInvestigation.id,
-    investigator_id:currentUser.id,
-    event_type:type,
-    event_time:new Date().toISOString()
-  };
-  $("capturedTime").textContent=
-    type+" | "+formatTime(pendingEvent.event_time);
-  $("area").value="";
-  $("notes").value="";
-  show("eventDetails",true);
-  document.querySelectorAll("#eventButtons button")
-    .forEach(b=>b.classList.toggle("selected",b.textContent===type));
+ const id=$("eventInvestigation").value;
+ if(!id) {
+  msg("Select an active investigation first.","warn");
+  return;
+ }
+ if(!user)return;
+ if(!crypto.randomUUID) {
+  msg("This browser cannot generate event IDs.","bad");
+  return;
+ }
+ pending={
+  id:crypto.randomUUID(),
+  investigation_id:id,
+  investigator_id:user.id,
+  event_type:type,
+  event_time:new Date().toISOString()
+ };
+ $("eventTime").textContent=type+" | "+timeLabel(pending.event_time);
+ $("eventArea").value="";
+ $("eventNotes").value="";
+ show("eventEntry",true);
+ document.querySelectorAll("#eventButtons button").forEach(b=>{
+  b.classList.toggle("selected",b.textContent===type);
+ });
 }
-
 function cancelEvent() {
-  pendingEvent=null;
-  show("eventDetails",false);
-  document.querySelectorAll("#eventButtons button")
-    .forEach(b=>b.classList.remove("selected"));
+ pending=null;
+ show("eventEntry",false);
+ document.querySelectorAll("#eventButtons button").forEach(b=>{
+  b.classList.remove("selected");
+ });
 }
-
 function saveEvent() {
-  if (!pendingEvent || !currentUser) return;
-  const entry={
-    ...pendingEvent,
-    area:$("area").value.trim(),
-    notes:$("notes").value.trim()
-  };
-  try {
-    const queue=queueRead();
-    queue.push(entry);
-    queueWrite(queue);
-  } catch {
-    message("Could not save locally. Check available device storage.","error");
-    return;
-  }
-  cancelEvent();
-  message("Event marker saved locally.","status");
-  renderRecent();
-  if(navigator.onLine) syncEvents();
-}
-
-async function syncEvents() {
-  if (!db || !currentUser || !navigator.onLine) return;
+ if(!pending)return;
+ const entry={
+  ...pending,
+  area:$("eventArea").value.trim(),
+  notes:$("eventNotes").value.trim()
+ };
+ try {
   const queue=queueRead();
-  if(!queue.length) {
-    queueStatus();
-    return;
-  }
-
-  const remaining=[];
-  let uploaded=0;
-  let firstError="";
-
-  for(const entry of queue) {
-    if(entry.investigator_id!==currentUser.id) {
-      remaining.push(entry);
-      continue;
-    }
-
-    const {error}=await db
-      .from("investigation_events")
-      .upsert(entry,{onConflict:"id"});
-
-    if(error) {
-      remaining.push(entry);
-      if(!firstError) firstError=error.message;
-    } else {
-      uploaded++;
-    }
-  }
-
-  try {
-    queueWrite(remaining);
-  } catch {
-    message("Sync completed but the local queue could not be updated.","error");
-    return;
-  }
-
-  if(firstError) {
-    message("Some events remain queued: "+firstError,"warning");
-  } else if(uploaded) {
-    message(uploaded+" event(s) synchronized.","status");
-  }
-  renderRecent();
+  queue.push(entry);
+  queueWrite(queue);
+ } catch {
+  msg("Local save failed. Do not discard this marker.","bad");
+  return;
+ }
+ cancelEvent();
+ msg("Event saved locally.","good");
+ if(navigator.onLine)syncEvents();
 }
-
-function renderRecent() {
-  const box=$("recentEvents");
-  box.replaceChildren();
-  if(!selectedInvestigation) return;
-
-  const items=queueRead()
-    .filter(e=>
-      e.investigation_id===selectedInvestigation.id &&
-      e.investigator_id===currentUser.id
-    )
-    .sort((a,b)=>b.event_time.localeCompare(a.event_time))
-    .slice(0,15);
-
-  if(!items.length) {
-    box.textContent="No locally pending markers.";
-    return;
-  }
-
-  items.forEach(e=>{
-    const div=document.createElement("div");
-    div.className="item";
-    const title=document.createElement("strong");
-    title.textContent=e.event_type;
-    const detail=document.createElement("p");
-    detail.className="small muted";
-    detail.textContent=formatTime(e.event_time)+" | Pending sync";
-    div.append(title,detail);
-    if(e.area) {
-      const area=document.createElement("p");
-      area.textContent=e.area;
-      div.append(area);
-    }
-    box.append(div);
-  });
+function renderPending() {
+ const box=$("pendingEvents");
+ box.replaceChildren();
+ const list=queueRead().filter(x=>x.investigator_id===user?.id);
+ addText(box,"p",list.length+" marker(s) awaiting sync.","muted");
+ list.slice().reverse().slice(0,20).forEach(e=>{
+  const card=document.createElement("div");
+  card.className="item";
+  addText(card,"strong",e.event_type);
+  addText(card,"p",timeLabel(e.event_time),"muted");
+  if(e.area)addText(card,"p",e.area);
+  box.append(card);
+ });
 }
-
-async function loadInvestigations() {
-  if(!db || !currentUser) return;
-
-  const {data,error}=await db
-    .from("investigations")
-    .select("id,investigation_date,start_time,status,location_id,locations(name)")
-    .order("investigation_date",{ascending:false});
-
+async function syncEvents() {
+ if(!db||!user||!navigator.onLine)return;
+ const queue=queueRead();
+ if(!queue.length) {
+  renderPending();
+  return;
+ }
+ const remaining=[];
+ let uploaded=0,firstError="";
+ for(const entry of queue) {
+  if(entry.investigator_id!==user.id) {
+   remaining.push(entry);
+   continue;
+  }
+  const {error}=await db.from("investigation_events")
+   .upsert(entry,{onConflict:"id"});
   if(error) {
-    message("Unable to load investigations: "+error.message,"error");
-    return;
+   remaining.push(entry);
+   if(!firstError)firstError=error.message;
+  } else {
+   uploaded++;
   }
-
-  investigations=data||[];
-  const box=$("investigationList");
-  box.replaceChildren();
-
-  if(!investigations.length) {
-    box.textContent="No investigations available yet.";
-    return;
-  }
-
-  investigations.forEach(inv=>{
-    const div=document.createElement("div");
-    div.className="item";
-    const name=inv.locations?.name||"Unnamed Location";
-    const title=document.createElement("strong");
-    title.textContent=name;
-    const info=document.createElement("p");
-    info.className="muted small";
-    info.textContent=inv.investigation_date+
-      " | "+inv.start_time+" | "+inv.status;
-    const button=document.createElement("button");
-    button.textContent="Open Investigation";
-    button.addEventListener("click",()=>selectInvestigation(inv));
-    div.append(title,info,button);
-    box.append(div);
-  });
-}
-
-function selectInvestigation(inv) {
-  selectedInvestigation=inv;
-  cancelEvent();
-  $("investigationTitle").textContent=
-    (inv.locations?.name||"Investigation")+" | Event Logger";
-  show("logger",true);
-  show("recentPanel",true);
-  const active=inv.status==="active";
-  document.querySelectorAll("#eventButtons button")
-    .forEach(b=>b.disabled=!active);
-  message(active
-    ?"Investigation opened. Ready to log events."
-    :"This investigation is not active. Event logging is disabled.",
-    active?"status":"warning");
-  renderRecent();
-}
-
-async function signedIn() {
-  const {data:{user},error}=await db.auth.getUser();
-  if(error || !user) {
-    await signedOut();
-    return;
-  }
-
-  const {data:member,error:memberError}=await db
-    .from("members")
-    .select("role,display_name")
-    .eq("id",user.id)
-    .single();
-
-  if(memberError || !member) {
-    message("No authorized member profile found.","error");
-    await db.auth.signOut();
-    await signedOut();
-    return;
-  }
-
-  currentUser=user;
-  currentRole=member.role;
-  show("login",false);
-  show("dashboard",true);
-  show("investigationsPanel",true);
-  $("memberInfo").textContent=
-    (member.display_name||user.email)+" | "+
-    currentRole.toUpperCase();
-  networkStatus();
-  queueStatus();
-  await loadInvestigations();
-  if(navigator.onLine) await syncEvents();
+ }
+ try {
+  queueWrite(remaining);
+ } catch {
+  msg("Local queue update failed.","bad");
+  return;
+ }
+ if(firstError)msg("Some markers remain pending: "+firstError,"warn");
+ else if(uploaded)msg(uploaded+" event marker(s) synchronized.","good");
 }
 
 async function signedOut() {
-  currentUser=null;
-  currentRole=null;
-  selectedInvestigation=null;
-  pendingEvent=null;
-  show("login",true);
-  show("dashboard",false);
-  show("investigationsPanel",false);
-  show("logger",false);
-  show("recentPanel",false);
+ user=null;
+ role=null;
+ pending=null;
+ show("loginPanel",true);
+ show("accountPanel",false);
+ show("navigation",false);
+ document.querySelectorAll(".page").forEach(p=>show(p.id,false));
 }
-
-$("loginForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  if(!db)return;
-  message("Signing in...");
-  const {error}=await db.auth.signInWithPassword({
-    email:$("email").value.trim(),
-    password:$("password").value
-  });
-  $("password").value="";
-  if(error) {
-    message(error.message,"error");
-    return;
-  }
-  await signedIn();
-});
-
-$("logout").addEventListener("click",async()=>{
-  if(db) await db.auth.signOut();
+async function signedIn() {
+ const {data:{user:authUser},error}=await db.auth.getUser();
+ if(error||!authUser) {
   await signedOut();
-  message("Signed out.");
+  return;
+ }
+ const result=await db.from("members")
+  .select("id,display_name,role")
+  .eq("id",authUser.id)
+  .single();
+ if(result.error||!result.data) {
+  msg("Authorized member profile not found.","bad");
+  await db.auth.signOut();
+  await signedOut();
+  return;
+ }
+ user=authUser;
+ role=result.data.role;
+ $("accountInfo").textContent=
+  (result.data.display_name||user.email)+" | "+role.toUpperCase();
+ show("loginPanel",false);
+ show("accountPanel",true);
+ show("navigation",true);
+ show("adminTab",role==="admin");
+ $("connectionInfo").textContent=navigator.onLine
+  ?"Online":"Offline. Pending markers remain on this device.";
+ await loadData();
+ setPage("investigationsPage");
+ if(navigator.onLine)await syncEvents();
+}
+$("loginForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(!db)return;
+ msg("Signing in...");
+ const {error}=await db.auth.signInWithPassword({
+  email:$("email").value.trim(),
+  password:$("password").value
+ });
+ $("password").value="";
+ if(error) {
+  msg(error.message,"bad");
+  return;
+ }
+ await signedIn();
 });
-
-$("refreshButton").addEventListener("click",loadInvestigations);
+$("logoutButton").addEventListener("click",async()=>{
+ await db.auth.signOut();
+ await signedOut();
+ msg("Signed out.");
+});
+$("tabs").addEventListener("click",e=>{
+ const b=e.target.closest("button[data-page]");
+ if(!b)return;
+ if(b.dataset.page==="adminPage"&&role!=="admin")return;
+ setPage(b.dataset.page);
+});
+$("locationForm").addEventListener("submit",saveLocation);
+$("cancelLocation").addEventListener("click",()=>show("locationEditor",false));
+$("newLocation").addEventListener("click",()=>openLocation());
+$("newInvestigation").addEventListener("click",()=>{
+ if(!locations.length) {
+  msg("Add a location first.","warn");
+  return;
+ }
+ openInvestigation();
+});
+$("investigationForm").addEventListener("submit",saveInvestigation);
+$("cancelInvestigation").addEventListener("click",()=>show("investigationEditor",false));
+$("saveAssignments").addEventListener("click",saveAssignments);
+$("cancelAssignments").addEventListener("click",()=>show("assignmentEditor",false));
+$("refreshInvestigations").addEventListener("click",loadData);
 $("saveEvent").addEventListener("click",saveEvent);
 $("cancelEvent").addEventListener("click",cancelEvent);
 $("syncButton").addEventListener("click",syncEvents);
-
-window.addEventListener("online",()=>{
-  networkStatus();
-  if(currentUser) syncEvents();
+$("eventInvestigation").addEventListener("change",()=>{
+ cancelEvent();
+ renderPending();
 });
-window.addEventListener("offline",networkStatus);
-
-async function initialize() {
-  renderButtons();
-  networkStatus();
-
-  if(SUPABASE_URL.startsWith("YOUR_") ||
-     SUPABASE_KEY.startsWith("YOUR_")) {
-    message("App interface installed. Supabase connection needed.","warning");
-    return;
-  }
-
-  if(!window.supabase) {
-    message("Supabase library unavailable. Connect to the internet and reload.","error");
-    return;
-  }
-
-  db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-  show("setup",false);
+window.addEventListener("online",()=>{
+ if(user) {
+  $("connectionInfo").textContent="Online";
+  syncEvents();
+ }
+});
+window.addEventListener("offline",()=>{
+ if(user) {
+  $("connectionInfo").textContent=
+   "Offline. Pending markers remain on this device.";
+ }
+});
+async function init() {
+ renderEventButtons();
+ if(!db) {
+  msg("Enter your Supabase Project URL and publishable key.","warn");
+  return;
+ }
+ try {
   await signedIn();
+ } catch(e) {
+  msg("Initialization error: "+e.message,"bad");
+ }
 }
-
-initialize();
+init();
 </script>
 </body>
 </html>
