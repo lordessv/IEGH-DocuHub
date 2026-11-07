@@ -209,6 +209,35 @@ button.selected {
   .panel { padding: 13px; }
   .header-menu { width: 125px; }
 }
+  
+/* Prevent iOS date/time inputs from overflowing */
+input[type="date"],
+input[type="time"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+/* Keep form controls inside their panels */
+.panel,
+form,
+.item {
+  min-width: 0;
+}
+.panel input,
+.panel select,
+.panel textarea {
+  max-width: 100%;
+}
+
+/* iPhone Safari date/time alignment */
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value {
+  text-align: left;
+}
 </style>
 </head>
 <body>
