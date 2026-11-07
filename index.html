@@ -2,254 +2,255 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#101827">
 <title>IEGH DocuHub</title>
+
 <style>
 :root {
-  font-family: system-ui, -apple-system, sans-serif;
-  color-scheme: dark;
-  background: #101827;
-  color: #edf4ff;
+  font-family:system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+  background:#101827;
+  color:#edf4ff;
 }
-* { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; }
+* { box-sizing:border-box; }
+html,body { margin:0; max-width:100%; }
+body { min-height:100vh; overflow-x:hidden; }
 header {
-  background: #192942;
-  border-bottom: 1px solid #39516e;
-  padding: 12px 4%;
+  background:#192942;
+  border-bottom:1px solid #39516e;
+  padding:12px 4%;
 }
 .header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
 }
 header h1 {
-  margin: 0;
-  font-size: clamp(1.25rem, 4.5vw, 2rem);
+  margin:0;
+  font-size:clamp(1.25rem,4.5vw,2rem);
 }
 main {
-  max-width: 1050px;
-  margin: auto;
-  padding: 12px;
+  max-width:1050px;
+  margin:auto;
+  padding:12px;
 }
 .panel {
-  background: #1c2c44;
-  border: 1px solid #3a526e;
-  border-radius: 15px;
-  padding: clamp(14px, 3vw, 25px);
-  margin-bottom: 14px;
+  background:#1c2c44;
+  border:1px solid #3a526e;
+  border-radius:15px;
+  padding:clamp(14px,3vw,25px);
+  margin-bottom:14px;
+  min-width:0;
 }
-h2 { margin: 0 0 14px; font-size: 1.3rem; }
-h3 { margin: 18px 0 10px; }
-h4 { margin: 14px 0 8px; color: #b9d9fa; }
-p { line-height: 1.5; }
+h2 { margin:0 0 14px; font-size:1.3rem; }
+h3 { margin:18px 0 10px; }
+h4 { margin:14px 0 8px; color:#b9d9fa; }
+p { line-height:1.5; }
 label {
-  display: block;
-  margin: 12px 0 5px;
-  color: #c7d9f0;
+  display:block;
+  margin:12px 0 5px;
+  color:#c7d9f0;
 }
-input, select, textarea, button {
-  font: inherit;
-  border-radius: 9px;
+input,select,textarea,button {
+  font:inherit;
+  border-radius:9px;
 }
-input, select, textarea {
-  width: 100%;
-  min-height: 48px;
-  padding: 12px;
-  background: #101b2e;
-  color: white;
-  border: 1px solid #526b8a;
+input,select,textarea {
+  display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  min-height:48px;
+  padding:12px;
+  background:#101b2e;
+  color:white;
+  border:1px solid #526b8a;
+}
+input[type="date"],
+input[type="time"] {
+  display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+  -webkit-appearance:none;
+  appearance:none;
+}
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value {
+  text-align:left;
 }
 textarea {
-  min-height: 90px;
-  resize: vertical;
+  min-height:90px;
+  resize:vertical;
 }
 button {
-  min-height: 48px;
-  padding: 12px 16px;
-  border: 0;
-  background: #396caa;
-  color: white;
-  font-weight: 650;
-  cursor: pointer;
+  min-height:48px;
+  padding:12px 16px;
+  border:0;
+  background:#396caa;
+  color:white;
+  font-weight:650;
+  cursor:pointer;
 }
-button:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-}
-button.secondary { background: #344c69; }
+button:disabled { opacity:.45; cursor:not-allowed; }
+button.secondary { background:#344c69; }
+button.danger { background:#9a3546; }
 button.selected {
-  background: #1684a2;
-  outline: 2px solid #9de8ff;
+  background:#1684a2;
+  outline:2px solid #9de8ff;
 }
 .header-menu {
-  width: 145px;
-  min-height: 44px;
-  padding: 8px;
-  background: #344c69;
-  font-weight: 650;
-  cursor: pointer;
+  width:145px;
+  min-height:44px;
+  padding:8px;
+  background:#344c69;
+  font-weight:650;
 }
 .grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
 }
 .grid button {
-  min-height: 66px;
-  padding: 10px 7px;
-  font-size: clamp(.82rem, 2.5vw, 1rem);
-  overflow-wrap: anywhere;
+  min-height:66px;
+  padding:10px 7px;
+  font-size:clamp(.82rem,2.5vw,1rem);
+  overflow-wrap:anywhere;
 }
 .actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:16px;
 }
-.actions button { flex: 1 1 130px; }
-.tabs {
-  display: flex;
-  gap: 8px;
-}
+.actions button { flex:1 1 130px; }
+.tabs { display:flex; gap:8px; }
 .tabs button {
-  flex: 1 1 0;
-  min-width: 0;
-  padding: 11px 5px;
-  font-size: clamp(.76rem, 2.7vw, 1rem);
+  flex:1 1 0;
+  min-width:0;
+  padding:11px 5px;
+  font-size:clamp(.76rem,2.7vw,1rem);
 }
 .item {
-  border: 1px solid #405b79;
-  border-radius: 11px;
-  padding: 13px;
-  margin: 10px 0;
+  border:1px solid #405b79;
+  border-radius:11px;
+  padding:13px;
+  margin:10px 0;
+  min-width:0;
 }
-.item p { margin: 6px 0; }
-.muted { color: #b3c7e1; }
-.good { color: #91e5b2; }
-.warn { color: #ffcc83; }
-.bad { color: #ff9ba7; }
-.hidden { display: none !important; }
+.item p { margin:6px 0; }
+.muted { color:#b3c7e1; }
+.good { color:#91e5b2; }
+.warn { color:#ffcc83; }
+.bad { color:#ff9ba7; }
+.hidden { display:none!important; }
 .marker {
-  color: #9ce8fa;
-  font-weight: 700;
-  font-size: 1.12rem;
+  color:#9ce8fa;
+  font-weight:700;
+  font-size:1.12rem;
 }
-#message { white-space: pre-wrap; }
+#message { white-space:pre-wrap; }
 .checkrow {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #344963;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding:10px;
+  border-bottom:1px solid #344963;
 }
 .checkrow input {
-  width: 22px;
-  min-height: 22px;
-  height: 22px;
+  width:22px;
+  min-height:22px;
+  height:22px;
 }
-.checkrow label {
-  margin: 0;
-  flex: 1;
-}
+.checkrow label { margin:0; flex:1; }
 .area-row {
-  border: 1px solid #405b79;
-  border-radius: 10px;
-  padding: 12px;
-  margin: 10px 0;
+  border:1px solid #405b79;
+  border-radius:10px;
+  padding:12px;
+  margin:10px 0;
 }
 .area-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
 }
-.event-group { margin: 18px 0; }
+.event-group { margin:18px 0; }
 .event-group h3 {
-  border-bottom: 1px solid #405b79;
-  padding-bottom: 7px;
+  border-bottom:1px solid #405b79;
+  padding-bottom:7px;
 }
 .event-status {
-  display: inline-block;
-  margin-top: 5px;
-  font-size: .85rem;
+  display:inline-block;
+  margin-top:5px;
+  font-size:.85rem;
 }
-.compact { margin: 6px 0; }
+.compact { margin:6px 0; }
 .workspace-heading {
-  border-bottom: 1px solid #405b79;
-  padding-bottom: 12px;
-  margin-bottom: 18px;
+  border-bottom:1px solid #405b79;
+  padding-bottom:12px;
+  margin-bottom:18px;
 }
-.workspace-heading h2 { margin-bottom: 6px; }
-.workspace-heading p { margin: 4px 0; }
+.workspace-heading h2 { margin-bottom:6px; }
+.workspace-heading p { margin:4px 0; }
 .workspace-actions {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 18px;
+  display:flex;
+  justify-content:flex-start;
+  margin-bottom:18px;
 }
 .workspace-actions button {
-  width: auto;
-  min-width: 180px;
+  width:auto;
+  min-width:180px;
 }
 .account-details {
-  margin-top: 12px;
-  padding: 12px;
-  border: 1px solid #405b79;
-  border-radius: 10px;
+  margin-top:12px;
+  padding:12px;
+  border:1px solid #405b79;
+  border-radius:10px;
 }
+.report-section {
+  border:1px solid #45627f;
+  border-radius:12px;
+  padding:15px;
+  margin:16px 0;
+}
+.status-pill {
+  display:inline-block;
+  padding:5px 10px;
+  border-radius:20px;
+  background:#344c69;
+  font-size:.85rem;
+  font-weight:700;
+}
+.status-pill.completed { background:#255b49; }
+.status-pill.active { background:#245c83; }
+.status-pill.cancelled { background:#703b45; }
+#closeControls { margin:20px 0; }
+#reportActions button { min-height:55px; }
+form { min-width:0; }
 @media(min-width:700px) {
   .grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns:repeat(3,minmax(0,1fr));
   }
 }
 @media(max-width:440px) {
-  main { padding: 9px; }
-  .area-fields { grid-template-columns: 1fr; }
-  .panel { padding: 13px; }
-  .header-menu { width: 125px; }
-}
-  
-/* Prevent iOS date/time inputs from overflowing */
-input[type="date"],
-input[type="time"] {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-  -webkit-appearance: none;
-  appearance: none;
-}
-/* Keep form controls inside their panels */
-.panel,
-form,
-.item {
-  min-width: 0;
-}
-.panel input,
-.panel select,
-.panel textarea {
-  max-width: 100%;
-}
-
-/* iPhone Safari date/time alignment */
-input[type="date"]::-webkit-date-and-time-value,
-input[type="time"]::-webkit-date-and-time-value {
-  text-align: left;
+  main { padding:9px; }
+  .area-fields { grid-template-columns:1fr; }
+  .panel { padding:13px; }
+  .header-menu { width:125px; }
 }
 </style>
 </head>
-<body>
 
+<body>
 <header>
   <div class="header-row">
     <h1>IEGH DocuHub</h1>
-    <select
-      id="mainMenu"
+    <select id="mainMenu"
       class="header-menu hidden"
-      aria-label="Main menu"
-    >
+      aria-label="Main menu">
       <option value="">☰ Menu</option>
       <option value="account">Account</option>
       <option value="admin" id="adminMenuOption">
@@ -262,24 +263,15 @@ input[type="time"]::-webkit-date-and-time-value {
 </header>
 
 <main>
-
 <section class="panel" id="loginPanel">
   <h2>Member Login</h2>
   <form id="loginForm">
-    <label for="email">Email</label>
-    <input
-      id="email"
-      type="email"
-      autocomplete="username"
-      required
-    >
-    <label for="password">Password</label>
-    <input
-      id="password"
-      type="password"
-      autocomplete="current-password"
-      required
-    >
+    <label>Email</label>
+    <input id="email" type="email"
+      autocomplete="username" required>
+    <label>Password</label>
+    <input id="password" type="password"
+      autocomplete="current-password" required>
     <div class="actions">
       <button type="submit">Sign In</button>
     </div>
@@ -323,23 +315,22 @@ input[type="time"]::-webkit-date-and-time-value {
   <div id="locationEditor" class="hidden">
     <h3 id="locationEditorTitle">Location Profile</h3>
     <form id="locationForm">
-
-      <label for="locName">Location Name *</label>
+      <label>Location Name *</label>
       <input id="locName" required>
 
-      <label for="locAddress">Street Address</label>
+      <label>Street Address</label>
       <input id="locAddress">
 
-      <label for="locCity">City</label>
+      <label>City</label>
       <input id="locCity">
 
-      <label for="locState">State</label>
+      <label>State</label>
       <input id="locState" value="CA">
 
-      <label for="locZip">ZIP Code</label>
+      <label>ZIP Code</label>
       <input id="locZip">
 
-      <label for="locType">Property Type</label>
+      <label>Property Type</label>
       <select id="locType">
         <option value="">Select property type</option>
         <option value="house">House / Residential</option>
@@ -357,84 +348,62 @@ input[type="time"]::-webkit-date-and-time-value {
 
       <h3>Buildings, Floors &amp; Areas</h3>
       <p class="muted">
-        Add only what's relevant. A house can use
-        one building. A larger property can have
-        several buildings or sections.
+        Add buildings, sections, floors, and rooms
+        as needed.
       </p>
-
       <div id="structuredAreas"></div>
-
       <div class="actions">
-        <button
-          type="button"
-          id="addArea"
-          class="secondary"
-        >
+        <button type="button" id="addArea"
+          class="secondary">
           + Add Building / Section
         </button>
       </div>
 
-      <label for="locDescription">Property Description</label>
+      <label>Property Description</label>
       <textarea id="locDescription"></textarea>
 
-      <label for="locHistory">Location History</label>
+      <label>Location History</label>
       <textarea id="locHistory"></textarea>
 
-      <label for="locActivity">
-        Reported Paranormal Activity
-      </label>
+      <label>Reported Paranormal Activity</label>
       <textarea id="locActivity"></textarea>
 
-      <label for="locRooms">
-        Additional Floors / Rooms Notes
-      </label>
+      <label>Additional Floors / Rooms Notes</label>
       <textarea id="locRooms"></textarea>
 
-      <label for="locExterior">
-        Exterior Areas / Notes
-      </label>
+      <label>Exterior Areas / Notes</label>
       <textarea id="locExterior"></textarea>
 
-      <label for="locAccess">Access Notes</label>
+      <label>Access Notes</label>
       <textarea id="locAccess"></textarea>
 
       <div class="actions">
         <button type="submit">Save Location</button>
-        <button
-          type="button"
-          class="secondary"
-          id="cancelLocation"
-        >
-          Cancel
-        </button>
+        <button type="button" class="secondary"
+          id="cancelLocation">Cancel</button>
       </div>
     </form>
   </div>
 </section>
 
-<section class="panel hidden page" id="investigationsPage">
+<section class="panel hidden page"
+  id="investigationsPage">
   <h2>Investigations</h2>
   <p class="muted">
-    Select an investigation to open its workspace.
+    Open active investigations for logging,
+    or completed investigations for review.
   </p>
   <div id="investigationList"></div>
   <div class="actions">
-    <button
-      class="secondary"
-      id="refreshInvestigations"
-    >
-      Refresh
-    </button>
+    <button class="secondary"
+      id="refreshInvestigations">Refresh</button>
   </div>
 </section>
 
 <section class="panel hidden page" id="eventsPage">
   <div class="workspace-actions">
-    <button
-      type="button"
-      class="secondary"
-      id="backToInvestigations"
-    >
+    <button type="button" class="secondary"
+      id="backToInvestigations">
       ← Back to Investigations
     </button>
   </div>
@@ -443,50 +412,75 @@ input[type="time"]::-webkit-date-and-time-value {
     <h2>Investigation Workspace</h2>
     <p id="workspaceTitle" class="marker"></p>
     <p id="workspaceDetails" class="muted"></p>
+    <span id="workspaceStatus"
+      class="status-pill"></span>
   </div>
 
-  <h2>Quick Event Logger</h2>
-  <p class="muted">
-    Tap an event button to capture its timestamp
-    immediately. Add details afterward.
-  </p>
+  <div id="activeWorkspace">
+    <h2>Quick Event Logger</h2>
+    <p class="muted">
+      Tap an event button to capture its timestamp
+      immediately. Add details afterward.
+    </p>
+    <div id="eventButtons"></div>
 
-  <div id="eventButtons"></div>
+    <div id="eventEntry" class="hidden">
+      <div class="item">
+        <p id="eventTime" class="marker"></p>
 
-  <div id="eventEntry" class="hidden">
-    <div class="item">
-      <p id="eventTime" class="marker"></p>
+        <div id="adminAttribution" class="hidden">
+          <label>Log Event For</label>
+          <select id="eventInvestigator"></select>
+          <p class="muted compact">
+            The person recording this event is
+            tracked separately.
+          </p>
+        </div>
 
-      <div id="adminAttribution" class="hidden">
-        <label for="eventInvestigator">Log Event For</label>
-        <select id="eventInvestigator"></select>
-        <p class="muted compact">
-          The actual person recording this event
-          is tracked separately.
-        </p>
+        <label>Room / Area (optional)</label>
+        <select id="eventArea"></select>
+
+        <label>Custom Area (optional)</label>
+        <input id="eventCustomArea"
+          placeholder="Enter an area">
+
+        <label>Description (optional)</label>
+        <textarea id="eventNotes"
+          placeholder="What happened?"></textarea>
+
+        <div class="actions">
+          <button id="saveEvent">Log Event</button>
+          <button class="secondary"
+            id="cancelEvent">Cancel</button>
+        </div>
       </div>
+    </div>
+  </div>
 
-      <label for="eventArea">Room / Area (optional)</label>
-      <select id="eventArea"></select>
+  <div id="completedNotice" class="hidden">
+    <div class="report-section">
+      <h3>Investigation Completed</h3>
+      <p class="muted">
+        This investigation is closed.
+        Event logging is disabled.
+        Existing records remain available.
+      </p>
+    </div>
+  </div>
 
-      <label for="eventCustomArea">Custom Area (optional)</label>
-      <input
-        id="eventCustomArea"
-        placeholder="Enter an area not listed above"
-      >
-
-      <label for="eventNotes">Description (optional)</label>
-      <textarea
-        id="eventNotes"
-        placeholder="What happened?"
-      ></textarea>
-
-      <div class="actions">
-        <button id="saveEvent">Log Event</button>
-        <button class="secondary" id="cancelEvent">
-          Cancel
-        </button>
-      </div>
+  <div id="reportSection" class="report-section hidden">
+    <h3>Investigation Reports</h3>
+    <p class="muted">
+      Generate reports using the complete
+      synchronized investigation history.
+    </p>
+    <div class="actions" id="reportActions">
+      <button id="downloadExcel">
+        Download Spreadsheet (.xlsx)
+      </button>
+      <button id="downloadPDF">
+        Download PDF Report
+      </button>
     </div>
   </div>
 
@@ -495,6 +489,30 @@ input[type="time"]::-webkit-date-and-time-value {
 
   <h3>Pending Local Markers</h3>
   <div id="pendingEvents"></div>
+
+  <div id="closeControls" class="hidden">
+    <div class="report-section">
+      <h3>Administrator Controls</h3>
+      <p class="muted">
+        Ending an investigation preserves its
+        recorded history and prevents additional
+        event logging through DocuHub.
+      </p>
+      <button id="endInvestigation" class="danger">
+        End Investigation
+      </button>
+    </div>
+  </div>
+
+  <div id="reopenControls" class="hidden">
+    <div class="report-section">
+      <h3>Administrator Controls</h3>
+      <button id="reopenInvestigation"
+        class="secondary">
+        Reactivate Investigation
+      </button>
+    </div>
+  </div>
 </section>
 
 <section class="panel hidden page" id="adminPage">
@@ -514,18 +532,17 @@ input[type="time"]::-webkit-date-and-time-value {
     <h3 id="investigationEditorTitle">
       Investigation Details
     </h3>
-
     <form id="investigationForm">
-      <label for="invLocation">Location *</label>
+      <label>Location *</label>
       <select id="invLocation" required></select>
 
-      <label for="invDate">Investigation Date *</label>
+      <label>Investigation Date *</label>
       <input id="invDate" type="date" required>
 
-      <label for="invTime">Start Time *</label>
+      <label>Start Time *</label>
       <input id="invTime" type="time" required>
 
-      <label for="invStatus">Status</label>
+      <label>Status</label>
       <select id="invStatus">
         <option value="scheduled">Scheduled</option>
         <option value="active">Active</option>
@@ -533,18 +550,15 @@ input[type="time"]::-webkit-date-and-time-value {
         <option value="cancelled">Cancelled</option>
       </select>
 
-      <label for="invNotes">Investigation Notes</label>
+      <label>Investigation Notes</label>
       <textarea id="invNotes"></textarea>
 
       <div class="actions">
-        <button type="submit">Save Investigation</button>
-        <button
-          type="button"
-          class="secondary"
-          id="cancelInvestigation"
-        >
-          Cancel
+        <button type="submit">
+          Save Investigation
         </button>
+        <button type="button" class="secondary"
+          id="cancelInvestigation">Cancel</button>
       </div>
     </form>
   </div>
@@ -553,42 +567,34 @@ input[type="time"]::-webkit-date-and-time-value {
     <h3>Assign Investigators</h3>
     <p id="assignmentTitle" class="muted"></p>
     <div id="memberChecklist"></div>
-
     <div class="actions">
       <button id="saveAssignments">
         Save Assignments
       </button>
-      <button
-        class="secondary"
-        id="cancelAssignments"
-      >
-        Cancel
-      </button>
+      <button class="secondary"
+        id="cancelAssignments">Cancel</button>
     </div>
   </div>
 
   <h3>Member Directory</h3>
   <div id="memberList"></div>
   <p class="muted">
-    New accounts must be created or invited
-    through Supabase Authentication.
+    Accounts are created or invited through
+    Supabase Authentication.
   </p>
 </section>
 
 <section class="panel">
-  <p
-    id="message"
-    class="muted"
-    role="status"
-    aria-live="polite"
-  >
+  <p id="message" class="muted"
+    role="status" aria-live="polite">
     Starting DocuHub...
   </p>
 </section>
-
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 
 <script>
 "use strict";
@@ -600,14 +606,12 @@ const SUPABASE_KEY =
   "sb_publishable__-GbvBCUDmSBlyVOMijkFA_M8tWiUEQ";
 
 const $ = id => document.getElementById(id);
-
-const show = (id, yes) =>
-  $(id).classList.toggle("hidden", !yes);
+const show = (id,yes) =>
+  $(id).classList.toggle("hidden",!yes);
 
 const db = window.supabase
   ? window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
+      SUPABASE_URL,SUPABASE_KEY
     )
   : null;
 
@@ -642,347 +646,281 @@ const EVENT_GROUPS = {
 
 const QUEUE_KEY = "iegh_docuhub_pending_v1";
 
-let user = null;
-let role = null;
+let user=null;
+let role=null;
+let locations=[];
+let investigations=[];
+let members=[];
+let assignments={};
+let historyEvents=[];
+let historyInvestigation=null;
+let editingLocation=null;
+let editingInvestigation=null;
+let assigningInvestigation=null;
+let activeInvestigationId=null;
+let pending=null;
+let structuredAreas=[];
+let syncing=false;
+let workspaceRequest=0;
+let reportBusy=false;
 
-let locations = [];
-let investigations = [];
-let members = [];
-let assignments = {};
-
-let historyEvents = [];
-let historyInvestigation = null;
-
-let editingLocation = null;
-let editingInvestigation = null;
-let assigningInvestigation = null;
-
-let activeInvestigationId = null;
-let pending = null;
-let structuredAreas = [];
-
-let syncing = false;
-let workspaceRequest = 0;
-
-function msg(text, kind = "muted") {
-  $("message").textContent = text;
-  $("message").className = kind;
+function msg(text,kind="muted") {
+  $("message").textContent=text;
+  $("message").className=kind;
 }
 
-function addText(parent, tag, value, cls) {
-  const el = document.createElement(tag);
-  el.textContent = value ?? "";
-  if (cls) el.className = cls;
+function addText(parent,tag,value,cls) {
+  const el=document.createElement(tag);
+  el.textContent=value??"";
+  if(cls) el.className=cls;
   parent.append(el);
   return el;
 }
 
-function addButton(parent, label, fn, cls = "secondary") {
-  const b = document.createElement("button");
-  b.textContent = label;
-  b.className = cls;
-  b.type = "button";
-  b.addEventListener("click", fn);
+function addButton(parent,label,fn,cls="secondary") {
+  const b=document.createElement("button");
+  b.type="button";
+  b.textContent=label;
+  b.className=cls;
+  b.addEventListener("click",fn);
   parent.append(b);
   return b;
 }
 
-function option(select, value, label) {
-  const el = document.createElement("option");
-  el.value = value;
-  el.textContent = label;
+function option(select,value,label) {
+  const el=document.createElement("option");
+  el.value=value;
+  el.textContent=label;
   select.append(el);
 }
 
 function formatDate(date) {
-  if (!date) return "";
+  if(!date) return "";
+  const parts=String(date).split("-");
+  if(parts.length!==3) return String(date);
 
-  const [year, month, day] =
-    String(date).split("-").map(Number);
+  const [y,m,d]=parts.map(Number);
+  const value=new Date(y,m-1,d);
 
-  return new Date(
-    year,
-    month - 1,
-    day
-  ).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric"
+  return value.toLocaleDateString("en-US",{
+    month:"short",
+    day:"numeric",
+    year:"numeric"
   });
 }
 
 function formatTime(time) {
-  if (!time) return "";
+  if(!time) return "";
+  const [h,m]=String(time).split(":").map(Number);
+  if(!Number.isFinite(h)) return String(time);
 
-  const [hours, minutes] =
-    String(time).split(":").map(Number);
+  return (h%12||12)+":"+
+    String(m||0).padStart(2,"0")+" "+
+    (h>=12?"PM":"AM");
+}
 
-  const hour12 = hours % 12 || 12;
-  const ampm = hours >= 12 ? "PM" : "AM";
+function timeLabel(iso) {
+  const d=new Date(iso);
+  if(Number.isNaN(d.getTime())) return String(iso);
 
-  return (
-    hour12 +
-    ":" +
-    String(minutes).padStart(2, "0") +
-    " " +
-    ampm
-  );
+  return d.toLocaleString("en-US",{
+    month:"short",
+    day:"numeric",
+    year:"numeric",
+    hour:"numeric",
+    minute:"2-digit",
+    second:"2-digit",
+    hour12:true
+  });
 }
 
 function queueRead() {
   try {
-    const v = JSON.parse(
-      localStorage.getItem(QUEUE_KEY) || "[]"
+    const v=JSON.parse(
+      localStorage.getItem(QUEUE_KEY)||"[]"
     );
-    return Array.isArray(v) ? v : [];
+    return Array.isArray(v)?v:[];
   } catch {
     return [];
   }
 }
 
 function queueWrite(v) {
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(v));
+  localStorage.setItem(
+    QUEUE_KEY,JSON.stringify(v)
+  );
   renderPending();
   renderHistory();
 }
 
-function timeLabel(iso) {
-  return new Date(iso).toLocaleString(
-    "en-US",
-    {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true
-    }
-  );
-}
-
 function locationName(id) {
-  return locations.find(x => x.id === id)?.name ||
+  return locations.find(x=>x.id===id)?.name||
     "Unknown location";
 }
 
 function memberName(m) {
-  const name = String(m?.display_name || "").trim();
-  return name || "Name not set";
+  return String(m?.display_name||"").trim()||
+    "Name not set";
 }
 
 function nameById(id) {
-  if (!id) return "Unknown";
-  const found = members.find(m => m.id === id);
-  return found ? memberName(found) : "Unknown member";
+  if(!id) return "Unknown";
+  const m=members.find(x=>x.id===id);
+  return m?memberName(m):"Unknown member";
 }
 
 function currentInvestigation() {
   return investigations.find(
-    x => x.id === activeInvestigationId
+    x=>x.id===activeInvestigationId
   );
 }
 
 function currentLocation() {
-  const inv = currentInvestigation();
+  const inv=currentInvestigation();
   return locations.find(
-    x => x.id === inv?.location_id
+    x=>x.id===inv?.location_id
   );
 }
 
 function setPage(id) {
-  if (id === "adminPage" && role !== "admin") {
-    return;
-  }
+  if(id==="adminPage"&&role!=="admin") return;
+  if(id==="eventsPage"&&!activeInvestigationId) return;
 
-  if (id === "eventsPage" && !activeInvestigationId) {
-    return;
-  }
-
-  document.querySelectorAll(".page").forEach(p => {
-    show(p.id, p.id === id);
+  document.querySelectorAll(".page").forEach(p=>{
+    show(p.id,p.id===id);
   });
 
-  document.querySelectorAll("#tabs button").forEach(b => {
-    b.classList.toggle(
-      "selected",
-      b.dataset.page === id ||
-      (
-        id === "eventsPage" &&
-        b.dataset.page === "investigationsPage"
-      )
+  document.querySelectorAll("#tabs button").forEach(b=>{
+    b.classList.toggle("selected",
+      b.dataset.page===id||
+      (id==="eventsPage"&&
+       b.dataset.page==="investigationsPage")
     );
   });
 }
 
 function propertyTypeLabel(type) {
-  const options = $("locType").options;
-  const found = [...options].find(o => o.value === type);
-  return found?.textContent || type || "";
+  const found=[...$("locType").options]
+    .find(x=>x.value===type);
+  return found?.textContent||type||"";
 }
 
 function normalizedAreas(value) {
-  if (!Array.isArray(value)) return [];
-
-  return value
-    .filter(x => x && typeof x === "object")
-    .map(x => ({
-      name: String(x.name || ""),
-      kind: String(x.kind || "building"),
-      floors: Array.isArray(x.floors)
-        ? x.floors.map(f => ({
-            name: String(f.name || ""),
-            rooms: Array.isArray(f.rooms)
-              ? f.rooms.map(String)
-              : []
-          }))
-        : []
-    }));
+  if(!Array.isArray(value)) return [];
+  return value.filter(
+    x=>x&&typeof x==="object"
+  ).map(x=>({
+    name:String(x.name||""),
+    kind:String(x.kind||"building"),
+    floors:Array.isArray(x.floors)
+      ?x.floors.map(f=>({
+        name:String(f.name||""),
+        rooms:Array.isArray(f.rooms)
+          ?f.rooms.map(String):[]
+      }))
+      :[]
+  }));
 }
 
 function splitNames(text) {
-  return text
-    .split(/[\n,]+/)
-    .map(s => s.trim())
+  return text.split(/[\n,]+/)
+    .map(x=>x.trim())
     .filter(Boolean);
 }
 
 function renderStructuredAreas() {
-  const box = $("structuredAreas");
+  const box=$("structuredAreas");
   box.replaceChildren();
 
-  if (!structuredAreas.length) {
-    addText(
-      box,
-      "p",
+  if(!structuredAreas.length) {
+    addText(box,"p",
       "No buildings or sections added yet.",
-      "muted"
-    );
+      "muted");
   }
 
-  structuredAreas.forEach((area, index) => {
-    const card = document.createElement("div");
-    card.className = "area-row";
+  structuredAreas.forEach((area,index)=>{
+    const card=document.createElement("div");
+    card.className="area-row";
 
-    addText(
-      card,
-      "h4",
-      "Building / Section " + (index + 1)
-    );
+    addText(card,"h4",
+      "Building / Section "+(index+1));
 
-    addText(card, "label", "Building / Section Name");
+    addText(card,"label","Building / Section Name");
 
-    const nameInput = document.createElement("input");
-    nameInput.value = area.name;
-    nameInput.placeholder =
-      "Example: Main House, North Grounds";
-
-    nameInput.setAttribute(
-      "aria-label",
-      "Building or section name"
-    );
-
-    nameInput.addEventListener("input", () => {
-      area.name = nameInput.value;
+    const name=document.createElement("input");
+    name.value=area.name;
+    name.placeholder="Main House, North Grounds";
+    name.addEventListener("input",()=>{
+      area.name=name.value;
     });
+    card.append(name);
 
-    card.append(nameInput);
+    addText(card,"label","Area Type");
 
-    addText(card, "label", "Area Type");
-
-    const kindSelect = document.createElement("select");
-
-    option(kindSelect, "building", "Building");
-    option(kindSelect, "outdoor", "Outdoor Section");
-    option(kindSelect, "other", "Other Section");
-
-    kindSelect.value = area.kind;
-
-    kindSelect.addEventListener("change", () => {
-      area.kind = kindSelect.value;
+    const kind=document.createElement("select");
+    option(kind,"building","Building");
+    option(kind,"outdoor","Outdoor Section");
+    option(kind,"other","Other Section");
+    kind.value=area.kind;
+    kind.addEventListener("change",()=>{
+      area.kind=kind.value;
     });
+    card.append(kind);
 
-    card.append(kindSelect);
+    area.floors.forEach((floor,fi)=>{
+      const floorBox=document.createElement("div");
+      floorBox.className="item";
 
-    addText(
-      card,
-      "p",
-      "Add floors or named areas below. Outdoor sections can use a single level called Grounds.",
-      "muted"
-    );
+      const fields=document.createElement("div");
+      fields.className="area-fields";
 
-    area.floors.forEach((floor, floorIndex) => {
-      const floorBox = document.createElement("div");
-      floorBox.className = "item";
-
-      const fields = document.createElement("div");
-      fields.className = "area-fields";
-
-      const floorField = document.createElement("div");
-      addText(floorField, "label", "Floor / Level");
-
-      const floorInput = document.createElement("input");
-      floorInput.value = floor.name;
-      floorInput.placeholder =
-        "Example: First Floor, Basement, Grounds";
-
-      floorInput.addEventListener("input", () => {
-        floor.name = floorInput.value;
+      const a=document.createElement("div");
+      addText(a,"label","Floor / Level");
+      const floorInput=document.createElement("input");
+      floorInput.value=floor.name;
+      floorInput.placeholder="First Floor, Basement";
+      floorInput.addEventListener("input",()=>{
+        floor.name=floorInput.value;
       });
+      a.append(floorInput);
 
-      floorField.append(floorInput);
-
-      const roomsField = document.createElement("div");
-      addText(roomsField, "label", "Rooms / Areas");
-
-      const roomsInput = document.createElement("textarea");
-      roomsInput.value = floor.rooms.join("\n");
-      roomsInput.placeholder = "One room or area per line";
-
-      roomsInput.addEventListener("input", () => {
-        floor.rooms = splitNames(roomsInput.value);
+      const b=document.createElement("div");
+      addText(b,"label","Rooms / Areas");
+      const rooms=document.createElement("textarea");
+      rooms.value=floor.rooms.join("\n");
+      rooms.placeholder="One room per line";
+      rooms.addEventListener("input",()=>{
+        floor.rooms=splitNames(rooms.value);
       });
+      b.append(rooms);
 
-      roomsField.append(roomsInput);
-      fields.append(floorField, roomsField);
+      fields.append(a,b);
       floorBox.append(fields);
 
-      const floorActions = document.createElement("div");
-      floorActions.className = "actions";
+      const actions=document.createElement("div");
+      actions.className="actions";
 
-      addButton(
-        floorActions,
-        "Remove Floor / Level",
-        () => {
-          area.floors.splice(floorIndex, 1);
-          renderStructuredAreas();
-        }
-      );
+      addButton(actions,"Remove Floor / Level",()=>{
+        area.floors.splice(fi,1);
+        renderStructuredAreas();
+      });
 
-      floorBox.append(floorActions);
+      floorBox.append(actions);
       card.append(floorBox);
     });
 
-    const actions = document.createElement("div");
-    actions.className = "actions";
+    const actions=document.createElement("div");
+    actions.className="actions";
 
-    addButton(
-      actions,
-      "+ Add Floor / Level",
-      () => {
-        area.floors.push({ name: "", rooms: [] });
-        renderStructuredAreas();
-      }
-    );
+    addButton(actions,"+ Add Floor / Level",()=>{
+      area.floors.push({name:"",rooms:[]});
+      renderStructuredAreas();
+    });
 
-    addButton(
-      actions,
-      "Remove Section",
-      () => {
-        structuredAreas.splice(index, 1);
-        renderStructuredAreas();
-      }
-    );
+    addButton(actions,"Remove Section",()=>{
+      structuredAreas.splice(index,1);
+      renderStructuredAreas();
+    });
 
     card.append(actions);
     box.append(card);
@@ -991,109 +929,83 @@ function renderStructuredAreas() {
 
 function addStructuredArea() {
   structuredAreas.push({
-    name: "",
-    kind: "building",
-    floors: [{ name: "", rooms: [] }]
+    name:"",
+    kind:"building",
+    floors:[{name:"",rooms:[]}]
   });
-
   renderStructuredAreas();
 }
 
 async function loadData() {
-  const [l, i, m] = await Promise.all([
-    db.from("locations")
-      .select("*")
-      .order("name"),
-
-    db.from("investigations")
-      .select("*")
-      .order("investigation_date", {
-        ascending: false
+  const [l,i,m]=await Promise.all([
+    db.from("locations").select("*").order("name"),
+    db.from("investigations").select("*")
+      .order("investigation_date",{
+        ascending:false
       }),
-
     db.from("members")
       .select("id,display_name,role")
   ]);
 
-  if (l.error || i.error || m.error) {
-    msg(
-      "Loading error: " +
-      (l.error || i.error || m.error).message,
-      "bad"
-    );
-    return;
+  if(l.error||i.error||m.error) {
+    msg("Loading error: "+
+      (l.error||i.error||m.error).message,"bad");
+    return false;
   }
 
-  locations = l.data || [];
-  investigations = i.data || [];
-  members = m.data || [];
+  locations=l.data||[];
+  investigations=i.data||[];
+  members=m.data||[];
 
   renderLocations();
   renderInvestigations();
   renderMembers();
   renderPending();
 
-  msg("DocuHub ready.", "good");
+  msg("DocuHub ready.","good");
+  return true;
 }
 
 function renderLocations() {
-  const box = $("locationList");
+  const box=$("locationList");
   box.replaceChildren();
 
-  if (!locations.length) {
-    addText(box, "p", "No locations added yet.", "muted");
+  if(!locations.length) {
+    addText(box,"p","No locations added yet.","muted");
   }
 
-  locations.forEach(loc => {
-    const card = document.createElement("div");
-    card.className = "item";
+  locations.forEach(loc=>{
+    const card=document.createElement("div");
+    card.className="item";
 
-    addText(card, "strong", loc.name);
+    addText(card,"strong",loc.name);
 
-    addText(
-      card,
-      "p",
-      [loc.address, loc.city, loc.state]
-        .filter(Boolean)
-        .join(", "),
-      "muted"
-    );
+    addText(card,"p",
+      [loc.address,loc.city,loc.state]
+        .filter(Boolean).join(", "),"muted");
 
-    if (loc.property_type) {
-      addText(
-        card,
-        "p",
+    if(loc.property_type) {
+      addText(card,"p",
         propertyTypeLabel(loc.property_type),
-        "muted"
-      );
+        "muted");
     }
 
-    if (loc.property_description) {
-      addText(card, "p", loc.property_description);
+    if(loc.property_description) {
+      addText(card,"p",loc.property_description);
     }
 
-    const areas = normalizedAreas(loc.property_areas);
-
-    if (areas.length) {
-      addText(
-        card,
-        "p",
-        areas.map(x => x.name || "Unnamed section")
-          .join(", "),
-        "muted"
-      );
+    const areas=normalizedAreas(loc.property_areas);
+    if(areas.length) {
+      addText(card,"p",
+        areas.map(x=>x.name||"Unnamed section")
+          .join(", "),"muted");
     }
 
-    if (role === "admin") {
-      const actions = document.createElement("div");
-      actions.className = "actions";
-
-      addButton(
-        actions,
-        "Edit Profile",
-        () => openLocation(loc)
-      );
-
+    if(role==="admin") {
+      const actions=document.createElement("div");
+      actions.className="actions";
+      addButton(actions,"Edit Profile",
+        ()=>openLocation(loc));
       card.append(actions);
     }
 
@@ -1101,69 +1013,67 @@ function renderLocations() {
   });
 }
 
-function openLocation(loc = null) {
-  if (role !== "admin") return;
+function openLocation(loc=null) {
+  if(role!=="admin") return;
 
-  editingLocation = loc?.id || null;
+  editingLocation=loc?.id||null;
 
-  const fields = {
-    locName: "name",
-    locAddress: "address",
-    locCity: "city",
-    locState: "state",
-    locZip: "postal_code",
-    locDescription: "property_description",
-    locHistory: "location_history",
-    locActivity: "reported_activity",
-    locRooms: "floors_and_rooms",
-    locExterior: "exterior_areas",
-    locAccess: "access_notes",
-    locType: "property_type"
+  const fields={
+    locName:"name",
+    locAddress:"address",
+    locCity:"city",
+    locState:"state",
+    locZip:"postal_code",
+    locDescription:"property_description",
+    locHistory:"location_history",
+    locActivity:"reported_activity",
+    locRooms:"floors_and_rooms",
+    locExterior:"exterior_areas",
+    locAccess:"access_notes",
+    locType:"property_type"
   };
 
-  Object.entries(fields).forEach(([id, key]) => {
-    $(id).value =
-      loc?.[key] ??
-      (id === "locState" ? "CA" : "");
+  Object.entries(fields).forEach(([id,key])=>{
+    $(id).value=loc?.[key]??
+      (id==="locState"?"CA":"");
   });
 
-  structuredAreas = normalizedAreas(loc?.property_areas);
+  structuredAreas=normalizedAreas(
+    loc?.property_areas
+  );
   renderStructuredAreas();
 
-  $("locationEditorTitle").textContent =
-    loc ? "Edit Location" : "Add Location";
+  $("locationEditorTitle").textContent=
+    loc?"Edit Location":"Add Location";
 
-  show("locationEditor", true);
+  show("locationEditor",true);
   setPage("locationsPage");
 
   $("locationEditor").scrollIntoView({
-    behavior: "smooth"
+    behavior:"smooth"
   });
 }
 
 async function saveLocation(e) {
   e.preventDefault();
-  if (role !== "admin") return;
+  if(role!=="admin") return;
 
-  const cleanAreas = structuredAreas.map(a => ({
-    name: a.name.trim(),
-    kind: a.kind,
-    floors: a.floors.map(f => ({
-      name: f.name.trim(),
-      rooms: f.rooms
-        .map(x => x.trim())
-        .filter(Boolean)
-    }))
-  }));
-
-  const data = {
-    name: $("locName").value.trim(),
-    address: $("locAddress").value.trim(),
-    city: $("locCity").value.trim(),
-    state: $("locState").value.trim(),
-    postal_code: $("locZip").value.trim(),
-    property_type: $("locType").value,
-    property_areas: cleanAreas,
+  const data={
+    name:$("locName").value.trim(),
+    address:$("locAddress").value.trim(),
+    city:$("locCity").value.trim(),
+    state:$("locState").value.trim(),
+    postal_code:$("locZip").value.trim(),
+    property_type:$("locType").value,
+    property_areas:structuredAreas.map(a=>({
+      name:a.name.trim(),
+      kind:a.kind,
+      floors:a.floors.map(f=>({
+        name:f.name.trim(),
+        rooms:f.rooms.map(x=>x.trim())
+          .filter(Boolean)
+      }))
+    })),
     property_description:
       $("locDescription").value.trim(),
     location_history:
@@ -1178,92 +1088,80 @@ async function saveLocation(e) {
       $("locAccess").value.trim()
   };
 
-  if (!data.name) {
-    msg("Location name required.", "bad");
+  if(!data.name) {
+    msg("Location name required.","bad");
     return;
   }
 
-  const r = editingLocation
-    ? await db.from("locations")
-        .update(data)
-        .eq("id", editingLocation)
-        .select()
-    : await db.from("locations")
-        .insert(data)
-        .select();
+  const r=editingLocation
+    ?await db.from("locations").update(data)
+      .eq("id",editingLocation).select()
+    :await db.from("locations").insert(data)
+      .select();
 
-  if (r.error) {
-    msg(r.error.message, "bad");
+  if(r.error) {
+    msg(r.error.message,"bad");
     return;
   }
 
-  show("locationEditor", false);
+  show("locationEditor",false);
   await loadData();
-  msg("Location saved.", "good");
+  msg("Location saved.","good");
+}
+
+function statusLabel(s) {
+  return s?s.charAt(0).toUpperCase()+
+    s.slice(1):"Unknown";
 }
 
 function renderInvestigations() {
-  const box = $("investigationList");
+  const box=$("investigationList");
   box.replaceChildren();
 
-  if (!investigations.length) {
-    addText(
-      box,
-      "p",
-      "No investigations scheduled yet.",
-      "muted"
-    );
+  if(!investigations.length) {
+    addText(box,"p",
+      "No investigations scheduled yet.","muted");
   }
 
-  investigations.forEach(inv => {
-    const card = document.createElement("div");
-    card.className = "item";
+  investigations.forEach(inv=>{
+    const card=document.createElement("div");
+    card.className="item";
 
-    addText(
-      card,
-      "strong",
-      locationName(inv.location_id)
-    );
+    addText(card,"strong",
+      locationName(inv.location_id));
 
-    addText(
-      card,
-      "p",
-      formatDate(inv.investigation_date) +
-      " | " +
-      formatTime(inv.start_time) +
-      " | " +
-      inv.status,
-      "muted"
-    );
+    addText(card,"p",
+      formatDate(inv.investigation_date)+
+      " | "+formatTime(inv.start_time),
+      "muted");
 
-    if (inv.notes) {
-      addText(card, "p", inv.notes);
+    addText(card,"span",
+      statusLabel(inv.status),
+      "status-pill "+inv.status);
+
+    if(inv.notes) {
+      addText(card,"p",inv.notes);
     }
 
-    const actions = document.createElement("div");
-    actions.className = "actions";
+    const actions=document.createElement("div");
+    actions.className="actions";
 
-    if (inv.status === "active") {
-      addButton(
-        actions,
-        "Open Investigation",
-        () => openWorkspace(inv),
-        ""
-      );
+    if(inv.status==="active") {
+      addButton(actions,"Open Investigation",
+        ()=>openWorkspace(inv),"");
     }
 
-    if (role === "admin") {
-      addButton(
-        actions,
-        "Edit",
-        () => openInvestigation(inv)
-      );
+    if(inv.status==="completed") {
+      addButton(actions,"View Completed Investigation",
+        ()=>openWorkspace(inv),"");
+    }
 
-      addButton(
-        actions,
-        "Assign Members",
-        () => openAssignments(inv)
-      );
+    if(role==="admin") {
+      addButton(actions,"Edit",
+        ()=>openInvestigation(inv));
+
+      addButton(actions,"Assign Members",
+        ()=>openAssignments(inv));
     }
 
     card.append(actions);
@@ -1271,908 +1169,1332 @@ function renderInvestigations() {
   });
 }
 
-function openInvestigation(inv = null) {
-  if (role !== "admin") return;
+function openInvestigation(inv=null) {
+  if(role!=="admin") return;
 
-  editingInvestigation = inv?.id || null;
+  editingInvestigation=inv?.id||null;
 
-  const select = $("invLocation");
+  const select=$("invLocation");
   select.replaceChildren();
 
-  locations.forEach(loc => {
-    option(select, loc.id, loc.name);
+  locations.forEach(loc=>{
+    option(select,loc.id,loc.name);
   });
 
-  $("invDate").value = inv?.investigation_date || "";
-  $("invTime").value =
-    inv?.start_time?.slice(0, 5) || "";
-  $("invStatus").value = inv?.status || "scheduled";
-  $("invNotes").value = inv?.notes || "";
+  $("invDate").value=inv?.investigation_date||"";
+  $("invTime").value=
+    inv?.start_time?.slice(0,5)||"";
+  $("invStatus").value=inv?.status||"scheduled";
+  $("invNotes").value=inv?.notes||"";
 
-  if (inv) select.value = inv.location_id;
+  if(inv) select.value=inv.location_id;
 
-  $("investigationEditorTitle").textContent =
-    inv ? "Edit Investigation" : "Schedule Investigation";
+  $("investigationEditorTitle").textContent=
+    inv?"Edit Investigation":"Schedule Investigation";
 
-  show("investigationEditor", true);
+  show("investigationEditor",true);
   setPage("adminPage");
 
   $("investigationEditor").scrollIntoView({
-    behavior: "smooth"
+    behavior:"smooth"
   });
 }
 
 async function saveInvestigation(e) {
   e.preventDefault();
-  if (role !== "admin") return;
+  if(role!=="admin") return;
 
-  const data = {
-    location_id: $("invLocation").value,
-    investigation_date: $("invDate").value,
-    start_time: $("invTime").value,
-    status: $("invStatus").value,
-    notes: $("invNotes").value.trim()
+  const data={
+    location_id:$("invLocation").value,
+    investigation_date:$("invDate").value,
+    start_time:$("invTime").value,
+    status:$("invStatus").value,
+    notes:$("invNotes").value.trim()
   };
 
-  if (
-    !data.location_id ||
-    !data.investigation_date ||
-    !data.start_time
-  ) {
-    msg(
-      "Location, date and start time required.",
-      "bad"
+  if(!data.location_id||
+     !data.investigation_date||
+     !data.start_time) {
+    msg("Location, date and time required.","bad");
+    return;
+  }
+
+  if(editingInvestigation) {
+    const existing=investigations.find(
+      x=>x.id===editingInvestigation
     );
+
+    if(existing?.status!==data.status) {
+      const ok=confirm(
+        "Change investigation status from "+
+        statusLabel(existing?.status)+" to "+
+        statusLabel(data.status)+"?"
+      );
+      if(!ok) return;
+    }
+  }
+
+  const r=editingInvestigation
+    ?await db.from("investigations")
+      .update(data)
+      .eq("id",editingInvestigation).select()
+    :await db.from("investigations")
+      .insert(data).select();
+
+  if(r.error) {
+    msg(r.error.message,"bad");
     return;
   }
 
-  const r = editingInvestigation
-    ? await db.from("investigations")
-        .update(data)
-        .eq("id", editingInvestigation)
-        .select()
-    : await db.from("investigations")
-        .insert(data)
-        .select();
-
-  if (r.error) {
-    msg(r.error.message, "bad");
-    return;
-  }
-
-  show("investigationEditor", false);
+  show("investigationEditor",false);
   await loadData();
-  msg("Investigation saved.", "good");
+  msg("Investigation saved.","good");
 }
 
 async function loadAssignments(invId) {
-  const { data, error } = await db
+  const {data,error}=await db
     .from("investigation_members")
     .select("member_id")
-    .eq("investigation_id", invId);
+    .eq("investigation_id",invId);
 
-  if (error) throw error;
+  if(error) throw error;
 
-  assignments[invId] =
-    (data || []).map(x => x.member_id);
+  assignments[invId]=(data||[])
+    .map(x=>x.member_id);
 
   return assignments[invId];
 }
 
 async function openAssignments(inv) {
-  if (role !== "admin") return;
+  if(role!=="admin") return;
 
-  assigningInvestigation = inv.id;
+  assigningInvestigation=inv.id;
 
-  $("assignmentTitle").textContent =
-    locationName(inv.location_id) +
-    " | " +
-    formatDate(inv.investigation_date);
+  $("assignmentTitle").textContent=
+    locationName(inv.location_id)+
+    " | "+formatDate(inv.investigation_date);
 
   let assigned;
-
   try {
-    assigned = new Set(
+    assigned=new Set(
       await loadAssignments(inv.id)
     );
-  } catch (e) {
-    msg(e.message, "bad");
+  } catch(e) {
+    msg(e.message,"bad");
     return;
   }
 
-  const box = $("memberChecklist");
+  const box=$("memberChecklist");
   box.replaceChildren();
 
-  [...members]
-    .sort((a, b) =>
-      memberName(a).localeCompare(memberName(b))
-    )
-    .forEach(m => {
-      const row = document.createElement("div");
-      row.className = "checkrow";
+  [...members].sort((a,b)=>
+    memberName(a).localeCompare(memberName(b))
+  ).forEach(m=>{
+    const row=document.createElement("div");
+    row.className="checkrow";
 
-      const input = document.createElement("input");
-      input.type = "checkbox";
-      input.value = m.id;
-      input.checked = assigned.has(m.id);
-      input.id = "member_" + m.id;
+    const input=document.createElement("input");
+    input.type="checkbox";
+    input.value=m.id;
+    input.checked=assigned.has(m.id);
+    input.id="member_"+m.id;
 
-      const label = document.createElement("label");
-      label.htmlFor = input.id;
-      label.textContent =
-        memberName(m) +
-        " (" +
-        m.role +
-        ")";
+    const label=document.createElement("label");
+    label.htmlFor=input.id;
+    label.textContent=
+      memberName(m)+" ("+m.role+")";
 
-      row.append(input, label);
-      box.append(row);
-    });
+    row.append(input,label);
+    box.append(row);
+  });
 
-  show("assignmentEditor", true);
+  show("assignmentEditor",true);
   setPage("adminPage");
 
   $("assignmentEditor").scrollIntoView({
-    behavior: "smooth"
+    behavior:"smooth"
   });
 }
 
 async function saveAssignments() {
-  if (!assigningInvestigation || role !== "admin") {
-    return;
-  }
+  if(!assigningInvestigation||
+     role!=="admin") return;
 
-  const id = assigningInvestigation;
+  const id=assigningInvestigation;
 
-  const selected = new Set(
+  const selected=new Set(
     [...$("memberChecklist")
       .querySelectorAll("input:checked")]
-      .map(x => x.value)
+      .map(x=>x.value)
   );
 
   let current;
-
   try {
-    current = new Set(await loadAssignments(id));
-  } catch (e) {
-    msg(e.message, "bad");
+    current=new Set(await loadAssignments(id));
+  } catch(e) {
+    msg(e.message,"bad");
     return;
   }
 
-  const add = [...selected]
-    .filter(x => !current.has(x))
-    .map(member_id => ({
-      investigation_id: id,
-      member_id
+  const add=[...selected]
+    .filter(x=>!current.has(x))
+    .map(member_id=>({
+      investigation_id:id,member_id
     }));
 
-  const remove = [...current]
-    .filter(x => !selected.has(x));
+  const remove=[...current]
+    .filter(x=>!selected.has(x));
 
-  if (add.length) {
-    const r = await db
-      .from("investigation_members")
-      .insert(add);
-
-    if (r.error) {
-      msg(r.error.message, "bad");
+  if(add.length) {
+    const r=await db
+      .from("investigation_members").insert(add);
+    if(r.error) {
+      msg(r.error.message,"bad");
       return;
     }
   }
 
-  for (const member_id of remove) {
-    const r = await db
+  for(const member_id of remove) {
+    const r=await db
       .from("investigation_members")
       .delete()
-      .eq("investigation_id", id)
-      .eq("member_id", member_id);
+      .eq("investigation_id",id)
+      .eq("member_id",member_id);
 
-    if (r.error) {
-      msg(r.error.message, "bad");
+    if(r.error) {
+      msg(r.error.message,"bad");
       return;
     }
   }
 
-  assignments[id] = [...selected];
-
-  show("assignmentEditor", false);
-  assigningInvestigation = null;
-
-  msg("Assignments saved.", "good");
+  assignments[id]=[...selected];
+  assigningInvestigation=null;
+  show("assignmentEditor",false);
+  msg("Assignments saved.","good");
 }
 
 function renderMembers() {
-  const box = $("memberList");
+  const box=$("memberList");
   box.replaceChildren();
 
-  [...members]
-    .sort((a, b) =>
-      memberName(a).localeCompare(memberName(b))
-    )
-    .forEach(m => {
-      const div = document.createElement("div");
-      div.className = "item";
+  [...members].sort((a,b)=>
+    memberName(a).localeCompare(memberName(b))
+  ).forEach(m=>{
+    const div=document.createElement("div");
+    div.className="item";
 
-      addText(div, "strong", memberName(m));
+    addText(div,"strong",memberName(m));
+    addText(div,"p",
+      m.role==="admin"
+        ?"Administrator":"Investigator",
+      "muted");
 
-      addText(
-        div,
-        "p",
-        m.role === "admin"
-          ? "Administrator"
-          : "Investigator",
-        "muted"
-      );
-
-      if (!String(m.display_name || "").trim()) {
-        addText(
-          div,
-          "p",
-          "Display name needs to be set.",
-          "warn"
-        );
-      }
-
-      box.append(div);
-    });
+    if(!String(m.display_name||"").trim()) {
+      addText(div,"p",
+        "Display name needs to be set.","warn");
+    }
+    box.append(div);
+  });
 }
 
 function renderEventButtons() {
-  const box = $("eventButtons");
+  const box=$("eventButtons");
   box.replaceChildren();
 
-  Object.entries(EVENT_GROUPS).forEach(
-    ([group, types]) => {
-      const section = document.createElement("div");
-      section.className = "event-group";
+  Object.entries(EVENT_GROUPS)
+    .forEach(([group,types])=>{
+      const section=document.createElement("div");
+      section.className="event-group";
 
-      addText(section, "h3", group);
+      addText(section,"h3",group);
 
-      const grid = document.createElement("div");
-      grid.className = "grid";
+      const grid=document.createElement("div");
+      grid.className="grid";
 
-      types.forEach(type => {
-        const b = addButton(
-          grid,
-          type,
-          () => captureEvent(type),
-          ""
-        );
-        b.dataset.eventType = type;
+      types.forEach(type=>{
+        const b=addButton(grid,type,
+          ()=>captureEvent(type),"");
+        b.dataset.eventType=type;
       });
 
       section.append(grid);
       box.append(section);
-    }
-  );
+    });
 }
 
 function eventAreaOptions() {
-  const select = $("eventArea");
+  const select=$("eventArea");
   select.replaceChildren();
 
-  option(select, "", "No area selected");
+  option(select,"","No area selected");
 
-  const loc = currentLocation();
-  if (!loc) return;
+  const loc=currentLocation();
+  if(!loc) return;
 
-  const seen = new Set();
+  const seen=new Set();
 
-  const addAreaOption = text => {
-    if (!text || seen.has(text)) return;
+  const add=text=>{
+    if(!text||seen.has(text)) return;
     seen.add(text);
-    option(select, text, text);
+    option(select,text,text);
   };
 
-  normalizedAreas(loc.property_areas).forEach(section => {
-    const sectionName = section.name || "Unnamed section";
+  normalizedAreas(loc.property_areas)
+    .forEach(section=>{
+      const name=section.name||"Unnamed section";
+      add(name);
 
-    addAreaOption(sectionName);
+      section.floors.forEach(floor=>{
+        const prefix=[name,floor.name]
+          .filter(Boolean).join(" / ");
+        add(prefix);
 
-    section.floors.forEach(floor => {
-      const prefix = [
-        sectionName,
-        floor.name
-      ].filter(Boolean).join(" / ");
-
-      if (prefix) addAreaOption(prefix);
-
-      floor.rooms.forEach(room => {
-        addAreaOption(
-          [prefix, room].filter(Boolean).join(" / ")
-        );
+        floor.rooms.forEach(room=>{
+          add([prefix,room]
+            .filter(Boolean).join(" / "));
+        });
       });
     });
-  });
 }
 
 function renderInvestigatorOptions() {
-  const select = $("eventInvestigator");
+  const select=$("eventInvestigator");
   select.replaceChildren();
 
-  const inv = currentInvestigation();
-  const ids = assignments[inv?.id] || [];
+  const inv=currentInvestigation();
+  const ids=assignments[inv?.id]||[];
 
-  const available = members
-    .filter(m => ids.includes(m.id))
-    .sort((a, b) =>
-      memberName(a).localeCompare(memberName(b))
-    );
+  option(select,user.id,"Myself");
 
-  option(select, user.id, "Myself");
+  members.filter(m=>
+    ids.includes(m.id)&&m.id!==user.id
+  ).sort((a,b)=>
+    memberName(a).localeCompare(memberName(b))
+  ).forEach(m=>{
+    option(select,m.id,memberName(m));
+  });
 
-  available
-    .filter(m => m.id !== user.id)
-    .forEach(m => {
-      option(select, m.id, memberName(m));
-    });
+  select.value=user.id;
+}
 
-  select.value = user.id;
+function updateWorkspaceControls() {
+  const inv=currentInvestigation();
+  if(!inv) return;
+
+  const active=inv.status==="active";
+  const completed=inv.status==="completed";
+
+  show("activeWorkspace",active);
+  show("completedNotice",completed);
+  show("reportSection",completed);
+  show("closeControls",active&&role==="admin");
+  show("reopenControls",completed&&role==="admin");
+
+  $("workspaceStatus").textContent=
+    statusLabel(inv.status);
+
+  $("workspaceStatus").className=
+    "status-pill "+inv.status;
 }
 
 async function openWorkspace(inv) {
-  if (!inv || inv.status !== "active") {
-    msg(
-      "Only active investigations can be opened for live logging.",
-      "warn"
-    );
+  if(!["active","completed"].includes(inv.status)) {
+    msg("This investigation cannot be opened.",
+      "warn");
     return;
   }
 
   cancelEvent();
 
-  activeInvestigationId = inv.id;
-  historyEvents = [];
-  historyInvestigation = null;
+  activeInvestigationId=inv.id;
+  historyEvents=[];
+  historyInvestigation=null;
 
-  $("workspaceTitle").textContent =
+  $("workspaceTitle").textContent=
     locationName(inv.location_id);
 
-  $("workspaceDetails").textContent =
-    formatDate(inv.investigation_date) +
-    " | Start: " +
-    formatTime(inv.start_time) +
-    " | " +
-    inv.status.toUpperCase();
+  $("workspaceDetails").textContent=
+    formatDate(inv.investigation_date)+
+    " | Start: "+formatTime(inv.start_time);
 
+  updateWorkspaceControls();
   setPage("eventsPage");
 
   eventAreaOptions();
   renderHistory();
   renderPending();
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+  window.scrollTo({top:0,behavior:"smooth"});
 
-  const requestId = ++workspaceRequest;
+  const requestId=++workspaceRequest;
 
   try {
     await loadAssignments(inv.id);
-  } catch (e) {
-    if (requestId === workspaceRequest) {
-      msg(
-        "Could not load assignments: " + e.message,
-        "warn"
-      );
+  } catch(e) {
+    if(requestId===workspaceRequest) {
+      msg("Assignment error: "+e.message,"warn");
     }
   }
 
-  if (requestId !== workspaceRequest) return;
-
+  if(requestId!==workspaceRequest) return;
   await loadEventHistory(inv.id);
 }
 
 function closeWorkspace() {
   cancelEvent();
-
-  activeInvestigationId = null;
-  historyEvents = [];
-  historyInvestigation = null;
-
+  activeInvestigationId=null;
+  historyEvents=[];
+  historyInvestigation=null;
   ++workspaceRequest;
   setPage("investigationsPage");
 }
 
 function captureEvent(type) {
-  const id = activeInvestigationId;
+  const inv=currentInvestigation();
 
-  if (!id) {
-    msg("Open an investigation first.", "warn");
+  if(!inv||inv.status!=="active") {
+    msg("Investigation is not active.","warn");
     return;
   }
 
-  if (!user) return;
+  if(!user) return;
 
-  if (!crypto.randomUUID) {
-    msg(
-      "This browser cannot generate event IDs.",
-      "bad"
-    );
+  if(!crypto.randomUUID) {
+    msg("Secure event IDs unavailable.","bad");
     return;
   }
 
-  const capturedTime = new Date().toISOString();
+  const capturedTime=new Date().toISOString();
 
-  pending = {
-    id: crypto.randomUUID(),
-    investigation_id: id,
-    investigator_id: user.id,
-    event_type: type,
-    event_time: capturedTime,
-    recorded_by: user.id
+  pending={
+    id:crypto.randomUUID(),
+    investigation_id:inv.id,
+    investigator_id:user.id,
+    event_type:type,
+    event_time:capturedTime,
+    recorded_by:user.id
   };
 
-  $("eventTime").textContent =
-    type + " | " + timeLabel(capturedTime);
+  $("eventTime").textContent=
+    type+" | "+timeLabel(capturedTime);
 
-  $("eventNotes").value = "";
-  $("eventCustomArea").value = "";
+  $("eventNotes").value="";
+  $("eventCustomArea").value="";
 
   eventAreaOptions();
 
-  show("adminAttribution", role === "admin");
+  show("adminAttribution",role==="admin");
+  if(role==="admin") renderInvestigatorOptions();
 
-  if (role === "admin") {
-    renderInvestigatorOptions();
-  }
-
-  show("eventEntry", true);
+  show("eventEntry",true);
 
   document.querySelectorAll(
     "#eventButtons button"
-  ).forEach(b => {
-    b.classList.toggle(
-      "selected",
-      b.dataset.eventType === type
-    );
+  ).forEach(b=>{
+    b.classList.toggle("selected",
+      b.dataset.eventType===type);
   });
 
   $("eventEntry").scrollIntoView({
-    behavior: "smooth",
-    block: "start"
+    behavior:"smooth",block:"start"
   });
 }
 
 function cancelEvent() {
-  pending = null;
-  show("eventEntry", false);
+  pending=null;
+  show("eventEntry",false);
 
   document.querySelectorAll(
     "#eventButtons button"
-  ).forEach(b => {
-    b.classList.remove("selected");
-  });
+  ).forEach(b=>b.classList.remove("selected"));
 }
 
-function saveEvent() {
-  if (!pending) return;
+async function saveEvent() {
+  if(!pending||!user) return;
 
-  const inv = currentInvestigation();
+  const inv=currentInvestigation();
 
-  if (!inv || inv.id !== pending.investigation_id) {
-    msg(
-      "Investigation changed. Marker not saved.",
-      "bad"
-    );
+  if(!inv||inv.status!=="active"||
+     inv.id!==pending.investigation_id) {
+    msg("Investigation is not active.","bad");
     return;
   }
 
-  const selectedInvestigator =
-    role === "admin"
-      ? $("eventInvestigator").value
-      : user.id;
+  const selected=role==="admin"
+    ?$("eventInvestigator").value:user.id;
 
-  const allowed = assignments[inv.id] || [];
+  const allowed=assignments[inv.id]||[];
 
-  if (
-    selectedInvestigator !== user.id &&
-    !allowed.includes(selectedInvestigator)
-  ) {
-    msg(
-      "Selected investigator is not assigned.",
-      "bad"
-    );
+  if(selected!==user.id&&!allowed.includes(selected)) {
+    msg("Investigator is not assigned.","bad");
     return;
   }
 
-  const entry = {
+  const entry={
     ...pending,
-    investigator_id: selectedInvestigator,
-    recorded_by: user.id,
-    area:
-      $("eventCustomArea").value.trim() ||
+    investigator_id:selected,
+    recorded_by:user.id,
+    area:$("eventCustomArea").value.trim()||
       $("eventArea").value,
-    notes: $("eventNotes").value.trim()
+    notes:$("eventNotes").value.trim()
   };
 
   try {
-    const queue = queueRead();
+    const queue=queueRead();
     queue.push(entry);
     queueWrite(queue);
   } catch {
-    msg(
-      "Local save failed. Do not discard this marker.",
-      "bad"
-    );
+    msg("Local save failed. Do not discard marker.",
+      "bad");
     return;
   }
 
   cancelEvent();
-  msg("Event saved locally.", "good");
+  msg("Event saved locally.","good");
 
-  if (navigator.onLine) {
-    syncEvents();
-  }
+  if(navigator.onLine) syncEvents();
 }
 
 function renderPending() {
-  const box = $("pendingEvents");
+  const box=$("pendingEvents");
   box.replaceChildren();
 
-  const list = queueRead().filter(
-    x =>
-      (x.recorded_by || x.investigator_id) === user?.id &&
-      (
-        !activeInvestigationId ||
-        x.investigation_id === activeInvestigationId
-      )
+  const list=queueRead().filter(x=>
+    (x.recorded_by||x.investigator_id)===user?.id&&
+    (!activeInvestigationId||
+      x.investigation_id===activeInvestigationId)
   );
 
-  addText(
-    box,
-    "p",
-    list.length + " marker(s) awaiting sync.",
-    "muted"
-  );
+  addText(box,"p",
+    list.length+" marker(s) awaiting sync.","muted");
 
-  list.slice()
-    .reverse()
-    .slice(0, 20)
-    .forEach(e => {
-      const card = document.createElement("div");
-      card.className = "item";
+  list.slice().reverse().slice(0,20)
+    .forEach(e=>{
+      const card=document.createElement("div");
+      card.className="item";
 
-      addText(card, "strong", e.event_type);
-      addText(card, "p", timeLabel(e.event_time), "muted");
-
-      if (e.area) {
-        addText(card, "p", e.area);
-      }
+      addText(card,"strong",e.event_type);
+      addText(card,"p",timeLabel(e.event_time),"muted");
+      if(e.area) addText(card,"p",e.area);
 
       box.append(card);
     });
 }
 
 async function loadEventHistory(invId) {
-  if (!invId || !db || !user) return;
+  if(!invId||!db||!user) return;
 
-  const requestedId = invId;
-
-  const { data, error } = await db
+  const {data,error}=await db
     .from("investigation_events")
     .select("*")
-    .eq("investigation_id", invId)
-    .order("event_time", { ascending: false })
+    .eq("investigation_id",invId)
+    .order("event_time",{ascending:false})
     .limit(200);
 
-  if (activeInvestigationId !== requestedId) return;
+  if(activeInvestigationId!==invId) return;
 
-  if (error) {
-    msg(
-      "Event history error: " + error.message,
-      "warn"
-    );
+  if(error) {
+    msg("Event history error: "+error.message,
+      "warn");
     return;
   }
 
-  historyEvents = data || [];
-  historyInvestigation = invId;
+  historyEvents=data||[];
+  historyInvestigation=invId;
   renderHistory();
 }
 
 function renderHistory() {
-  const box = $("eventHistory");
+  const box=$("eventHistory");
   box.replaceChildren();
 
-  const invId = activeInvestigationId;
-
-  if (!invId) {
-    addText(
-      box,
-      "p",
-      "Open an investigation to view its events.",
-      "muted"
-    );
+  const id=activeInvestigationId;
+  if(!id) {
+    addText(box,"p",
+      "Open an investigation to view events.",
+      "muted");
     return;
   }
 
-  const synced =
-    historyInvestigation === invId
-      ? historyEvents
-      : [];
+  const synced=historyInvestigation===id
+    ?historyEvents:[];
 
-  const queued = queueRead()
-    .filter(
-      x =>
-        x.investigation_id === invId &&
-        (x.recorded_by || x.investigator_id) === user?.id
-    )
-    .map(x => ({
-      ...x,
-      _local: true
-    }));
+  const queued=queueRead().filter(x=>
+    x.investigation_id===id&&
+    (x.recorded_by||x.investigator_id)===user?.id
+  ).map(x=>({...x,_local:true}));
 
-  const ids = new Set(queued.map(x => x.id));
+  const ids=new Set(queued.map(x=>x.id));
 
-  const combined = [
+  const combined=[
     ...queued,
-    ...synced.filter(x => !ids.has(x.id))
-  ].sort(
-    (a, b) =>
-      new Date(b.event_time) -
-      new Date(a.event_time)
+    ...synced.filter(x=>!ids.has(x.id))
+  ].sort((a,b)=>
+    new Date(b.event_time)-new Date(a.event_time)
   );
 
-  if (!combined.length) {
-    addText(
-      box,
-      "p",
-      "No events recorded for this investigation.",
-      "muted"
-    );
+  if(!combined.length) {
+    addText(box,"p",
+      "No events recorded.","muted");
     return;
   }
 
-  addText(
-    box,
-    "p",
-    combined.length +
-      " event(s) displayed, newest first.",
-    "muted"
-  );
+  addText(box,"p",
+    combined.length+
+    " event(s) displayed, newest first.",
+    "muted");
 
-  combined.forEach(e => {
-    const card = document.createElement("div");
-    card.className = "item";
+  combined.forEach(e=>{
+    const card=document.createElement("div");
+    card.className="item";
 
-    addText(card, "strong", e.event_type);
-    addText(card, "p", timeLabel(e.event_time), "marker");
+    addText(card,"strong",e.event_type);
+    addText(card,"p",
+      timeLabel(e.event_time),"marker");
 
-    addText(
-      card,
-      "p",
-      "Investigator: " + nameById(e.investigator_id),
-      "muted"
-    );
+    addText(card,"p",
+      "Investigator: "+nameById(e.investigator_id),
+      "muted");
 
-    const recorder = e.recorded_by || e.investigator_id;
+    const recorder=e.recorded_by||
+      e.investigator_id;
 
-    if (recorder !== e.investigator_id) {
-      addText(
-        card,
-        "p",
-        "Recorded by: " + nameById(recorder),
-        "muted"
-      );
+    if(recorder!==e.investigator_id) {
+      addText(card,"p",
+        "Recorded by: "+nameById(recorder),
+        "muted");
     }
 
-    if (e.area) {
-      addText(card, "p", "Area: " + e.area);
-    }
+    if(e.area) addText(card,"p","Area: "+e.area);
+    if(e.notes) addText(card,"p",e.notes);
 
-    if (e.notes) {
-      addText(card, "p", e.notes);
-    }
-
-    addText(
-      card,
-      "span",
-      e._local
-        ? "Pending synchronization"
-        : "Synchronized",
-      "event-status " +
-      (e._local ? "warn" : "good")
-    );
+    addText(card,"span",
+      e._local?"Pending synchronization":
+        "Synchronized",
+      "event-status "+(e._local?"warn":"good"));
 
     box.append(card);
   });
 }
 
 async function syncEvents() {
-  if (
-    syncing ||
-    !db ||
-    !user ||
-    !navigator.onLine
-  ) {
+  if(syncing||!db||!user||!navigator.onLine) {
     return;
   }
 
-  syncing = true;
+  syncing=true;
 
   try {
-    const queue = queueRead();
-
-    if (!queue.length) {
+    const queue=queueRead();
+    if(!queue.length) {
       renderPending();
       return;
     }
 
-    const remaining = [];
-    let uploaded = 0;
-    let firstError = "";
+    const remaining=[];
+    let uploaded=0;
+    let firstError="";
 
-    for (const entry of queue) {
-      const owner =
-        entry.recorded_by || entry.investigator_id;
+    for(const entry of queue) {
+      const owner=entry.recorded_by||
+        entry.investigator_id;
 
-      if (owner !== user.id) {
+      if(owner!==user.id) {
         remaining.push(entry);
         continue;
       }
 
-      const payload = {
-        id: entry.id,
-        investigation_id: entry.investigation_id,
-        investigator_id: entry.investigator_id,
-        event_type: entry.event_type,
-        event_time: entry.event_time,
-        area: entry.area || "",
-        notes: entry.notes || ""
+      const payload={
+        id:entry.id,
+        investigation_id:entry.investigation_id,
+        investigator_id:entry.investigator_id,
+        event_type:entry.event_type,
+        event_time:entry.event_time,
+        area:entry.area||"",
+        notes:entry.notes||""
       };
 
-      const { error } = await db
+      const {error}=await db
         .from("investigation_events")
         .insert(payload);
 
-      if (error) {
-        if (error.code === "23505") {
+      if(error) {
+        if(error.code==="23505") {
           uploaded++;
         } else {
           remaining.push(entry);
-
-          if (!firstError) {
-            firstError = error.message;
-          }
+          if(!firstError) firstError=error.message;
         }
       } else {
         uploaded++;
       }
     }
 
-    try {
-      const currentQueue = queueRead();
+    const currentQueue=queueRead();
+    const processed=new Set(queue.map(x=>x.id));
+    const newEntries=currentQueue.filter(
+      x=>!processed.has(x.id)
+    );
 
-      const processedIds = new Set(
-        queue.map(x => x.id)
-      );
+    queueWrite([...remaining,...newEntries]);
 
-      const newEntries = currentQueue.filter(
-        x => !processedIds.has(x.id)
-      );
-
-      queueWrite([
-        ...remaining,
-        ...newEntries
-      ]);
-    } catch {
-      msg("Local queue update failed.", "bad");
-      return;
+    if(firstError) {
+      msg("Some events remain pending: "+
+        firstError,"warn");
+    } else if(uploaded) {
+      msg(uploaded+" event(s) synchronized.","good");
     }
 
-    if (firstError) {
-      msg(
-        "Some markers remain pending: " + firstError,
-        "warn"
-      );
-    } else if (uploaded) {
-      msg(
-        uploaded + " event marker(s) synchronized.",
-        "good"
-      );
-    }
-
-    if (activeInvestigationId) {
+    if(activeInvestigationId) {
       await loadEventHistory(activeInvestigationId);
     }
   } finally {
-    syncing = false;
+    syncing=false;
   }
 }
 
+/* INVESTIGATION CLOSEOUT */
+
+async function changeInvestigationStatus(
+  nextStatus
+) {
+  if(role!=="admin"||!user) return;
+
+  const inv=currentInvestigation();
+  if(!inv) return;
+
+  const isClosing=nextStatus==="completed";
+
+  if(isClosing&&inv.status!=="active") return;
+  if(!isClosing&&inv.status!=="completed") return;
+
+  if(isClosing) {
+    const local=queueRead().filter(x=>
+      x.investigation_id===inv.id
+    );
+
+    if(local.length) {
+      msg(
+        "This device has pending event markers. "+
+        "Synchronize them before ending the investigation.",
+        "warn"
+      );
+      return;
+    }
+  }
+
+  const question=isClosing
+    ?"End this investigation?\n\n"+
+      "Event logging will close. Existing records "+
+      "will remain available."
+    :"Reactivate this investigation?\n\n"+
+      "Event logging will become available again.";
+
+  if(!confirm(question)) return;
+
+  const button=isClosing
+    ?$("endInvestigation")
+    :$("reopenInvestigation");
+
+  button.disabled=true;
+
+  try {
+    const {data,error}=await db
+      .from("investigations")
+      .update({status:nextStatus})
+      .eq("id",inv.id)
+      .eq("status",inv.status)
+      .select("id,status")
+      .single();
+
+    if(error) throw error;
+
+    if(!data||data.status!==nextStatus) {
+      throw new Error(
+        "Status change was not confirmed."
+      );
+    }
+
+    inv.status=nextStatus;
+    cancelEvent();
+
+    renderInvestigations();
+    updateWorkspaceControls();
+
+    msg(
+      isClosing
+        ?"Investigation completed successfully."
+        :"Investigation reactivated.",
+      "good"
+    );
+  } catch(e) {
+    msg("Status change failed: "+e.message,"bad");
+  } finally {
+    button.disabled=false;
+  }
+}
+
+/* COMPLETE REPORT DATA */
+
+async function fetchAllEvents(invId) {
+  const all=[];
+  const pageSize=500;
+  let start=0;
+
+  while(true) {
+    const {data,error}=await db
+      .from("investigation_events")
+      .select("*")
+      .eq("investigation_id",invId)
+      .order("event_time",{ascending:true})
+      .order("id",{ascending:true})
+      .range(start,start+pageSize-1);
+
+    if(error) throw error;
+
+    const rows=data||[];
+    all.push(...rows);
+
+    if(rows.length<pageSize) break;
+    start+=pageSize;
+
+    if(start>100000) {
+      throw new Error(
+        "Report exceeds the supported event limit."
+      );
+    }
+  }
+
+  return all;
+}
+
+async function fetchReportData() {
+  const inv=currentInvestigation();
+
+  if(!inv||inv.status!=="completed") {
+    throw new Error(
+      "Reports are available for completed investigations."
+    );
+  }
+
+  if(!navigator.onLine) {
+    throw new Error(
+      "Connect to the internet to retrieve the full report."
+    );
+  }
+
+  const {data:latest,error:statusError}=await db
+    .from("investigations")
+    .select("*")
+    .eq("id",inv.id)
+    .single();
+
+  if(statusError) throw statusError;
+
+  if(latest.status!=="completed") {
+    throw new Error(
+      "This investigation is no longer completed."
+    );
+  }
+
+  const [events,assigned]=await Promise.all([
+    fetchAllEvents(inv.id),
+    loadAssignments(inv.id)
+  ]);
+
+  const localPending=queueRead().filter(x=>
+    x.investigation_id===inv.id
+  );
+
+  if(localPending.length) {
+    throw new Error(
+      "This device still has pending event markers. "+
+      "Reports cannot be considered complete until "+
+      "they are resolved."
+    );
+  }
+
+  return {
+    inv:latest,
+    loc:locations.find(
+      x=>x.id===latest.location_id
+    ),
+    events,
+    investigators:members.filter(m=>
+      assigned.includes(m.id)
+    ).sort((a,b)=>
+      memberName(a).localeCompare(memberName(b))
+    )
+  };
+}
+
+function reportRows(data) {
+  return data.events.map((e,index)=>({
+    "No.":index+1,
+    "Date":new Date(e.event_time)
+      .toLocaleDateString("en-US",{
+        month:"short",day:"numeric",year:"numeric"
+      }),
+    "Time":new Date(e.event_time)
+      .toLocaleTimeString("en-US",{
+        hour:"numeric",minute:"2-digit",
+        second:"2-digit",hour12:true
+      }),
+    "Event Type":e.event_type||"",
+    "Investigator":nameById(e.investigator_id),
+    "Recorded By":nameById(
+      e.recorded_by||e.investigator_id
+    ),
+    "Room / Area":e.area||"",
+    "Description":e.notes||"",
+    "Event ID":e.id||""
+  }));
+}
+
+function reportFileName(data,ext) {
+  const name=String(
+    data.loc?.name||"Investigation"
+  ).replace(/[^a-z0-9]+/gi,"_")
+    .replace(/^_+|_+$/g,"")
+    .slice(0,65);
+
+  return "IEGH_"+name+"_"+
+    data.inv.investigation_date+"."+ext;
+}
+
+async function generateExcel(data) {
+  if(!window.XLSX) {
+    throw new Error(
+      "Excel library unavailable. Check your connection."
+    );
+  }
+
+  const wb=XLSX.utils.book_new();
+
+  const details=[
+    ["IEGH INVESTIGATION REPORT"],
+    ["Location",data.loc?.name||""],
+    ["Address",[
+      data.loc?.address,
+      data.loc?.city,
+      data.loc?.state,
+      data.loc?.postal_code
+    ].filter(Boolean).join(", ")],
+    ["Investigation Date",
+      formatDate(data.inv.investigation_date)],
+    ["Start Time",formatTime(data.inv.start_time)],
+    ["Status",statusLabel(data.inv.status)],
+    ["Investigation Notes",data.inv.notes||""],
+    ["Investigators",
+      data.investigators.map(memberName).join(", ")],
+    ["Total Events",data.events.length],
+    ["Report Generated",timeLabel(
+      new Date().toISOString()
+    )]
+  ];
+
+  const summary=XLSX.utils.aoa_to_sheet(details);
+  summary["!cols"]=[
+    {wch:24},{wch:85}
+  ];
+
+  XLSX.utils.book_append_sheet(
+    wb,summary,"Investigation Summary"
+  );
+
+  const rows=reportRows(data);
+
+  const events=XLSX.utils.json_to_sheet(
+    rows.length?rows:[],
+    {
+      header:[
+        "No.","Date","Time","Event Type",
+        "Investigator","Recorded By",
+        "Room / Area","Description","Event ID"
+      ]
+    }
+  );
+
+  events["!cols"]=[
+    {wch:7},{wch:18},{wch:16},
+    {wch:26},{wch:22},{wch:22},
+    {wch:34},{wch:75},{wch:40}
+  ];
+
+  XLSX.utils.book_append_sheet(
+    wb,events,"Event Log"
+  );
+
+  const counts={};
+
+  data.events.forEach(e=>{
+    const key=e.event_type||"Unspecified";
+    counts[key]=(counts[key]||0)+1;
+  });
+
+  const countRows=Object.entries(counts)
+    .sort((a,b)=>a[0].localeCompare(b[0]))
+    .map(([type,count])=>({
+      "Event Type":type,
+      "Count":count
+    }));
+
+  const countSheet=XLSX.utils.json_to_sheet(
+    countRows,
+    {header:["Event Type","Count"]}
+  );
+
+  countSheet["!cols"]=[
+    {wch:32},{wch:12}
+  ];
+
+  XLSX.utils.book_append_sheet(
+    wb,countSheet,"Activity Summary"
+  );
+
+  XLSX.writeFile(
+    wb,reportFileName(data,"xlsx")
+  );
+}
+
+function safePDFText(value) {
+  return String(value??"")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^\x20-\x7E\n]/g,"?");
+}
+
+async function generatePDF(data) {
+  if(!window.jspdf?.jsPDF) {
+    throw new Error(
+      "PDF library unavailable. Check your connection."
+    );
+  }
+
+  const doc=new window.jspdf.jsPDF({
+    unit:"pt",
+    format:"letter"
+  });
+
+  const pageWidth=612;
+  const pageHeight=792;
+  const left=48;
+  const right=48;
+  const width=pageWidth-left-right;
+  let y=52;
+  let page=1;
+
+  function pageHeader() {
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(9);
+    doc.setTextColor(75,90,110);
+    doc.text("IEGH DOCUHUB",left,28);
+
+    doc.setDrawColor(190,200,215);
+    doc.line(left,35,pageWidth-right,35);
+
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9);
+    doc.text(
+      "Page "+page,
+      pageWidth-right,
+      pageHeight-26,
+      {align:"right"}
+    );
+
+    doc.setTextColor(30,40,55);
+  }
+
+  function newPage() {
+    doc.addPage();
+    page++;
+    y=52;
+    pageHeader();
+  }
+
+  function ensure(height) {
+    if(y+height>pageHeight-52) {
+      newPage();
+    }
+  }
+
+  function paragraph(text,size=10,gap=8) {
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(size);
+
+    const lines=doc.splitTextToSize(
+      safePDFText(text),width
+    );
+
+    const lineHeight=size*1.45;
+    for(const line of lines) {
+      ensure(lineHeight);
+      doc.text(line,left,y);
+      y+=lineHeight;
+    }
+
+    y+=gap;
+  }
+
+  function heading(text) {
+    ensure(34);
+    y+=8;
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(13);
+    doc.text(safePDFText(text),left,y);
+    y+=18;
+  }
+
+  function field(label,value) {
+    ensure(18);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(10);
+    doc.text(safePDFText(label),left,y);
+    y+=15;
+    paragraph(value||"Not specified",10,5);
+  }
+
+  pageHeader();
+
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(20);
+  doc.setTextColor(25,48,75);
+  doc.text("Investigation Report",left,y);
+  y+=28;
+
+  doc.setTextColor(30,40,55);
+
+  heading("Investigation Information");
+
+  field("Location",data.loc?.name);
+  field("Address",[
+    data.loc?.address,
+    data.loc?.city,
+    data.loc?.state,
+    data.loc?.postal_code
+  ].filter(Boolean).join(", "));
+
+  field("Date",
+    formatDate(data.inv.investigation_date));
+
+  field("Scheduled Start",
+    formatTime(data.inv.start_time));
+
+  field("Status",statusLabel(data.inv.status));
+
+  field("Participating Investigators",
+    data.investigators.map(memberName).join(", ")||
+    "None assigned");
+
+  field("Investigation Notes",
+    data.inv.notes||"None recorded");
+
+  heading("Documented Activity");
+
+  paragraph(
+    "Total recorded events: "+data.events.length
+  );
+
+  const counts={};
+  data.events.forEach(e=>{
+    const type=e.event_type||"Unspecified";
+    counts[type]=(counts[type]||0)+1;
+  });
+
+  Object.entries(counts)
+    .sort((a,b)=>a[0].localeCompare(b[0]))
+    .forEach(([type,count])=>{
+      paragraph(type+": "+count,10,2);
+    });
+
+  heading("Chronological Event Log");
+
+  if(!data.events.length) {
+    paragraph("No events were recorded.");
+  }
+
+  data.events.forEach((e,index)=>{
+    ensure(72);
+
+    doc.setDrawColor(195,205,215);
+    doc.line(left,y,pageWidth-right,y);
+    y+=16;
+
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(11);
+
+    const title=(index+1)+". "+
+      safePDFText(e.event_type||"Event");
+
+    const titleLines=doc.splitTextToSize(
+      title,width
+    );
+
+    titleLines.forEach(line=>{
+      ensure(16);
+      doc.text(line,left,y);
+      y+=15;
+    });
+
+    paragraph(timeLabel(e.event_time),10,3);
+
+    paragraph(
+      "Investigator: "+nameById(e.investigator_id),
+      10,3
+    );
+
+    const recorder=e.recorded_by||
+      e.investigator_id;
+
+    if(recorder!==e.investigator_id) {
+      paragraph(
+        "Recorded by: "+nameById(recorder),
+        10,3
+      );
+    }
+
+    if(e.area) {
+      paragraph("Area: "+e.area,10,3);
+    }
+
+    if(e.notes) {
+      paragraph("Description: "+e.notes,10,5);
+    } else {
+      paragraph("Description: None recorded",10,5);
+    }
+
+    y+=6;
+  });
+
+  heading("Report Information");
+
+  paragraph(
+    "Generated: "+timeLabel(
+      new Date().toISOString()
+    )
+  );
+
+  paragraph(
+    "This report documents recorded investigation "+
+    "events. Entries reflect observations submitted "+
+    "by investigators and do not independently "+
+    "establish paranormal causes.",
+    9,5
+  );
+
+  doc.save(reportFileName(data,"pdf"));
+}
+
+async function downloadReport(type) {
+  if(reportBusy) return;
+
+  reportBusy=true;
+
+  $("downloadExcel").disabled=true;
+  $("downloadPDF").disabled=true;
+
+  try {
+    msg("Preparing complete investigation report...");
+
+    const data=await fetchReportData();
+
+    if(type==="excel") {
+      await generateExcel(data);
+    } else {
+      await generatePDF(data);
+    }
+
+    msg("Report generated successfully.","good");
+  } catch(e) {
+    msg("Report error: "+e.message,"bad");
+  } finally {
+    reportBusy=false;
+    $("downloadExcel").disabled=false;
+    $("downloadPDF").disabled=false;
+  }
+}
+
+/* AUTHENTICATION */
+
 async function signedOut() {
-  user = null;
-  role = null;
-  pending = null;
-
-  assignments = {};
-  historyEvents = [];
-  historyInvestigation = null;
-  activeInvestigationId = null;
-
+  user=null;
+  role=null;
+  pending=null;
+  assignments={};
+  historyEvents=[];
+  historyInvestigation=null;
+  activeInvestigationId=null;
   ++workspaceRequest;
 
-  show("loginPanel", true);
-  show("navigation", false);
-  show("mainMenu", false);
+  show("loginPanel",true);
+  show("navigation",false);
+  show("mainMenu",false);
 
-  document.querySelectorAll(".page").forEach(p => {
-    show(p.id, false);
+  document.querySelectorAll(".page").forEach(p=>{
+    show(p.id,false);
   });
 }
 
 async function signedIn() {
-  const {
-    data: { user: authUser },
-    error
-  } = await db.auth.getUser();
+  const {data:{user:authUser},error}=
+    await db.auth.getUser();
 
-  if (error || !authUser) {
+  if(error||!authUser) {
     await signedOut();
     return;
   }
 
-  const result = await db
-    .from("members")
+  const result=await db.from("members")
     .select("id,display_name,role")
-    .eq("id", authUser.id)
+    .eq("id",authUser.id)
     .single();
 
-  if (result.error || !result.data) {
-    msg(
-      "Authorized member profile not found.",
-      "bad"
-    );
-
+  if(result.error||!result.data) {
     await db.auth.signOut();
     await signedOut();
+    msg("Authorized member profile not found.",
+      "bad");
     return;
   }
 
-  user = authUser;
-  role = result.data.role;
+  user=authUser;
+  role=result.data.role;
 
-  $("accountInfo").textContent =
-    memberName(result.data) +
-    " | " +
-    (role === "admin" ? "Administrator" : "Investigator");
+  $("accountInfo").textContent=
+    memberName(result.data)+" | "+
+    (role==="admin"
+      ?"Administrator":"Investigator");
 
-  $("connectionInfo").textContent =
-    navigator.onLine
-      ? "Online"
-      : "Offline. Pending markers remain on this device.";
+  $("connectionInfo").textContent=
+    navigator.onLine?"Online":"Offline";
 
-  show("loginPanel", false);
-  show("navigation", true);
-  show("mainMenu", true);
+  show("loginPanel",false);
+  show("navigation",true);
+  show("mainMenu",true);
 
-  $("adminMenuOption").disabled = role !== "admin";
-  $("adminMenuOption").hidden = role !== "admin";
-  $("mainMenu").value = "";
+  $("adminMenuOption").disabled=
+    role!=="admin";
+  $("adminMenuOption").hidden=
+    role!=="admin";
+  $("mainMenu").value="";
 
   await loadData();
   setPage("investigationsPage");
 
-  if (navigator.onLine) {
-    await syncEvents();
-  }
+  if(navigator.onLine) await syncEvents();
 }
 
 async function confirmSignOut() {
-  if (!user) return;
+  if(!user) return;
 
-  const confirmed = window.confirm(
-    "Are you sure you want to sign out of DocuHub?"
-  );
+  if(!confirm(
+    "Are you sure you want to sign out?"
+  )) return;
 
-  if (!confirmed) return;
+  const {error}=await db.auth.signOut();
 
-  const { error } = await db.auth.signOut();
-
-  if (error) {
-    msg(error.message, "bad");
+  if(error) {
+    msg(error.message,"bad");
     return;
   }
 
@@ -2180,106 +2502,96 @@ async function confirmSignOut() {
   msg("Signed out.");
 }
 
-$("mainMenu").addEventListener("change", async e => {
-  const action = e.target.value;
+/* EVENT HANDLERS */
 
-  e.target.value = "";
+$("mainMenu").addEventListener(
+  "change",async e=>{
+    const action=e.target.value;
+    e.target.value="";
 
-  if (!action || !user) return;
+    if(!action||!user) return;
 
-  if (action === "logout") {
-    await confirmSignOut();
-    return;
-  }
+    if(action==="logout") {
+      await confirmSignOut();
+      return;
+    }
 
-  if (action === "sync") {
-    await syncEvents();
-    return;
-  }
+    if(action==="sync") {
+      await syncEvents();
+      return;
+    }
 
-  if (action === "admin") {
-    if (role !== "admin") return;
+    if(action==="admin"&&role!=="admin") return;
 
     cancelEvent();
-    activeInvestigationId = null;
+    activeInvestigationId=null;
     ++workspaceRequest;
 
-    setPage("adminPage");
-    return;
+    if(action==="admin") setPage("adminPage");
+    if(action==="account") setPage("accountPage");
   }
-
-  if (action === "account") {
-    cancelEvent();
-    activeInvestigationId = null;
-    ++workspaceRequest;
-
-    setPage("accountPage");
-  }
-});
-
-$("loginForm").addEventListener("submit", async e => {
-  e.preventDefault();
-
-  if (!db) return;
-
-  msg("Signing in...");
-
-  const { error } = await db.auth.signInWithPassword({
-    email: $("email").value.trim(),
-    password: $("password").value
-  });
-
-  $("password").value = "";
-
-  if (error) {
-    msg(error.message, "bad");
-    return;
-  }
-
-  await signedIn();
-});
-
-$("logoutButton").addEventListener(
-  "click",
-  confirmSignOut
 );
 
-$("tabs").addEventListener("click", e => {
-  const b = e.target.closest("button[data-page]");
-  if (!b) return;
+$("loginForm").addEventListener(
+  "submit",async e=>{
+    e.preventDefault();
+    if(!db) return;
+
+    msg("Signing in...");
+
+    const {error}=await db.auth
+      .signInWithPassword({
+        email:$("email").value.trim(),
+        password:$("password").value
+      });
+
+    $("password").value="";
+
+    if(error) {
+      msg(error.message,"bad");
+      return;
+    }
+
+    await signedIn();
+  }
+);
+
+$("logoutButton").addEventListener(
+  "click",confirmSignOut
+);
+
+$("tabs").addEventListener("click",e=>{
+  const b=e.target.closest(
+    "button[data-page]"
+  );
+  if(!b) return;
 
   cancelEvent();
-  activeInvestigationId = null;
+  activeInvestigationId=null;
   ++workspaceRequest;
-
   setPage(b.dataset.page);
 });
 
 $("locationForm").addEventListener(
-  "submit",
-  saveLocation
+  "submit",saveLocation
 );
 
 $("cancelLocation").addEventListener(
-  "click",
-  () => show("locationEditor", false)
+  "click",()=>show("locationEditor",false)
 );
 
 $("addArea").addEventListener(
-  "click",
-  addStructuredArea
+  "click",addStructuredArea
 );
 
 $("newLocation").addEventListener(
-  "click",
-  () => openLocation()
+  "click",()=>openLocation()
 );
 
 $("newInvestigation").addEventListener(
-  "click",
-  () => {
-    if (!locations.length) {
-      msg("Add a location first.", "warn");
+  "click",()=>{
+    if(!locations.length) {
+      msg("Add a location first.","warn");
       return;
     }
     openInvestigation();
@@ -2287,79 +2599,80 @@ $("newInvestigation").addEventListener(
 );
 
 $("investigationForm").addEventListener(
-  "submit",
-  saveInvestigation
+  "submit",saveInvestigation
 );
 
 $("cancelInvestigation").addEventListener(
-  "click",
-  () => show("investigationEditor", false)
+  "click",()=>show("investigationEditor",false)
 );
 
 $("saveAssignments").addEventListener(
-  "click",
-  saveAssignments
+  "click",saveAssignments
 );
 
 $("cancelAssignments").addEventListener(
-  "click",
-  () => show("assignmentEditor", false)
+  "click",()=>show("assignmentEditor",false)
 );
 
 $("refreshInvestigations").addEventListener(
-  "click",
-  loadData
+  "click",loadData
 );
 
 $("backToInvestigations").addEventListener(
-  "click",
-  closeWorkspace
+  "click",closeWorkspace
 );
 
 $("saveEvent").addEventListener(
-  "click",
-  saveEvent
+  "click",saveEvent
 );
 
 $("cancelEvent").addEventListener(
-  "click",
-  cancelEvent
+  "click",cancelEvent
 );
 
 $("syncButton").addEventListener(
-  "click",
-  syncEvents
+  "click",syncEvents
 );
 
-window.addEventListener("online", () => {
-  if (!user) return;
+$("endInvestigation").addEventListener(
+  "click",()=>changeInvestigationStatus("completed")
+);
 
-  $("connectionInfo").textContent = "Online";
+$("reopenInvestigation").addEventListener(
+  "click",()=>changeInvestigationStatus("active")
+);
+
+$("downloadExcel").addEventListener(
+  "click",()=>downloadReport("excel")
+);
+
+$("downloadPDF").addEventListener(
+  "click",()=>downloadReport("pdf")
+);
+
+window.addEventListener("online",()=>{
+  if(!user) return;
+  $("connectionInfo").textContent="Online";
   syncEvents();
 });
 
-window.addEventListener("offline", () => {
-  if (!user) return;
-
-  $("connectionInfo").textContent =
-    "Offline. Pending markers remain on this device.";
+window.addEventListener("offline",()=>{
+  if(!user) return;
+  $("connectionInfo").textContent="Offline";
 });
 
 async function init() {
   renderEventButtons();
 
-  if (!db) {
-    msg("Supabase library could not load.", "bad");
+  if(!db) {
+    msg("Supabase library could not load.","bad");
     return;
   }
 
   try {
     await signedIn();
-  } catch (e) {
-    msg(
-      "Initialization error: " + e.message,
-      "bad"
-    );
+  } catch(e) {
+    msg("Initialization error: "+e.message,"bad");
   }
 }
 
