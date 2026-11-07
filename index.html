@@ -681,7 +681,28 @@ function queueWrite(v) {
   renderPending();
   renderHistory();
 }
+function formatDate(date) {
+  if (!date) return "";
 
+  const [year, month, day] = date.split("-").map(Number);
+
+  return new Date(year, month - 1, day)
+    .toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+}
+function formatTime(time) {
+  if (!time) return "";
+
+  const [hours, minutes] = time.split(":").map(Number);
+
+  const hour12 = hours % 12 || 12;
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  return `${hour12}:${String(minutes).padStart(2, "0")} ${ampm}`;
+}
 function timeLabel(iso) {
   return new Date(iso).toLocaleString(
     undefined,
