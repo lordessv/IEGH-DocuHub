@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#101827">
 <title>IEGH DocuHub</title>
 
@@ -68,8 +69,7 @@ input,select,textarea {
   color:white;
   border:1px solid #526b8a;
 }
-input[type="date"],
-input[type="time"] {
+input[type="date"],input[type="time"] {
   display:block;
   width:100%;
   min-width:0;
@@ -82,10 +82,7 @@ input[type="date"]::-webkit-date-and-time-value,
 input[type="time"]::-webkit-date-and-time-value {
   text-align:left;
 }
-textarea {
-  min-height:90px;
-  resize:vertical;
-}
+textarea { min-height:90px; resize:vertical; }
 button {
   min-height:48px;
   padding:12px 16px;
@@ -229,6 +226,62 @@ button.selected {
 #closeControls { margin:20px 0; }
 #reportActions button { min-height:55px; }
 form { min-width:0; }
+
+/* LOCATION PROFILE VIEW */
+.location-actions {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:14px;
+}
+.location-actions button {
+  width:100%;
+  min-width:0;
+  min-height:48px;
+  padding:10px 5px;
+  font-size:clamp(.82rem,2.8vw,1rem);
+}
+.location-actions.single {
+  grid-template-columns:1fr;
+}
+.profile-field {
+  padding:11px 0;
+  border-bottom:1px solid #344963;
+}
+.profile-field:last-child { border-bottom:0; }
+.profile-label {
+  color:#9dbbdc;
+  font-size:.86rem;
+  font-weight:700;
+  margin-bottom:5px;
+}
+.profile-value {
+  color:#edf4ff;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  line-height:1.5;
+}
+.profile-section {
+  border:1px solid #405b79;
+  border-radius:11px;
+  padding:13px;
+  margin:12px 0;
+}
+.profile-section h4 { margin:0 0 10px; }
+.profile-subsection {
+  border-left:3px solid #527ca8;
+  padding:7px 0 7px 12px;
+  margin:9px 0;
+}
+.profile-subsection p { margin:5px 0; }
+#locationProfile {
+  min-width:0;
+}
+#locationProfileTitle {
+  color:#9ce8fa;
+  overflow-wrap:anywhere;
+}
+
 @media(min-width:700px) {
   .grid {
     grid-template-columns:repeat(3,minmax(0,1fr));
@@ -311,6 +364,27 @@ form { min-width:0; }
   </p>
   <div id="locationList"></div>
 
+  <!-- READ-ONLY LOCATION PROFILE -->
+  <div id="locationProfile" class="hidden">
+    <div class="actions">
+      <button type="button" class="secondary"
+        id="backToLocations">
+        ← Back to Locations
+      </button>
+    </div>
+
+    <h2 id="locationProfileTitle"></h2>
+    <div id="locationProfileContent"></div>
+
+    <div class="actions">
+      <button type="button" class="secondary"
+        id="closeLocationProfile">
+        Close Profile
+      </button>
+    </div>
+  </div>
+
+  <!-- LOCATION EDITOR -->
   <div id="locationEditor" class="hidden">
     <h3 id="locationEditorTitle">Location Profile</h3>
     <form id="locationForm">
@@ -821,6 +895,201 @@ function splitNames(text) {
     .filter(Boolean);
 }
 
+/* LOCATION PROFILE VIEW */
+
+function profileField(parent,label,value) {
+  if(value===null||value===undefined||
+     String(value).trim()==="") return;
+
+  const field=document.createElement("div");
+  field.className="profile-field";
+
+  addText(field,"div",label,"profile-label");
+  addText(field,"div",String(value),"profile-value");
+
+  parent.append(field);
+}
+
+function closeLocationProfile() {
+  show("locationProfile",false);
+  show("locationList",true);
+  show("locationEditor",false);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function viewLocation(loc) {
+  if(!user||!loc) return;
+
+  show("locationEditor",false);
+  show("locationList",false);
+  show("locationProfile",true);
+
+  $("locationProfileTitle").textContent=loc.name;
+
+  const box=$("locationProfileContent");
+  box.replaceChildren();
+
+  const basic=document.createElement("div");
+  basic.className="profile-section";
+
+  addText(basic,"h4","Property Information");
+
+  profileField(
+    basic,"Property Type",
+    propertyTypeLabel(loc.property_type)
+  );
+
+  profileField(
+    basic,"Street Address",loc.address
+  );
+
+  profileField(
+    basic,"City",loc.city
+  );
+
+  profileField(
+    basic,"State",loc.state
+  );
+
+  profileField(
+    basic,"ZIP Code",loc.postal_code
+  );
+
+  profileField(
+    basic,"Property Description",
+    loc.property_description
+  );
+
+  box.append(basic);
+
+  const history=document.createElement("div");
+  history.className="profile-section";
+
+  addText(history,"h4","History & Reported Activity");
+
+  profileField(
+    history,"Location History",
+    loc.location_history
+  );
+
+  profileField(
+    history,"Reported Paranormal Activity",
+    loc.reported_activity
+  );
+
+  box.append(history);
+
+  const areas=document.createElement("div");
+  areas.className="profile-section";
+
+  addText(areas,"h4","Buildings, Floors & Areas");
+
+  const sections=normalizedAreas(loc.property_areas);
+
+  if(!sections.length) {
+    addText(
+      areas,"p",
+      "No structured areas recorded.",
+      "muted"
+    );
+  }
+
+  sections.forEach((section,index)=>{
+    const sectionBox=document.createElement("div");
+    sectionBox.className="profile-subsection";
+
+    addText(
+      sectionBox,"strong",
+      section.name||"Section "+(index+1)
+    );
+
+    addText(
+      sectionBox,"p",
+      section.kind==="outdoor"
+        ?"Outdoor Section"
+        :section.kind==="building"
+          ?"Building"
+          :"Other Section",
+      "muted"
+    );
+
+    section.floors.forEach(floor=>{
+      const floorBox=document.createElement("div");
+      floorBox.className="profile-subsection";
+
+      addText(
+        floorBox,"strong",
+        floor.name||"Unnamed Level"
+      );
+
+      if(floor.rooms.length) {
+        addText(
+          floorBox,"p",
+          floor.rooms.join(", ")
+        );
+      }
+
+      sectionBox.append(floorBox);
+    });
+
+    areas.append(sectionBox);
+  });
+
+  profileField(
+    areas,"Additional Floors / Rooms Notes",
+    loc.floors_and_rooms
+  );
+
+  profileField(
+    areas,"Exterior Areas / Notes",
+    loc.exterior_areas
+  );
+
+  box.append(areas);
+
+  const access=document.createElement("div");
+  access.className="profile-section";
+
+  addText(access,"h4","Access Information");
+
+  if(loc.access_notes) {
+    profileField(
+      access,"Access Notes",
+      loc.access_notes
+    );
+  } else {
+    addText(
+      access,"p",
+      "No access notes recorded.",
+      "muted"
+    );
+  }
+
+  box.append(access);
+
+  if(role==="admin") {
+    const actions=document.createElement("div");
+    actions.className="location-actions";
+
+    addButton(
+      actions,"Edit Profile",
+      ()=>openLocation(loc),""
+    );
+
+    addButton(
+      actions,"Back to Locations",
+      closeLocationProfile
+    );
+
+    box.append(actions);
+  }
+
+  $("locationProfile").scrollIntoView({
+    behavior:"smooth",
+    block:"start"
+  });
+}
+
 function renderStructuredAreas() {
   const box=$("structuredAreas");
   box.replaceChildren();
@@ -994,20 +1263,33 @@ function renderLocations() {
           .join(", "),"muted");
     }
 
+    const actions=document.createElement("div");
+    actions.className="location-actions";
+
+    addButton(
+      actions,"View Profile",
+      ()=>viewLocation(loc),""
+    );
+
     if(role==="admin") {
-      const actions=document.createElement("div");
-      actions.className="actions";
-      addButton(actions,"Edit Profile",
-        ()=>openLocation(loc));
-      card.append(actions);
+      addButton(
+        actions,"Edit Profile",
+        ()=>openLocation(loc),"secondary"
+      );
+    } else {
+      actions.classList.add("single");
     }
 
+    card.append(actions);
     box.append(card);
   });
 }
 
 function openLocation(loc=null) {
   if(role!=="admin") return;
+
+  show("locationProfile",false);
+  show("locationList",true);
 
   editingLocation=loc?.id||null;
 
@@ -2575,6 +2857,14 @@ $("cancelLocation").addEventListener(
 
 $("addArea").addEventListener(
   "click",addStructuredArea
+);
+
+$("backToLocations").addEventListener(
+  "click",closeLocationProfile
+);
+
+$("closeLocationProfile").addEventListener(
+  "click",closeLocationProfile
 );
 
 $("newLocation").addEventListener(
