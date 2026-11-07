@@ -1,11 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#101827">
 <title>IEGH DocuHub</title>
-
 <style>
 :root {
   font-family:system-ui,-apple-system,sans-serif;
@@ -13,97 +13,68 @@
   background:#101827;
   color:#edf4ff;
 }
-* { box-sizing:border-box; }
-html,body { margin:0; max-width:100%; }
-body { min-height:100vh; overflow-x:hidden; }
+* {box-sizing:border-box}
+html,body {margin:0;max-width:100%}
+body {min-height:100vh;overflow-x:hidden}
 header {
   background:#192942;
   border-bottom:1px solid #39516e;
   padding:12px 4%;
 }
 .header-row {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
+  display:flex;align-items:center;
+  justify-content:space-between;gap:12px;
 }
 header h1 {
-  margin:0;
-  font-size:clamp(1.25rem,4.5vw,2rem);
+  margin:0;font-size:clamp(1.25rem,4.5vw,2rem);
 }
-main {
-  max-width:1050px;
-  margin:auto;
-  padding:12px;
-}
+main {max-width:1050px;margin:auto;padding:12px}
 .panel {
   background:#1c2c44;
   border:1px solid #3a526e;
   border-radius:15px;
   padding:clamp(14px,3vw,25px);
-  margin-bottom:14px;
-  min-width:0;
+  margin-bottom:14px;min-width:0;
 }
-h2 { margin:0 0 14px; font-size:1.3rem; }
-h3 { margin:18px 0 10px; }
-h4 { margin:14px 0 8px; color:#b9d9fa; }
-p { line-height:1.5; }
+h2 {margin:0 0 14px;font-size:1.3rem}
+h3 {margin:18px 0 10px}
+h4 {margin:14px 0 8px;color:#b9d9fa}
+p {line-height:1.5}
 label {
-  display:block;
-  margin:12px 0 5px;
-  color:#c7d9f0;
+  display:block;margin:12px 0 5px;color:#c7d9f0;
 }
 input,select,textarea,button {
-  font:inherit;
-  border-radius:9px;
+  font:inherit;border-radius:9px;
 }
 input,select,textarea {
-  display:block;
-  width:100%;
-  min-width:0;
-  max-width:100%;
-  min-height:48px;
-  padding:12px;
-  background:#101b2e;
-  color:white;
+  display:block;width:100%;min-width:0;
+  max-width:100%;min-height:48px;padding:12px;
+  background:#101b2e;color:white;
   border:1px solid #526b8a;
 }
 input[type="date"],input[type="time"] {
-  display:block;
-  width:100%;
-  min-width:0;
-  max-width:100%;
-  box-sizing:border-box;
-  -webkit-appearance:none;
-  appearance:none;
+  width:100%;min-width:0;max-width:100%;
+  -webkit-appearance:none;appearance:none;
 }
 input[type="date"]::-webkit-date-and-time-value,
 input[type="time"]::-webkit-date-and-time-value {
   text-align:left;
 }
-textarea { min-height:90px; resize:vertical; }
+textarea {min-height:90px;resize:vertical}
 button {
-  min-height:48px;
-  padding:12px 16px;
-  border:0;
-  background:#396caa;
-  color:white;
-  font-weight:650;
-  cursor:pointer;
+  min-height:48px;padding:12px 16px;border:0;
+  background:#396caa;color:white;
+  font-weight:650;cursor:pointer;
 }
-button:disabled { opacity:.45; cursor:not-allowed; }
-button.secondary { background:#344c69; }
-button.danger { background:#9a3546; }
+button:disabled {opacity:.45;cursor:not-allowed}
+button.secondary {background:#344c69}
+button.danger {background:#9a3546}
 button.selected {
-  background:#1684a2;
-  outline:2px solid #9de8ff;
+  background:#1684a2;outline:2px solid #9de8ff;
 }
 .header-menu {
-  width:145px;
-  min-height:44px;
-  padding:8px;
-  background:#344c69;
-  font-weight:650;
+  width:145px;min-height:44px;padding:8px;
+  background:#344c69;font-weight:650;
 }
 .grid {
   display:grid;
@@ -111,196 +82,185 @@ button.selected {
   gap:9px;
 }
 .grid button {
-  min-height:66px;
-  padding:10px 7px;
+  min-height:66px;padding:10px 7px;
   font-size:clamp(.82rem,2.5vw,1rem);
   overflow-wrap:anywhere;
 }
 .actions {
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:16px;
+  display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;
 }
-.actions button { flex:1 1 130px; }
-.tabs { display:flex; gap:8px; }
+.actions button {flex:1 1 130px}
+.tabs {display:flex;gap:8px}
 .tabs button {
-  flex:1 1 0;
-  min-width:0;
-  padding:11px 5px;
+  flex:1 1 0;min-width:0;padding:11px 5px;
   font-size:clamp(.76rem,2.7vw,1rem);
 }
 .item {
-  border:1px solid #405b79;
-  border-radius:11px;
-  padding:13px;
-  margin:10px 0;
-  min-width:0;
+  border:1px solid #405b79;border-radius:11px;
+  padding:13px;margin:10px 0;min-width:0;
 }
-.item p { margin:6px 0; }
-.muted { color:#b3c7e1; }
-.good { color:#91e5b2; }
-.warn { color:#ffcc83; }
-.bad { color:#ff9ba7; }
-.hidden { display:none!important; }
+.item p {margin:6px 0}
+.muted {color:#b3c7e1}
+.good {color:#91e5b2}
+.warn {color:#ffcc83}
+.bad {color:#ff9ba7}
+.hidden {display:none!important}
 .marker {
-  color:#9ce8fa;
-  font-weight:700;
-  font-size:1.12rem;
+  color:#9ce8fa;font-weight:700;font-size:1.12rem;
 }
-#message { white-space:pre-wrap; }
+#message {white-space:pre-wrap}
 .checkrow {
-  display:flex;
-  gap:10px;
-  align-items:center;
-  padding:10px;
-  border-bottom:1px solid #344963;
+  display:flex;gap:10px;align-items:center;
+  padding:10px;border-bottom:1px solid #344963;
 }
 .checkrow input {
-  width:22px;
-  min-height:22px;
-  height:22px;
+  width:22px;min-height:22px;height:22px;
 }
-.checkrow label { margin:0; flex:1; }
+.checkrow label {margin:0;flex:1}
 .area-row {
-  border:1px solid #405b79;
-  border-radius:10px;
-  padding:12px;
-  margin:10px 0;
+  border:1px solid #405b79;border-radius:10px;
+  padding:12px;margin:10px 0;
 }
 .area-fields {
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:8px;
 }
-.event-group { margin:18px 0; }
+.event-group {margin:18px 0}
 .event-group h3 {
-  border-bottom:1px solid #405b79;
-  padding-bottom:7px;
+  border-bottom:1px solid #405b79;padding-bottom:7px;
 }
 .event-status {
-  display:inline-block;
-  margin-top:5px;
-  font-size:.85rem;
+  display:inline-block;margin-top:5px;font-size:.85rem;
 }
-.compact { margin:6px 0; }
+.compact {margin:6px 0}
 .workspace-heading {
   border-bottom:1px solid #405b79;
-  padding-bottom:12px;
-  margin-bottom:12px;
+  padding-bottom:12px;margin-bottom:12px;
 }
-.workspace-heading p { margin:4px 0; }
+.workspace-heading p {margin:4px 0}
 .workspace-actions {
-  display:flex;
-  justify-content:flex-start;
+  display:flex;justify-content:flex-start;
   margin-bottom:12px;
 }
 .workspace-actions button {
-  width:auto;
-  min-width:180px;
+  width:auto;min-width:180px;
 }
 .account-details {
-  margin-top:12px;
-  padding:12px;
-  border:1px solid #405b79;
-  border-radius:10px;
+  margin-top:12px;padding:12px;
+  border:1px solid #405b79;border-radius:10px;
 }
 .report-section {
-  border:1px solid #45627f;
-  border-radius:12px;
-  padding:15px;
-  margin:16px 0;
+  border:1px solid #45627f;border-radius:12px;
+  padding:15px;margin:16px 0;
 }
 .status-pill {
-  display:inline-block;
-  padding:5px 10px;
-  border-radius:20px;
-  background:#344c69;
-  font-size:.85rem;
-  font-weight:700;
+  display:inline-block;padding:5px 10px;
+  border-radius:20px;background:#344c69;
+  font-size:.85rem;font-weight:700;
 }
-.status-pill.completed { background:#255b49; }
-.status-pill.active { background:#245c83; }
-.status-pill.cancelled { background:#703b45; }
-#closeControls { margin:20px 0; }
-#reportActions button { min-height:55px; }
-form { min-width:0; }
+.status-pill.completed {background:#255b49}
+.status-pill.active {background:#245c83}
+.status-pill.cancelled {background:#703b45}
+#closeControls {margin:20px 0}
+#reportActions button {min-height:55px}
+form {min-width:0}
 
-/* LOCATION PROFILE VIEW */
+/* LOCATION DIRECTORY ALPHABET */
+.alphabet-menu {
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  margin:12px 0 15px;
+}
+.alphabet-menu button {
+  flex:0 0 auto;
+  width:34px;
+  min-height:36px;
+  padding:5px 0;
+  border:1px solid #527294;
+  border-radius:7px;
+  background:#304862;
+  font-size:.88rem;
+  font-weight:700;
+  text-align:center;
+}
+.alphabet-menu button.selected {
+  background:#1684a2;
+  border-color:#9de8ff;
+  outline:none;
+}
+.alphabet-menu button:disabled {
+  opacity:.27;
+  background:#1b2b40;
+  border-color:#344963;
+}
+#locationFilterInfo {
+  font-size:.85rem;
+  margin:0 0 10px;
+}
+
+/* LOCATION PROFILES */
 .location-actions {
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-  margin-top:14px;
+  gap:10px;margin-top:14px;
 }
 .location-actions button {
-  width:100%;
-  min-width:0;
-  min-height:48px;
+  width:100%;min-width:0;min-height:48px;
   padding:10px 5px;
   font-size:clamp(.82rem,2.8vw,1rem);
 }
-.location-actions.single {
-  grid-template-columns:1fr;
-}
+.location-actions.single {grid-template-columns:1fr}
 .profile-field {
-  padding:11px 0;
-  border-bottom:1px solid #344963;
+  padding:11px 0;border-bottom:1px solid #344963;
 }
-.profile-field:last-child { border-bottom:0; }
+.profile-field:last-child {border-bottom:0}
 .profile-label {
-  color:#9dbbdc;
-  font-size:.86rem;
-  font-weight:700;
-  margin-bottom:5px;
+  color:#9dbbdc;font-size:.86rem;
+  font-weight:700;margin-bottom:5px;
 }
 .profile-value {
-  color:#edf4ff;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
-  line-height:1.5;
+  color:#edf4ff;white-space:pre-wrap;
+  overflow-wrap:anywhere;line-height:1.5;
 }
 .profile-section {
-  border:1px solid #405b79;
-  border-radius:11px;
-  padding:13px;
-  margin:12px 0;
+  border:1px solid #405b79;border-radius:11px;
+  padding:13px;margin:12px 0;
 }
-.profile-section h4 { margin:0 0 10px; }
+.profile-section h4 {margin:0 0 10px}
 .profile-subsection {
   border-left:3px solid #527ca8;
-  padding:7px 0 7px 12px;
-  margin:9px 0;
+  padding:7px 0 7px 12px;margin:9px 0;
 }
-.profile-subsection p { margin:5px 0; }
-#locationProfile {
-  min-width:0;
-}
+.profile-subsection p {margin:5px 0}
+#locationProfile {min-width:0}
 #locationProfileTitle {
-  color:#9ce8fa;
-  overflow-wrap:anywhere;
+  color:#9ce8fa;overflow-wrap:anywhere;
 }
-
 @media(min-width:700px) {
   .grid {
     grid-template-columns:repeat(3,minmax(0,1fr));
   }
 }
 @media(max-width:440px) {
-  main { padding:9px; }
-  .area-fields { grid-template-columns:1fr; }
-  .panel { padding:13px; }
-  .header-menu { width:125px; }
+  main {padding:9px}
+  .area-fields {grid-template-columns:1fr}
+  .panel {padding:13px}
+  .header-menu {width:125px}
+  .alphabet-menu {gap:4px}
+  .alphabet-menu button {
+    width:32px;min-height:36px;font-size:.84rem;
+  }
 }
 </style>
 </head>
-
 <body>
+
 <header>
   <div class="header-row">
     <h1>IEGH DocuHub</h1>
-    <select id="mainMenu"
-      class="header-menu hidden"
+    <select id="mainMenu" class="header-menu hidden"
       aria-label="Main menu">
       <option value="">☰ Menu</option>
       <option value="account">Account</option>
@@ -358,12 +318,14 @@ form { min-width:0; }
 
 <section class="panel hidden page" id="locationsPage">
   <h2>Location Directory</h2>
-  <p class="muted">
-    Reusable property profiles for investigation sites.
-  </p>
-  <div id="locationList"></div>
+  <div id="locationDirectory">
+    <div id="alphabetMenu" class="alphabet-menu"
+      role="group" aria-label="Filter locations by letter">
+    </div>
+    <p id="locationFilterInfo" class="muted"></p>
+    <div id="locationList"></div>
+  </div>
 
-  <!-- READ-ONLY LOCATION PROFILE -->
   <div id="locationProfile" class="hidden">
     <div class="actions">
       <button type="button" class="secondary"
@@ -371,10 +333,8 @@ form { min-width:0; }
         ← Back to Locations
       </button>
     </div>
-
     <h2 id="locationProfileTitle"></h2>
     <div id="locationProfileContent"></div>
-
     <div class="actions">
       <button type="button" class="secondary"
         id="closeLocationProfile">
@@ -383,25 +343,19 @@ form { min-width:0; }
     </div>
   </div>
 
-  <!-- LOCATION EDITOR -->
   <div id="locationEditor" class="hidden">
     <h3 id="locationEditorTitle">Location Profile</h3>
     <form id="locationForm">
       <label>Location Name *</label>
       <input id="locName" required>
-
       <label>Street Address</label>
       <input id="locAddress">
-
       <label>City</label>
       <input id="locCity">
-
       <label>State</label>
       <input id="locState" value="CA">
-
       <label>ZIP Code</label>
       <input id="locZip">
-
       <label>Property Type</label>
       <select id="locType">
         <option value="">Select property type</option>
@@ -417,7 +371,6 @@ form { min-width:0; }
         <option value="mixed">Mixed Property</option>
         <option value="other">Other</option>
       </select>
-
       <h3>Buildings, Floors &amp; Areas</h3>
       <p class="muted">
         Add buildings, sections, floors, and rooms
@@ -430,25 +383,18 @@ form { min-width:0; }
           + Add Building / Section
         </button>
       </div>
-
       <label>Property Description</label>
       <textarea id="locDescription"></textarea>
-
       <label>Location History</label>
       <textarea id="locHistory"></textarea>
-
       <label>Reported Paranormal Activity</label>
       <textarea id="locActivity"></textarea>
-
       <label>Additional Floors / Rooms Notes</label>
       <textarea id="locRooms"></textarea>
-
       <label>Exterior Areas / Notes</label>
       <textarea id="locExterior"></textarea>
-
       <label>Access Notes</label>
       <textarea id="locAccess"></textarea>
-
       <div class="actions">
         <button type="submit">Save Location</button>
         <button type="button" class="secondary"
@@ -458,8 +404,7 @@ form { min-width:0; }
   </div>
 </section>
 
-<section class="panel hidden page"
-  id="investigationsPage">
+<section class="panel hidden page" id="investigationsPage">
   <h2>Investigations</h2>
   <p class="muted">
     Open active investigations for logging,
@@ -479,21 +424,17 @@ form { min-width:0; }
       ← Back to Investigations
     </button>
   </div>
-
   <div class="workspace-heading">
     <p id="workspaceTitle" class="marker"></p>
     <p id="workspaceDetails" class="muted"></p>
     <span id="workspaceStatus"
       class="status-pill"></span>
   </div>
-
   <div id="activeWorkspace">
     <div id="eventButtons"></div>
-
     <div id="eventEntry" class="hidden">
       <div class="item">
         <p id="eventTime" class="marker"></p>
-
         <div id="adminAttribution" class="hidden">
           <label>Log Event For</label>
           <select id="eventInvestigator"></select>
@@ -502,18 +443,14 @@ form { min-width:0; }
             tracked separately.
           </p>
         </div>
-
         <label>Room / Area (optional)</label>
         <select id="eventArea"></select>
-
         <label>Custom Area (optional)</label>
         <input id="eventCustomArea"
           placeholder="Enter an area">
-
         <label>Description (optional)</label>
         <textarea id="eventNotes"
           placeholder="What happened?"></textarea>
-
         <div class="actions">
           <button id="saveEvent">Log Event</button>
           <button class="secondary"
@@ -522,7 +459,6 @@ form { min-width:0; }
       </div>
     </div>
   </div>
-
   <div id="completedNotice" class="hidden">
     <div class="report-section">
       <h3>Investigation Completed</h3>
@@ -533,7 +469,6 @@ form { min-width:0; }
       </p>
     </div>
   </div>
-
   <div id="reportSection" class="report-section hidden">
     <h3>Investigation Reports</h3>
     <p class="muted">
@@ -549,13 +484,10 @@ form { min-width:0; }
       </button>
     </div>
   </div>
-
   <h3>Investigation Event History</h3>
   <div id="eventHistory"></div>
-
   <h3>Pending Local Markers</h3>
   <div id="pendingEvents"></div>
-
   <div id="closeControls" class="hidden">
     <div class="report-section">
       <h3>Administrator Controls</h3>
@@ -569,7 +501,6 @@ form { min-width:0; }
       </button>
     </div>
   </div>
-
   <div id="reopenControls" class="hidden">
     <div class="report-section">
       <h3>Administrator Controls</h3>
@@ -586,14 +517,12 @@ form { min-width:0; }
   <p class="muted">
     Manage locations, schedules, and assignments.
   </p>
-
   <div class="actions">
     <button id="newLocation">Add Location</button>
     <button id="newInvestigation">
       Schedule Investigation
     </button>
   </div>
-
   <div id="investigationEditor" class="hidden">
     <h3 id="investigationEditorTitle">
       Investigation Details
@@ -601,13 +530,10 @@ form { min-width:0; }
     <form id="investigationForm">
       <label>Location *</label>
       <select id="invLocation" required></select>
-
       <label>Investigation Date *</label>
       <input id="invDate" type="date" required>
-
       <label>Start Time *</label>
       <input id="invTime" type="time" required>
-
       <label>Status</label>
       <select id="invStatus">
         <option value="scheduled">Scheduled</option>
@@ -615,10 +541,8 @@ form { min-width:0; }
         <option value="completed">Completed</option>
         <option value="cancelled">Cancelled</option>
       </select>
-
       <label>Investigation Notes</label>
       <textarea id="invNotes"></textarea>
-
       <div class="actions">
         <button type="submit">
           Save Investigation
@@ -628,7 +552,6 @@ form { min-width:0; }
       </div>
     </form>
   </div>
-
   <div id="assignmentEditor" class="hidden">
     <h3>Assign Investigators</h3>
     <p id="assignmentTitle" class="muted"></p>
@@ -641,7 +564,6 @@ form { min-width:0; }
         id="cancelAssignments">Cancel</button>
     </div>
   </div>
-
   <h3>Member Directory</h3>
   <div id="memberList"></div>
   <p class="muted">
@@ -667,83 +589,65 @@ form { min-width:0; }
 
 const SUPABASE_URL =
   "https://wuhshzfxdhsxpehbhuvn.supabase.co/";
-
 const SUPABASE_KEY =
   "sb_publishable__-GbvBCUDmSBlyVOMijkFA_M8tWiUEQ";
 
-const $ = id => document.getElementById(id);
-const show = (id,yes) =>
+const $=id=>document.getElementById(id);
+const show=(id,yes)=>
   $(id).classList.toggle("hidden",!yes);
+const db=window.supabase
+  ?window.supabase.createClient(
+    SUPABASE_URL,SUPABASE_KEY
+  ):null;
 
-const db = window.supabase
-  ? window.supabase.createClient(
-      SUPABASE_URL,SUPABASE_KEY
-    )
-  : null;
-
-const EVENT_GROUPS = {
-  "Auditory Activity": [
-    "Voice / Whisper",
-    "Footsteps",
-    "Knocking / Tapping",
-    "Other Sound"
+const EVENT_GROUPS={
+  "Auditory Activity":[
+    "Voice / Whisper","Footsteps",
+    "Knocking / Tapping","Other Sound"
   ],
-  "Visual Activity": [
-    "Apparition / Shadow",
-    "Object Movement",
+  "Visual Activity":[
+    "Apparition / Shadow","Object Movement",
     "Light Anomaly"
   ],
-  "Equipment Activity": [
-    "EMF Spike",
-    "REM Pod",
-    "Other Equipment"
+  "Equipment Activity":[
+    "EMF Spike","REM Pod","Other Equipment"
   ],
-  "Investigation Activity": [
-    "Investigator Movement",
-    "Experiment",
+  "Investigation Activity":[
+    "Investigator Movement","Experiment",
     "General Note"
   ],
-  "Environmental Activity": [
-    "Temperature Change",
-    "Physical Sensation",
+  "Environmental Activity":[
+    "Temperature Change","Physical Sensation",
     "Unusual Odor"
   ]
 };
 
-const QUEUE_KEY = "iegh_docuhub_pending_v1";
+const QUEUE_KEY="iegh_docuhub_pending_v1";
+const ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-let user=null;
-let role=null;
-let locations=[];
-let investigations=[];
-let members=[];
-let assignments={};
-let historyEvents=[];
+let user=null,role=null;
+let locations=[],investigations=[],members=[];
+let assignments={},historyEvents=[];
 let historyInvestigation=null;
-let editingLocation=null;
-let editingInvestigation=null;
+let editingLocation=null,editingInvestigation=null;
 let assigningInvestigation=null;
-let activeInvestigationId=null;
-let pending=null;
+let activeInvestigationId=null,pending=null;
 let structuredAreas=[];
-let syncing=false;
-let workspaceRequest=0;
-let reportBusy=false;
+let syncing=false,workspaceRequest=0,reportBusy=false;
+let selectedLocationLetter=null;
 
-function msg(text,kind="muted") {
+function msg(text,kind="muted"){
   $("message").textContent=text;
   $("message").className=kind;
 }
-
-function addText(parent,tag,value,cls) {
+function addText(parent,tag,value,cls){
   const el=document.createElement(tag);
   el.textContent=value??"";
-  if(cls) el.className=cls;
+  if(cls)el.className=cls;
   parent.append(el);
   return el;
 }
-
-function addButton(parent,label,fn,cls="secondary") {
+function addButton(parent,label,fn,cls="secondary"){
   const b=document.createElement("button");
   b.type="button";
   b.textContent=label;
@@ -752,110 +656,79 @@ function addButton(parent,label,fn,cls="secondary") {
   parent.append(b);
   return b;
 }
-
-function option(select,value,label) {
+function option(select,value,label){
   const el=document.createElement("option");
-  el.value=value;
-  el.textContent=label;
+  el.value=value;el.textContent=label;
   select.append(el);
 }
-
-function formatDate(date) {
-  if(!date) return "";
+function formatDate(date){
+  if(!date)return "";
   const parts=String(date).split("-");
-  if(parts.length!==3) return String(date);
-
+  if(parts.length!==3)return String(date);
   const [y,m,d]=parts.map(Number);
-  const value=new Date(y,m-1,d);
-
-  return value.toLocaleDateString("en-US",{
-    month:"short",
-    day:"numeric",
-    year:"numeric"
-  });
+  return new Date(y,m-1,d).toLocaleDateString(
+    "en-US",{month:"short",day:"numeric",year:"numeric"}
+  );
 }
-
-function formatTime(time) {
-  if(!time) return "";
+function formatTime(time){
+  if(!time)return "";
   const [h,m]=String(time).split(":").map(Number);
-  if(!Number.isFinite(h)) return String(time);
-
+  if(!Number.isFinite(h))return String(time);
   return (h%12||12)+":"+
     String(m||0).padStart(2,"0")+" "+
     (h>=12?"PM":"AM");
 }
-
-function timeLabel(iso) {
+function timeLabel(iso){
   const d=new Date(iso);
-  if(Number.isNaN(d.getTime())) return String(iso);
-
+  if(Number.isNaN(d.getTime()))return String(iso);
   return d.toLocaleString("en-US",{
-    month:"short",
-    day:"numeric",
-    year:"numeric",
-    hour:"numeric",
-    minute:"2-digit",
-    second:"2-digit",
-    hour12:true
+    month:"short",day:"numeric",year:"numeric",
+    hour:"numeric",minute:"2-digit",
+    second:"2-digit",hour12:true
   });
 }
-
-function queueRead() {
-  try {
+function queueRead(){
+  try{
     const v=JSON.parse(
       localStorage.getItem(QUEUE_KEY)||"[]"
     );
     return Array.isArray(v)?v:[];
-  } catch {
-    return [];
-  }
+  }catch{return []}
 }
-
-function queueWrite(v) {
-  localStorage.setItem(
-    QUEUE_KEY,JSON.stringify(v)
-  );
-  renderPending();
-  renderHistory();
+function queueWrite(v){
+  localStorage.setItem(QUEUE_KEY,JSON.stringify(v));
+  renderPending();renderHistory();
 }
-
-function locationName(id) {
+function locationName(id){
   return locations.find(x=>x.id===id)?.name||
     "Unknown location";
 }
-
-function memberName(m) {
+function memberName(m){
   return String(m?.display_name||"").trim()||
     "Name not set";
 }
-
-function nameById(id) {
-  if(!id) return "Unknown";
+function nameById(id){
+  if(!id)return "Unknown";
   const m=members.find(x=>x.id===id);
   return m?memberName(m):"Unknown member";
 }
-
-function currentInvestigation() {
+function currentInvestigation(){
   return investigations.find(
     x=>x.id===activeInvestigationId
   );
 }
-
-function currentLocation() {
+function currentLocation(){
   const inv=currentInvestigation();
   return locations.find(
     x=>x.id===inv?.location_id
   );
 }
-
-function setPage(id) {
-  if(id==="adminPage"&&role!=="admin") return;
-  if(id==="eventsPage"&&!activeInvestigationId) return;
-
+function setPage(id){
+  if(id==="adminPage"&&role!=="admin")return;
+  if(id==="eventsPage"&&!activeInvestigationId)return;
   document.querySelectorAll(".page").forEach(p=>{
     show(p.id,p.id===id);
   });
-
   document.querySelectorAll("#tabs button").forEach(b=>{
     b.classList.toggle("selected",
       b.dataset.page===id||
@@ -864,250 +737,211 @@ function setPage(id) {
     );
   });
 }
-
-function propertyTypeLabel(type) {
+function propertyTypeLabel(type){
   const found=[...$("locType").options]
     .find(x=>x.value===type);
   return found?.textContent||type||"";
 }
-
-function normalizedAreas(value) {
-  if(!Array.isArray(value)) return [];
-  return value.filter(
-    x=>x&&typeof x==="object"
-  ).map(x=>({
-    name:String(x.name||""),
-    kind:String(x.kind||"building"),
-    floors:Array.isArray(x.floors)
-      ?x.floors.map(f=>({
-        name:String(f.name||""),
-        rooms:Array.isArray(f.rooms)
-          ?f.rooms.map(String):[]
-      }))
-      :[]
-  }));
+function normalizedAreas(value){
+  if(!Array.isArray(value))return [];
+  return value.filter(x=>x&&typeof x==="object")
+    .map(x=>({
+      name:String(x.name||""),
+      kind:String(x.kind||"building"),
+      floors:Array.isArray(x.floors)
+        ?x.floors.map(f=>({
+          name:String(f.name||""),
+          rooms:Array.isArray(f.rooms)
+            ?f.rooms.map(String):[]
+        })):[]
+    }));
+}
+function splitNames(text){
+  return text.split(/[\n,]+/)
+    .map(x=>x.trim()).filter(Boolean);
 }
 
-function splitNames(text) {
-  return text.split(/[\n,]+/)
-    .map(x=>x.trim())
-    .filter(Boolean);
+/* A-Z LOCATION FILTER */
+
+function locationFirstLetter(loc){
+  return String(loc.name||"")
+    .trim().charAt(0).toUpperCase();
+}
+function sortedLocations(){
+  return [...locations].sort((a,b)=>
+    String(a.name||"").localeCompare(
+      String(b.name||""),"en",
+      {sensitivity:"base",numeric:true}
+    )
+  );
+}
+function resetLocationFilter(){
+  selectedLocationLetter=null;
+  renderAlphabetMenu();
+  renderLocations();
+}
+function toggleLocationLetter(letter){
+  selectedLocationLetter=
+    selectedLocationLetter===letter?null:letter;
+  renderAlphabetMenu();
+  renderLocations();
+}
+function renderAlphabetMenu(){
+  const box=$("alphabetMenu");
+  box.replaceChildren();
+
+  const available=new Set(
+    locations.map(locationFirstLetter)
+  );
+
+  if(selectedLocationLetter&&
+     !available.has(selectedLocationLetter)){
+    selectedLocationLetter=null;
+  }
+
+  ALPHABET.forEach(letter=>{
+    const button=document.createElement("button");
+    button.type="button";
+    button.textContent=letter;
+    button.disabled=!available.has(letter);
+    const selected=selectedLocationLetter===letter;
+    button.classList.toggle("selected",selected);
+    button.setAttribute("aria-pressed",String(selected));
+    button.setAttribute(
+      "aria-label",
+      selected
+        ?"Clear "+letter+" location filter"
+        :"Show locations beginning with "+letter
+    );
+    button.addEventListener("click",()=>{
+      toggleLocationLetter(letter);
+    });
+    box.append(button);
+  });
 }
 
 /* LOCATION PROFILE VIEW */
 
-function profileField(parent,label,value) {
+function profileField(parent,label,value){
   if(value===null||value===undefined||
-     String(value).trim()==="") return;
-
+     String(value).trim()==="")return;
   const field=document.createElement("div");
   field.className="profile-field";
-
   addText(field,"div",label,"profile-label");
   addText(field,"div",String(value),"profile-value");
-
   parent.append(field);
 }
-
-function closeLocationProfile() {
+function closeLocationProfile(){
   show("locationProfile",false);
-  show("locationList",true);
+  show("locationDirectory",true);
   show("locationEditor",false);
   window.scrollTo({top:0,behavior:"smooth"});
 }
-
-function viewLocation(loc) {
-  if(!user||!loc) return;
-
+function viewLocation(loc){
+  if(!user||!loc)return;
   show("locationEditor",false);
-  show("locationList",false);
+  show("locationDirectory",false);
   show("locationProfile",true);
 
   $("locationProfileTitle").textContent=loc.name;
-
   const box=$("locationProfileContent");
   box.replaceChildren();
 
   const basic=document.createElement("div");
   basic.className="profile-section";
-
   addText(basic,"h4","Property Information");
-
-  profileField(
-    basic,"Property Type",
-    propertyTypeLabel(loc.property_type)
-  );
-
-  profileField(
-    basic,"Street Address",loc.address
-  );
-
-  profileField(
-    basic,"City",loc.city
-  );
-
-  profileField(
-    basic,"State",loc.state
-  );
-
-  profileField(
-    basic,"ZIP Code",loc.postal_code
-  );
-
-  profileField(
-    basic,"Property Description",
-    loc.property_description
-  );
-
+  profileField(basic,"Property Type",
+    propertyTypeLabel(loc.property_type));
+  profileField(basic,"Street Address",loc.address);
+  profileField(basic,"City",loc.city);
+  profileField(basic,"State",loc.state);
+  profileField(basic,"ZIP Code",loc.postal_code);
+  profileField(basic,"Property Description",
+    loc.property_description);
   box.append(basic);
 
   const history=document.createElement("div");
   history.className="profile-section";
-
   addText(history,"h4","History & Reported Activity");
-
-  profileField(
-    history,"Location History",
-    loc.location_history
-  );
-
-  profileField(
-    history,"Reported Paranormal Activity",
-    loc.reported_activity
-  );
-
+  profileField(history,"Location History",
+    loc.location_history);
+  profileField(history,"Reported Paranormal Activity",
+    loc.reported_activity);
   box.append(history);
 
   const areas=document.createElement("div");
   areas.className="profile-section";
-
   addText(areas,"h4","Buildings, Floors & Areas");
-
   const sections=normalizedAreas(loc.property_areas);
-
-  if(!sections.length) {
-    addText(
-      areas,"p",
-      "No structured areas recorded.",
-      "muted"
-    );
+  if(!sections.length){
+    addText(areas,"p",
+      "No structured areas recorded.","muted");
   }
-
   sections.forEach((section,index)=>{
     const sectionBox=document.createElement("div");
     sectionBox.className="profile-subsection";
-
-    addText(
-      sectionBox,"strong",
-      section.name||"Section "+(index+1)
-    );
-
-    addText(
-      sectionBox,"p",
-      section.kind==="outdoor"
-        ?"Outdoor Section"
-        :section.kind==="building"
-          ?"Building"
-          :"Other Section",
-      "muted"
-    );
+    addText(sectionBox,"strong",
+      section.name||"Section "+(index+1));
+    addText(sectionBox,"p",
+      section.kind==="outdoor"?"Outdoor Section":
+      section.kind==="building"?"Building":
+      "Other Section","muted");
 
     section.floors.forEach(floor=>{
       const floorBox=document.createElement("div");
       floorBox.className="profile-subsection";
-
-      addText(
-        floorBox,"strong",
-        floor.name||"Unnamed Level"
-      );
-
-      if(floor.rooms.length) {
-        addText(
-          floorBox,"p",
-          floor.rooms.join(", ")
-        );
+      addText(floorBox,"strong",
+        floor.name||"Unnamed Level");
+      if(floor.rooms.length){
+        addText(floorBox,"p",floor.rooms.join(", "));
       }
-
       sectionBox.append(floorBox);
     });
-
     areas.append(sectionBox);
   });
-
-  profileField(
-    areas,"Additional Floors / Rooms Notes",
-    loc.floors_and_rooms
-  );
-
-  profileField(
-    areas,"Exterior Areas / Notes",
-    loc.exterior_areas
-  );
-
+  profileField(areas,"Additional Floors / Rooms Notes",
+    loc.floors_and_rooms);
+  profileField(areas,"Exterior Areas / Notes",
+    loc.exterior_areas);
   box.append(areas);
 
   const access=document.createElement("div");
   access.className="profile-section";
-
   addText(access,"h4","Access Information");
-
-  if(loc.access_notes) {
-    profileField(
-      access,"Access Notes",
-      loc.access_notes
-    );
-  } else {
-    addText(
-      access,"p",
-      "No access notes recorded.",
-      "muted"
-    );
+  if(loc.access_notes){
+    profileField(access,"Access Notes",loc.access_notes);
+  }else{
+    addText(access,"p","No access notes recorded.",
+      "muted");
   }
-
   box.append(access);
 
-  if(role==="admin") {
+  if(role==="admin"){
     const actions=document.createElement("div");
     actions.className="location-actions";
-
-    addButton(
-      actions,"Edit Profile",
-      ()=>openLocation(loc),""
-    );
-
-    addButton(
-      actions,"Back to Locations",
-      closeLocationProfile
-    );
-
+    addButton(actions,"Edit Profile",
+      ()=>openLocation(loc),"");
+    addButton(actions,"Back to Locations",
+      closeLocationProfile);
     box.append(actions);
   }
-
   $("locationProfile").scrollIntoView({
-    behavior:"smooth",
-    block:"start"
+    behavior:"smooth",block:"start"
   });
 }
 
-function renderStructuredAreas() {
+function renderStructuredAreas(){
   const box=$("structuredAreas");
   box.replaceChildren();
-
-  if(!structuredAreas.length) {
+  if(!structuredAreas.length){
     addText(box,"p",
-      "No buildings or sections added yet.",
-      "muted");
+      "No buildings or sections added yet.","muted");
   }
-
   structuredAreas.forEach((area,index)=>{
     const card=document.createElement("div");
     card.className="area-row";
-
-    addText(card,"h4",
-      "Building / Section "+(index+1));
-
+    addText(card,"h4","Building / Section "+(index+1));
     addText(card,"label","Building / Section Name");
-
     const name=document.createElement("input");
     name.value=area.name;
     name.placeholder="Main House, North Grounds";
@@ -1117,7 +951,6 @@ function renderStructuredAreas() {
     card.append(name);
 
     addText(card,"label","Area Type");
-
     const kind=document.createElement("select");
     option(kind,"building","Building");
     option(kind,"outdoor","Outdoor Section");
@@ -1131,7 +964,6 @@ function renderStructuredAreas() {
     area.floors.forEach((floor,fi)=>{
       const floorBox=document.createElement("div");
       floorBox.className="item";
-
       const fields=document.createElement("div");
       fields.className="area-fields";
 
@@ -1154,109 +986,109 @@ function renderStructuredAreas() {
         floor.rooms=splitNames(rooms.value);
       });
       b.append(rooms);
-
       fields.append(a,b);
       floorBox.append(fields);
 
       const actions=document.createElement("div");
       actions.className="actions";
-
       addButton(actions,"Remove Floor / Level",()=>{
         area.floors.splice(fi,1);
         renderStructuredAreas();
       });
-
       floorBox.append(actions);
       card.append(floorBox);
     });
 
     const actions=document.createElement("div");
     actions.className="actions";
-
     addButton(actions,"+ Add Floor / Level",()=>{
       area.floors.push({name:"",rooms:[]});
       renderStructuredAreas();
     });
-
     addButton(actions,"Remove Section",()=>{
       structuredAreas.splice(index,1);
       renderStructuredAreas();
     });
-
     card.append(actions);
     box.append(card);
   });
 }
-
-function addStructuredArea() {
+function addStructuredArea(){
   structuredAreas.push({
-    name:"",
-    kind:"building",
+    name:"",kind:"building",
     floors:[{name:"",rooms:[]}]
   });
   renderStructuredAreas();
 }
 
-async function loadData() {
+async function loadData(){
   const [l,i,m]=await Promise.all([
     db.from("locations").select("*").order("name"),
     db.from("investigations").select("*")
-      .order("investigation_date",{
-        ascending:false
-      }),
+      .order("investigation_date",{ascending:false}),
     db.from("members")
       .select("id,display_name,role")
   ]);
-
-  if(l.error||i.error||m.error) {
+  if(l.error||i.error||m.error){
     msg("Loading error: "+
       (l.error||i.error||m.error).message,"bad");
     return false;
   }
-
   locations=l.data||[];
   investigations=i.data||[];
   members=m.data||[];
-
+  renderAlphabetMenu();
   renderLocations();
   renderInvestigations();
   renderMembers();
   renderPending();
-
   msg("DocuHub ready.","good");
   return true;
 }
 
-function renderLocations() {
+function renderLocations(){
   const box=$("locationList");
   box.replaceChildren();
 
-  if(!locations.length) {
-    addText(box,"p","No locations added yet.","muted");
+  const all=sortedLocations();
+  const filtered=selectedLocationLetter
+    ?all.filter(loc=>
+      locationFirstLetter(loc)===selectedLocationLetter
+    ):all;
+
+  $("locationFilterInfo").textContent=
+    selectedLocationLetter
+      ?filtered.length+" location(s) beginning with "+
+        selectedLocationLetter+
+        ". Tap "+selectedLocationLetter+
+        " again to show all."
+      :all.length+" location(s)";
+
+  if(!filtered.length){
+    addText(box,"p",
+      selectedLocationLetter
+        ?"No locations begin with this letter."
+        :"No locations added yet.",
+      "muted");
   }
 
-  locations.forEach(loc=>{
+  filtered.forEach(loc=>{
     const card=document.createElement("div");
     card.className="item";
-
     addText(card,"strong",loc.name);
-
     addText(card,"p",
       [loc.address,loc.city,loc.state]
         .filter(Boolean).join(", "),"muted");
 
-    if(loc.property_type) {
+    if(loc.property_type){
       addText(card,"p",
-        propertyTypeLabel(loc.property_type),
-        "muted");
+        propertyTypeLabel(loc.property_type),"muted");
     }
-
-    if(loc.property_description) {
+    if(loc.property_description){
       addText(card,"p",loc.property_description);
     }
-
     const areas=normalizedAreas(loc.property_areas);
-    if(areas.length) {
+    if(areas.length){
       addText(card,"p",
         areas.map(x=>x.name||"Unnamed section")
           .join(", "),"muted");
@@ -1264,32 +1096,23 @@ function renderLocations() {
 
     const actions=document.createElement("div");
     actions.className="location-actions";
-
-    addButton(
-      actions,"View Profile",
-      ()=>viewLocation(loc),""
-    );
-
-    if(role==="admin") {
-      addButton(
-        actions,"Edit Profile",
-        ()=>openLocation(loc),"secondary"
-      );
-    } else {
+    addButton(actions,"View Profile",
+      ()=>viewLocation(loc),"");
+    if(role==="admin"){
+      addButton(actions,"Edit Profile",
+        ()=>openLocation(loc),"secondary");
+    }else{
       actions.classList.add("single");
     }
-
     card.append(actions);
     box.append(card);
   });
 }
 
-function openLocation(loc=null) {
-  if(role!=="admin") return;
-
+function openLocation(loc=null){
+  if(role!=="admin")return;
   show("locationProfile",false);
-  show("locationList",true);
-
+  show("locationDirectory",true);
   editingLocation=loc?.id||null;
 
   const fields={
@@ -1306,32 +1129,24 @@ function openLocation(loc=null) {
     locAccess:"access_notes",
     locType:"property_type"
   };
-
   Object.entries(fields).forEach(([id,key])=>{
     $(id).value=loc?.[key]??
       (id==="locState"?"CA":"");
   });
-
-  structuredAreas=normalizedAreas(
-    loc?.property_areas
-  );
+  structuredAreas=normalizedAreas(loc?.property_areas);
   renderStructuredAreas();
-
   $("locationEditorTitle").textContent=
     loc?"Edit Location":"Add Location";
-
   show("locationEditor",true);
   setPage("locationsPage");
-
   $("locationEditor").scrollIntoView({
     behavior:"smooth"
   });
 }
 
-async function saveLocation(e) {
+async function saveLocation(e){
   e.preventDefault();
-  if(role!=="admin") return;
-
+  if(role!=="admin")return;
   const data={
     name:$("locName").value.trim(),
     address:$("locAddress").value.trim(),
@@ -1340,144 +1155,101 @@ async function saveLocation(e) {
     postal_code:$("locZip").value.trim(),
     property_type:$("locType").value,
     property_areas:structuredAreas.map(a=>({
-      name:a.name.trim(),
-      kind:a.kind,
+      name:a.name.trim(),kind:a.kind,
       floors:a.floors.map(f=>({
         name:f.name.trim(),
-        rooms:f.rooms.map(x=>x.trim())
-          .filter(Boolean)
+        rooms:f.rooms.map(x=>x.trim()).filter(Boolean)
       }))
     })),
     property_description:
       $("locDescription").value.trim(),
-    location_history:
-      $("locHistory").value.trim(),
-    reported_activity:
-      $("locActivity").value.trim(),
-    floors_and_rooms:
-      $("locRooms").value.trim(),
-    exterior_areas:
-      $("locExterior").value.trim(),
-    access_notes:
-      $("locAccess").value.trim()
+    location_history:$("locHistory").value.trim(),
+    reported_activity:$("locActivity").value.trim(),
+    floors_and_rooms:$("locRooms").value.trim(),
+    exterior_areas:$("locExterior").value.trim(),
+    access_notes:$("locAccess").value.trim()
   };
-
-  if(!data.name) {
+  if(!data.name){
     msg("Location name required.","bad");
     return;
   }
-
   const r=editingLocation
     ?await db.from("locations").update(data)
       .eq("id",editingLocation).select()
-    :await db.from("locations").insert(data)
-      .select();
-
-  if(r.error) {
-    msg(r.error.message,"bad");
-    return;
+    :await db.from("locations").insert(data).select();
+  if(r.error){
+    msg(r.error.message,"bad");return;
   }
-
   show("locationEditor",false);
   await loadData();
   msg("Location saved.","good");
 }
 
-function statusLabel(s) {
-  return s?s.charAt(0).toUpperCase()+
-    s.slice(1):"Unknown";
+function statusLabel(s){
+  return s?s.charAt(0).toUpperCase()+s.slice(1):
+    "Unknown";
 }
-
-function renderInvestigations() {
+function renderInvestigations(){
   const box=$("investigationList");
   box.replaceChildren();
-
-  if(!investigations.length) {
+  if(!investigations.length){
     addText(box,"p",
       "No investigations scheduled yet.","muted");
   }
-
   investigations.forEach(inv=>{
     const card=document.createElement("div");
     card.className="item";
-
-    addText(card,"strong",
-      locationName(inv.location_id));
-
+    addText(card,"strong",locationName(inv.location_id));
     addText(card,"p",
-      formatDate(inv.investigation_date)+
-      " | "+formatTime(inv.start_time),
-      "muted");
-
-    addText(card,"span",
-      statusLabel(inv.status),
+      formatDate(inv.investigation_date)+" | "+
+      formatTime(inv.start_time),"muted");
+    addText(card,"span",statusLabel(inv.status),
       "status-pill "+inv.status);
-
-    if(inv.notes) {
-      addText(card,"p",inv.notes);
-    }
-
+    if(inv.notes)addText(card,"p",inv.notes);
     const actions=document.createElement("div");
     actions.className="actions";
-
-    if(inv.status==="active") {
+    if(inv.status==="active"){
       addButton(actions,"Open Investigation",
         ()=>openWorkspace(inv),"");
     }
-
-    if(inv.status==="completed") {
+    if(inv.status==="completed"){
       addButton(actions,"View Completed Investigation",
         ()=>openWorkspace(inv),"");
     }
-
-    if(role==="admin") {
+    if(role==="admin"){
       addButton(actions,"Edit",
         ()=>openInvestigation(inv));
-
       addButton(actions,"Assign Members",
         ()=>openAssignments(inv));
     }
-
     card.append(actions);
     box.append(card);
   });
 }
 
-function openInvestigation(inv=null) {
-  if(role!=="admin") return;
-
+function openInvestigation(inv=null){
+  if(role!=="admin")return;
   editingInvestigation=inv?.id||null;
-
   const select=$("invLocation");
   select.replaceChildren();
-
-  locations.forEach(loc=>{
-    option(select,loc.id,loc.name);
-  });
-
+  locations.forEach(loc=>option(select,loc.id,loc.name));
   $("invDate").value=inv?.investigation_date||"";
-  $("invTime").value=
-    inv?.start_time?.slice(0,5)||"";
+  $("invTime").value=inv?.start_time?.slice(0,5)||"";
   $("invStatus").value=inv?.status||"scheduled";
   $("invNotes").value=inv?.notes||"";
-
-  if(inv) select.value=inv.location_id;
-
+  if(inv)select.value=inv.location_id;
   $("investigationEditorTitle").textContent=
     inv?"Edit Investigation":"Schedule Investigation";
-
   show("investigationEditor",true);
   setPage("adminPage");
-
   $("investigationEditor").scrollIntoView({
     behavior:"smooth"
   });
 }
 
-async function saveInvestigation(e) {
+async function saveInvestigation(e){
   e.preventDefault();
-  if(role!=="admin") return;
-
+  if(role!=="admin")return;
   const data={
     location_id:$("invLocation").value,
     investigation_date:$("invDate").value,
@@ -1485,185 +1257,132 @@ async function saveInvestigation(e) {
     status:$("invStatus").value,
     notes:$("invNotes").value.trim()
   };
-
   if(!data.location_id||
-     !data.investigation_date||
-     !data.start_time) {
+     !data.investigation_date||!data.start_time){
     msg("Location, date and time required.","bad");
     return;
   }
-
-  if(editingInvestigation) {
+  if(editingInvestigation){
     const existing=investigations.find(
       x=>x.id===editingInvestigation
     );
-
-    if(existing?.status!==data.status) {
-      const ok=confirm(
+    if(existing?.status!==data.status){
+      if(!confirm(
         "Change investigation status from "+
         statusLabel(existing?.status)+" to "+
         statusLabel(data.status)+"?"
-      );
-      if(!ok) return;
+      ))return;
     }
   }
-
   const r=editingInvestigation
-    ?await db.from("investigations")
-      .update(data)
+    ?await db.from("investigations").update(data)
       .eq("id",editingInvestigation).select()
-    :await db.from("investigations")
-      .insert(data).select();
-
-  if(r.error) {
-    msg(r.error.message,"bad");
-    return;
+    :await db.from("investigations").insert(data)
+      .select();
+  if(r.error){
+    msg(r.error.message,"bad");return;
   }
-
   show("investigationEditor",false);
   await loadData();
   msg("Investigation saved.","good");
 }
 
-async function loadAssignments(invId) {
+async function loadAssignments(invId){
   const {data,error}=await db
     .from("investigation_members")
     .select("member_id")
     .eq("investigation_id",invId);
-
-  if(error) throw error;
-
-  assignments[invId]=(data||[])
-    .map(x=>x.member_id);
-
+  if(error)throw error;
+  assignments[invId]=(data||[]).map(x=>x.member_id);
   return assignments[invId];
 }
-
-async function openAssignments(inv) {
-  if(role!=="admin") return;
-
+async function openAssignments(inv){
+  if(role!=="admin")return;
   assigningInvestigation=inv.id;
-
   $("assignmentTitle").textContent=
-    locationName(inv.location_id)+
-    " | "+formatDate(inv.investigation_date);
-
+    locationName(inv.location_id)+" | "+
+    formatDate(inv.investigation_date);
   let assigned;
-  try {
-    assigned=new Set(
-      await loadAssignments(inv.id)
-    );
-  } catch(e) {
-    msg(e.message,"bad");
-    return;
+  try{
+    assigned=new Set(await loadAssignments(inv.id));
+  }catch(e){
+    msg(e.message,"bad");return;
   }
-
   const box=$("memberChecklist");
   box.replaceChildren();
-
   [...members].sort((a,b)=>
     memberName(a).localeCompare(memberName(b))
   ).forEach(m=>{
     const row=document.createElement("div");
     row.className="checkrow";
-
     const input=document.createElement("input");
     input.type="checkbox";
     input.value=m.id;
     input.checked=assigned.has(m.id);
     input.id="member_"+m.id;
-
     const label=document.createElement("label");
     label.htmlFor=input.id;
-    label.textContent=
-      memberName(m)+" ("+m.role+")";
-
+    label.textContent=memberName(m)+" ("+m.role+")";
     row.append(input,label);
     box.append(row);
   });
-
   show("assignmentEditor",true);
   setPage("adminPage");
-
   $("assignmentEditor").scrollIntoView({
     behavior:"smooth"
   });
 }
-
-async function saveAssignments() {
-  if(!assigningInvestigation||
-     role!=="admin") return;
-
+async function saveAssignments(){
+  if(!assigningInvestigation||role!=="admin")return;
   const id=assigningInvestigation;
-
   const selected=new Set(
     [...$("memberChecklist")
       .querySelectorAll("input:checked")]
       .map(x=>x.value)
   );
-
   let current;
-  try {
+  try{
     current=new Set(await loadAssignments(id));
-  } catch(e) {
-    msg(e.message,"bad");
-    return;
+  }catch(e){
+    msg(e.message,"bad");return;
   }
-
   const add=[...selected]
     .filter(x=>!current.has(x))
     .map(member_id=>({
       investigation_id:id,member_id
     }));
-
   const remove=[...current]
     .filter(x=>!selected.has(x));
 
-  if(add.length) {
-    const r=await db
-      .from("investigation_members").insert(add);
-    if(r.error) {
-      msg(r.error.message,"bad");
-      return;
-    }
+  if(add.length){
+    const r=await db.from("investigation_members")
+      .insert(add);
+    if(r.error){msg(r.error.message,"bad");return}
   }
-
-  for(const member_id of remove) {
-    const r=await db
-      .from("investigation_members")
-      .delete()
-      .eq("investigation_id",id)
+  for(const member_id of remove){
+    const r=await db.from("investigation_members")
+      .delete().eq("investigation_id",id)
       .eq("member_id",member_id);
-
-    if(r.error) {
-      msg(r.error.message,"bad");
-      return;
-    }
+    if(r.error){msg(r.error.message,"bad");return}
   }
-
   assignments[id]=[...selected];
   assigningInvestigation=null;
   show("assignmentEditor",false);
   msg("Assignments saved.","good");
 }
-
-function renderMembers() {
+function renderMembers(){
   const box=$("memberList");
   box.replaceChildren();
-
   [...members].sort((a,b)=>
     memberName(a).localeCompare(memberName(b))
   ).forEach(m=>{
     const div=document.createElement("div");
     div.className="item";
-
     addText(div,"strong",memberName(m));
     addText(div,"p",
-      m.role==="admin"
-        ?"Administrator":"Investigator",
+      m.role==="admin"?"Administrator":"Investigator",
       "muted");
-
-    if(!String(m.display_name||"").trim()) {
+    if(!String(m.display_name||"").trim()){
       addText(div,"p",
         "Display name needs to be set.","warn");
     }
@@ -1671,150 +1390,108 @@ function renderMembers() {
   });
 }
 
-function renderEventButtons() {
+function renderEventButtons(){
   const box=$("eventButtons");
   box.replaceChildren();
-
-  Object.entries(EVENT_GROUPS)
-    .forEach(([group,types])=>{
-      const section=document.createElement("div");
-      section.className="event-group";
-
-      addText(section,"h3",group);
-
-      const grid=document.createElement("div");
-      grid.className="grid";
-
-      types.forEach(type=>{
-        const b=addButton(grid,type,
-          ()=>captureEvent(type),"");
-        b.dataset.eventType=type;
-      });
-
-      section.append(grid);
-      box.append(section);
+  Object.entries(EVENT_GROUPS).forEach(([group,types])=>{
+    const section=document.createElement("div");
+    section.className="event-group";
+    addText(section,"h3",group);
+    const grid=document.createElement("div");
+    grid.className="grid";
+    types.forEach(type=>{
+      const b=addButton(grid,type,
+        ()=>captureEvent(type),"");
+      b.dataset.eventType=type;
     });
+    section.append(grid);
+    box.append(section);
+  });
 }
-
-function eventAreaOptions() {
+function eventAreaOptions(){
   const select=$("eventArea");
   select.replaceChildren();
-
   option(select,"","No area selected");
-
   const loc=currentLocation();
-  if(!loc) return;
-
+  if(!loc)return;
   const seen=new Set();
-
   const add=text=>{
-    if(!text||seen.has(text)) return;
-    seen.add(text);
-    option(select,text,text);
+    if(!text||seen.has(text))return;
+    seen.add(text);option(select,text,text);
   };
-
   normalizedAreas(loc.property_areas)
     .forEach(section=>{
       const name=section.name||"Unnamed section";
       add(name);
-
       section.floors.forEach(floor=>{
         const prefix=[name,floor.name]
           .filter(Boolean).join(" / ");
         add(prefix);
-
         floor.rooms.forEach(room=>{
-          add([prefix,room]
-            .filter(Boolean).join(" / "));
+          add([prefix,room].filter(Boolean).join(" / "));
         });
       });
     });
 }
-
-function renderInvestigatorOptions() {
+function renderInvestigatorOptions(){
   const select=$("eventInvestigator");
   select.replaceChildren();
-
   const inv=currentInvestigation();
   const ids=assignments[inv?.id]||[];
-
   option(select,user.id,"Myself");
-
   members.filter(m=>
     ids.includes(m.id)&&m.id!==user.id
   ).sort((a,b)=>
     memberName(a).localeCompare(memberName(b))
-  ).forEach(m=>{
-    option(select,m.id,memberName(m));
-  });
-
+  ).forEach(m=>option(select,m.id,memberName(m)));
   select.value=user.id;
 }
-
-function updateWorkspaceControls() {
+function updateWorkspaceControls(){
   const inv=currentInvestigation();
-  if(!inv) return;
-
+  if(!inv)return;
   const active=inv.status==="active";
   const completed=inv.status==="completed";
-
   show("activeWorkspace",active);
   show("completedNotice",completed);
   show("reportSection",completed);
   show("closeControls",active&&role==="admin");
   show("reopenControls",completed&&role==="admin");
-
-  $("workspaceStatus").textContent=
-    statusLabel(inv.status);
-
+  $("workspaceStatus").textContent=statusLabel(inv.status);
   $("workspaceStatus").className=
     "status-pill "+inv.status;
 }
-
-async function openWorkspace(inv) {
-  if(!["active","completed"].includes(inv.status)) {
-    msg("This investigation cannot be opened.",
-      "warn");
+async function openWorkspace(inv){
+  if(!["active","completed"].includes(inv.status)){
+    msg("This investigation cannot be opened.","warn");
     return;
   }
-
   cancelEvent();
-
   activeInvestigationId=inv.id;
   historyEvents=[];
   historyInvestigation=null;
-
   $("workspaceTitle").textContent=
     locationName(inv.location_id);
-
   $("workspaceDetails").textContent=
     formatDate(inv.investigation_date)+
     " | Start: "+formatTime(inv.start_time);
-
   updateWorkspaceControls();
   setPage("eventsPage");
-
   eventAreaOptions();
   renderHistory();
   renderPending();
-
   window.scrollTo({top:0,behavior:"smooth"});
-
   const requestId=++workspaceRequest;
-
-  try {
+  try{
     await loadAssignments(inv.id);
-  } catch(e) {
-    if(requestId===workspaceRequest) {
+  }catch(e){
+    if(requestId===workspaceRequest){
       msg("Assignment error: "+e.message,"warn");
     }
   }
-
-  if(requestId!==workspaceRequest) return;
+  if(requestId!==workspaceRequest)return;
   await loadEventHistory(inv.id);
 }
-
-function closeWorkspace() {
+function closeWorkspace(){
   cancelEvent();
   activeInvestigationId=null;
   historyEvents=[];
@@ -1822,24 +1499,16 @@ function closeWorkspace() {
   ++workspaceRequest;
   setPage("investigationsPage");
 }
-
-function captureEvent(type) {
+function captureEvent(type){
   const inv=currentInvestigation();
-
-  if(!inv||inv.status!=="active") {
-    msg("Investigation is not active.","warn");
-    return;
+  if(!inv||inv.status!=="active"){
+    msg("Investigation is not active.","warn");return;
   }
-
-  if(!user) return;
-
-  if(!crypto.randomUUID) {
-    msg("Secure event IDs unavailable.","bad");
-    return;
+  if(!user)return;
+  if(!crypto.randomUUID){
+    msg("Secure event IDs unavailable.","bad");return;
   }
-
   const capturedTime=new Date().toISOString();
-
   pending={
     id:crypto.randomUUID(),
     investigation_id:inv.id,
@@ -1848,62 +1517,42 @@ function captureEvent(type) {
     event_time:capturedTime,
     recorded_by:user.id
   };
-
   $("eventTime").textContent=
     type+" | "+timeLabel(capturedTime);
-
   $("eventNotes").value="";
   $("eventCustomArea").value="";
-
   eventAreaOptions();
-
   show("adminAttribution",role==="admin");
-  if(role==="admin") renderInvestigatorOptions();
-
+  if(role==="admin")renderInvestigatorOptions();
   show("eventEntry",true);
-
-  document.querySelectorAll(
-    "#eventButtons button"
-  ).forEach(b=>{
-    b.classList.toggle("selected",
-      b.dataset.eventType===type);
-  });
-
+  document.querySelectorAll("#eventButtons button")
+    .forEach(b=>{
+      b.classList.toggle("selected",
+        b.dataset.eventType===type);
+    });
   $("eventEntry").scrollIntoView({
     behavior:"smooth",block:"start"
   });
 }
-
-function cancelEvent() {
+function cancelEvent(){
   pending=null;
   show("eventEntry",false);
-
-  document.querySelectorAll(
-    "#eventButtons button"
-  ).forEach(b=>b.classList.remove("selected"));
+  document.querySelectorAll("#eventButtons button")
+    .forEach(b=>b.classList.remove("selected"));
 }
-
-async function saveEvent() {
-  if(!pending||!user) return;
-
+async function saveEvent(){
+  if(!pending||!user)return;
   const inv=currentInvestigation();
-
   if(!inv||inv.status!=="active"||
-     inv.id!==pending.investigation_id) {
-    msg("Investigation is not active.","bad");
-    return;
+     inv.id!==pending.investigation_id){
+    msg("Investigation is not active.","bad");return;
   }
-
   const selected=role==="admin"
     ?$("eventInvestigator").value:user.id;
-
   const allowed=assignments[inv.id]||[];
-
-  if(selected!==user.id&&!allowed.includes(selected)) {
-    msg("Investigator is not assigned.","bad");
-    return;
+  if(selected!==user.id&&!allowed.includes(selected)){
+    msg("Investigator is not assigned.","bad");return;
   }
-
   const entry={
     ...pending,
     investigator_id:selected,
@@ -1912,172 +1561,120 @@ async function saveEvent() {
       $("eventArea").value,
     notes:$("eventNotes").value.trim()
   };
-
-  try {
+  try{
     const queue=queueRead();
     queue.push(entry);
     queueWrite(queue);
-  } catch {
+  }catch{
     msg("Local save failed. Do not discard marker.",
       "bad");
     return;
   }
-
   cancelEvent();
   msg("Event saved locally.","good");
-
-  if(navigator.onLine) syncEvents();
+  if(navigator.onLine)syncEvents();
 }
-
-function renderPending() {
+function renderPending(){
   const box=$("pendingEvents");
   box.replaceChildren();
-
   const list=queueRead().filter(x=>
     (x.recorded_by||x.investigator_id)===user?.id&&
     (!activeInvestigationId||
-      x.investigation_id===activeInvestigationId)
+     x.investigation_id===activeInvestigationId)
   );
-
   addText(box,"p",
     list.length+" marker(s) awaiting sync.","muted");
-
-  list.slice().reverse().slice(0,20)
-    .forEach(e=>{
-      const card=document.createElement("div");
-      card.className="item";
-
-      addText(card,"strong",e.event_type);
-      addText(card,"p",timeLabel(e.event_time),"muted");
-      if(e.area) addText(card,"p",e.area);
-
-      box.append(card);
-    });
+  list.slice().reverse().slice(0,20).forEach(e=>{
+    const card=document.createElement("div");
+    card.className="item";
+    addText(card,"strong",e.event_type);
+    addText(card,"p",timeLabel(e.event_time),"muted");
+    if(e.area)addText(card,"p",e.area);
+    box.append(card);
+  });
 }
-
-async function loadEventHistory(invId) {
-  if(!invId||!db||!user) return;
-
+async function loadEventHistory(invId){
+  if(!invId||!db||!user)return;
   const {data,error}=await db
-    .from("investigation_events")
-    .select("*")
+    .from("investigation_events").select("*")
     .eq("investigation_id",invId)
     .order("event_time",{ascending:false})
     .limit(200);
-
-  if(activeInvestigationId!==invId) return;
-
-  if(error) {
-    msg("Event history error: "+error.message,
-      "warn");
+  if(activeInvestigationId!==invId)return;
+  if(error){
+    msg("Event history error: "+error.message,"warn");
     return;
   }
-
   historyEvents=data||[];
   historyInvestigation=invId;
   renderHistory();
 }
-
-function renderHistory() {
+function renderHistory(){
   const box=$("eventHistory");
   box.replaceChildren();
-
   const id=activeInvestigationId;
-  if(!id) {
+  if(!id){
     addText(box,"p",
-      "Open an investigation to view events.",
-      "muted");
+      "Open an investigation to view events.","muted");
     return;
   }
-
   const synced=historyInvestigation===id
     ?historyEvents:[];
-
   const queued=queueRead().filter(x=>
     x.investigation_id===id&&
     (x.recorded_by||x.investigator_id)===user?.id
   ).map(x=>({...x,_local:true}));
-
   const ids=new Set(queued.map(x=>x.id));
-
   const combined=[
-    ...queued,
-    ...synced.filter(x=>!ids.has(x.id))
+    ...queued,...synced.filter(x=>!ids.has(x.id))
   ].sort((a,b)=>
     new Date(b.event_time)-new Date(a.event_time)
   );
-
-  if(!combined.length) {
-    addText(box,"p",
-      "No events recorded.","muted");
+  if(!combined.length){
+    addText(box,"p","No events recorded.","muted");
     return;
   }
-
   addText(box,"p",
     combined.length+
-    " event(s) displayed, newest first.",
-    "muted");
-
+    " event(s) displayed, newest first.","muted");
   combined.forEach(e=>{
     const card=document.createElement("div");
     card.className="item";
-
     addText(card,"strong",e.event_type);
-    addText(card,"p",
-      timeLabel(e.event_time),"marker");
-
+    addText(card,"p",timeLabel(e.event_time),"marker");
     addText(card,"p",
       "Investigator: "+nameById(e.investigator_id),
       "muted");
-
-    const recorder=e.recorded_by||
-      e.investigator_id;
-
-    if(recorder!==e.investigator_id) {
+    const recorder=e.recorded_by||e.investigator_id;
+    if(recorder!==e.investigator_id){
       addText(card,"p",
-        "Recorded by: "+nameById(recorder),
-        "muted");
+        "Recorded by: "+nameById(recorder),"muted");
     }
-
-    if(e.area) addText(card,"p","Area: "+e.area);
-    if(e.notes) addText(card,"p",e.notes);
-
+    if(e.area)addText(card,"p","Area: "+e.area);
+    if(e.notes)addText(card,"p",e.notes);
     addText(card,"span",
       e._local?"Pending synchronization":
         "Synchronized",
       "event-status "+(e._local?"warn":"good"));
-
     box.append(card);
   });
 }
-
-async function syncEvents() {
-  if(syncing||!db||!user||!navigator.onLine) {
-    return;
-  }
-
+async function syncEvents(){
+  if(syncing||!db||!user||!navigator.onLine)return;
   syncing=true;
-
-  try {
+  try{
     const queue=queueRead();
-    if(!queue.length) {
-      renderPending();
-      return;
+    if(!queue.length){
+      renderPending();return;
     }
-
     const remaining=[];
-    let uploaded=0;
-    let firstError="";
-
-    for(const entry of queue) {
+    let uploaded=0,firstError="";
+    for(const entry of queue){
       const owner=entry.recorded_by||
         entry.investigator_id;
-
-      if(owner!==user.id) {
-        remaining.push(entry);
-        continue;
+      if(owner!==user.id){
+        remaining.push(entry);continue;
       }
-
       const payload={
         id:entry.id,
         investigation_id:entry.investigation_id,
@@ -2087,212 +1684,153 @@ async function syncEvents() {
         area:entry.area||"",
         notes:entry.notes||""
       };
-
       const {error}=await db
-        .from("investigation_events")
-        .insert(payload);
-
-      if(error) {
-        if(error.code==="23505") {
+        .from("investigation_events").insert(payload);
+      if(error){
+        if(error.code==="23505"){
           uploaded++;
-        } else {
+        }else{
           remaining.push(entry);
-          if(!firstError) firstError=error.message;
+          if(!firstError)firstError=error.message;
         }
-      } else {
-        uploaded++;
-      }
+      }else uploaded++;
     }
-
     const currentQueue=queueRead();
     const processed=new Set(queue.map(x=>x.id));
     const newEntries=currentQueue.filter(
       x=>!processed.has(x.id)
     );
-
     queueWrite([...remaining,...newEntries]);
-
-    if(firstError) {
+    if(firstError){
       msg("Some events remain pending: "+
         firstError,"warn");
-    } else if(uploaded) {
+    }else if(uploaded){
       msg(uploaded+" event(s) synchronized.","good");
     }
-
-    if(activeInvestigationId) {
+    if(activeInvestigationId){
       await loadEventHistory(activeInvestigationId);
     }
-  } finally {
+  }finally{
     syncing=false;
   }
 }
 
-/* INVESTIGATION CLOSEOUT */
+/* ADMIN CLOSEOUT */
 
-async function changeInvestigationStatus(
-  nextStatus
-) {
-  if(role!=="admin"||!user) return;
-
+async function changeInvestigationStatus(nextStatus){
+  if(role!=="admin"||!user)return;
   const inv=currentInvestigation();
-  if(!inv) return;
-
+  if(!inv)return;
   const isClosing=nextStatus==="completed";
-
-  if(isClosing&&inv.status!=="active") return;
-  if(!isClosing&&inv.status!=="completed") return;
-
-  if(isClosing) {
+  if(isClosing&&inv.status!=="active")return;
+  if(!isClosing&&inv.status!=="completed")return;
+  if(isClosing){
     const local=queueRead().filter(x=>
       x.investigation_id===inv.id
     );
-
-    if(local.length) {
-      msg(
-        "This device has pending event markers. "+
+    if(local.length){
+      msg("This device has pending event markers. "+
         "Synchronize them before ending the investigation.",
-        "warn"
-      );
+        "warn");
       return;
     }
   }
-
   const question=isClosing
     ?"End this investigation?\n\n"+
       "Event logging will close. Existing records "+
       "will remain available."
     :"Reactivate this investigation?\n\n"+
       "Event logging will become available again.";
-
-  if(!confirm(question)) return;
-
+  if(!confirm(question))return;
   const button=isClosing
-    ?$("endInvestigation")
-    :$("reopenInvestigation");
-
+    ?$("endInvestigation"):$("reopenInvestigation");
   button.disabled=true;
-
-  try {
+  try{
     const {data,error}=await db
       .from("investigations")
       .update({status:nextStatus})
-      .eq("id",inv.id)
-      .eq("status",inv.status)
-      .select("id,status")
-      .single();
-
-    if(error) throw error;
-
-    if(!data||data.status!==nextStatus) {
-      throw new Error(
-        "Status change was not confirmed."
-      );
+      .eq("id",inv.id).eq("status",inv.status)
+      .select("id,status").single();
+    if(error)throw error;
+    if(!data||data.status!==nextStatus){
+      throw new Error("Status change was not confirmed.");
     }
-
     inv.status=nextStatus;
     cancelEvent();
-
     renderInvestigations();
     updateWorkspaceControls();
-
-    msg(
-      isClosing
-        ?"Investigation completed successfully."
-        :"Investigation reactivated.",
-      "good"
-    );
-  } catch(e) {
+    msg(isClosing
+      ?"Investigation completed successfully."
+      :"Investigation reactivated.","good");
+  }catch(e){
     msg("Status change failed: "+e.message,"bad");
-  } finally {
+  }finally{
     button.disabled=false;
   }
 }
 
-/* COMPLETE REPORT DATA */
+/* REPORTS */
 
-async function fetchAllEvents(invId) {
-  const all=[];
-  const pageSize=500;
+async function fetchAllEvents(invId){
+  const all=[],pageSize=500;
   let start=0;
-
-  while(true) {
+  while(true){
     const {data,error}=await db
-      .from("investigation_events")
-      .select("*")
+      .from("investigation_events").select("*")
       .eq("investigation_id",invId)
       .order("event_time",{ascending:true})
       .order("id",{ascending:true})
       .range(start,start+pageSize-1);
-
-    if(error) throw error;
-
+    if(error)throw error;
     const rows=data||[];
     all.push(...rows);
-
-    if(rows.length<pageSize) break;
+    if(rows.length<pageSize)break;
     start+=pageSize;
-
-    if(start>100000) {
+    if(start>100000){
       throw new Error(
         "Report exceeds the supported event limit."
       );
     }
   }
-
   return all;
 }
-
-async function fetchReportData() {
+async function fetchReportData(){
   const inv=currentInvestigation();
-
-  if(!inv||inv.status!=="completed") {
+  if(!inv||inv.status!=="completed"){
     throw new Error(
       "Reports are available for completed investigations."
     );
   }
-
-  if(!navigator.onLine) {
+  if(!navigator.onLine){
     throw new Error(
       "Connect to the internet to retrieve the full report."
     );
   }
-
   const {data:latest,error:statusError}=await db
-    .from("investigations")
-    .select("*")
-    .eq("id",inv.id)
-    .single();
-
-  if(statusError) throw statusError;
-
-  if(latest.status!=="completed") {
+    .from("investigations").select("*")
+    .eq("id",inv.id).single();
+  if(statusError)throw statusError;
+  if(latest.status!=="completed"){
     throw new Error(
       "This investigation is no longer completed."
     );
   }
-
   const [events,assigned]=await Promise.all([
-    fetchAllEvents(inv.id),
-    loadAssignments(inv.id)
+    fetchAllEvents(inv.id),loadAssignments(inv.id)
   ]);
-
   const localPending=queueRead().filter(x=>
     x.investigation_id===inv.id
   );
-
-  if(localPending.length) {
+  if(localPending.length){
     throw new Error(
       "This device still has pending event markers. "+
       "Reports cannot be considered complete until "+
       "they are resolved."
     );
   }
-
   return {
     inv:latest,
-    loc:locations.find(
-      x=>x.id===latest.location_id
-    ),
+    loc:locations.find(x=>x.id===latest.location_id),
     events,
     investigators:members.filter(m=>
       assigned.includes(m.id)
@@ -2301,8 +1839,7 @@ async function fetchReportData() {
     )
   };
 }
-
-function reportRows(data) {
+function reportRows(data){
   return data.events.map((e,index)=>({
     "No.":index+1,
     "Date":new Date(e.event_time)
@@ -2324,35 +1861,24 @@ function reportRows(data) {
     "Event ID":e.id||""
   }));
 }
-
-function reportFileName(data,ext) {
-  const name=String(
-    data.loc?.name||"Investigation"
-  ).replace(/[^a-z0-9]+/gi,"_")
-    .replace(/^_+|_+$/g,"")
-    .slice(0,65);
-
+function reportFileName(data,ext){
+  const name=String(data.loc?.name||"Investigation")
+    .replace(/[^a-z0-9]+/gi,"_")
+    .replace(/^_+|_+$/g,"").slice(0,65);
   return "IEGH_"+name+"_"+
     data.inv.investigation_date+"."+ext;
 }
-
-async function generateExcel(data) {
-  if(!window.XLSX) {
-    throw new Error(
-      "Excel library unavailable. Check your connection."
-    );
+async function generateExcel(data){
+  if(!window.XLSX){
+    throw new Error("Excel library unavailable.");
   }
-
   const wb=XLSX.utils.book_new();
-
   const details=[
     ["IEGH INVESTIGATION REPORT"],
     ["Location",data.loc?.name||""],
     ["Address",[
-      data.loc?.address,
-      data.loc?.city,
-      data.loc?.state,
-      data.loc?.postal_code
+      data.loc?.address,data.loc?.city,
+      data.loc?.state,data.loc?.postal_code
     ].filter(Boolean).join(", ")],
     ["Investigation Date",
       formatDate(data.inv.investigation_date)],
@@ -2362,25 +1888,17 @@ async function generateExcel(data) {
     ["Investigators",
       data.investigators.map(memberName).join(", ")],
     ["Total Events",data.events.length],
-    ["Report Generated",timeLabel(
-      new Date().toISOString()
-    )]
+    ["Report Generated",
+      timeLabel(new Date().toISOString())]
   ];
-
   const summary=XLSX.utils.aoa_to_sheet(details);
-  summary["!cols"]=[
-    {wch:24},{wch:85}
-  ];
-
+  summary["!cols"]=[{wch:24},{wch:85}];
   XLSX.utils.book_append_sheet(
     wb,summary,"Investigation Summary"
   );
 
-  const rows=reportRows(data);
-
   const events=XLSX.utils.json_to_sheet(
-    rows.length?rows:[],
-    {
+    reportRows(data),{
       header:[
         "No.","Date","Time","Event Type",
         "Investigator","Recorded By",
@@ -2388,138 +1906,88 @@ async function generateExcel(data) {
       ]
     }
   );
-
   events["!cols"]=[
     {wch:7},{wch:18},{wch:16},
     {wch:26},{wch:22},{wch:22},
     {wch:34},{wch:75},{wch:40}
   ];
-
-  XLSX.utils.book_append_sheet(
-    wb,events,"Event Log"
-  );
+  XLSX.utils.book_append_sheet(wb,events,"Event Log");
 
   const counts={};
-
   data.events.forEach(e=>{
     const key=e.event_type||"Unspecified";
     counts[key]=(counts[key]||0)+1;
   });
-
   const countRows=Object.entries(counts)
     .sort((a,b)=>a[0].localeCompare(b[0]))
     .map(([type,count])=>({
-      "Event Type":type,
-      "Count":count
+      "Event Type":type,"Count":count
     }));
-
   const countSheet=XLSX.utils.json_to_sheet(
-    countRows,
-    {header:["Event Type","Count"]}
+    countRows,{header:["Event Type","Count"]}
   );
-
-  countSheet["!cols"]=[
-    {wch:32},{wch:12}
-  ];
-
+  countSheet["!cols"]=[{wch:32},{wch:12}];
   XLSX.utils.book_append_sheet(
     wb,countSheet,"Activity Summary"
   );
-
-  XLSX.writeFile(
-    wb,reportFileName(data,"xlsx")
-  );
+  XLSX.writeFile(wb,reportFileName(data,"xlsx"));
 }
-
-function safePDFText(value) {
-  return String(value??"")
-    .normalize("NFKD")
+function safePDFText(value){
+  return String(value??"").normalize("NFKD")
     .replace(/[\u0300-\u036f]/g,"")
     .replace(/[^\x20-\x7E\n]/g,"?");
 }
-
-async function generatePDF(data) {
-  if(!window.jspdf?.jsPDF) {
-    throw new Error(
-      "PDF library unavailable. Check your connection."
-    );
+async function generatePDF(data){
+  if(!window.jspdf?.jsPDF){
+    throw new Error("PDF library unavailable.");
   }
-
   const doc=new window.jspdf.jsPDF({
-    unit:"pt",
-    format:"letter"
+    unit:"pt",format:"letter"
   });
+  const pageWidth=612,pageHeight=792;
+  const left=48,right=48,width=pageWidth-left-right;
+  let y=52,page=1;
 
-  const pageWidth=612;
-  const pageHeight=792;
-  const left=48;
-  const right=48;
-  const width=pageWidth-left-right;
-  let y=52;
-  let page=1;
-
-  function pageHeader() {
+  function pageHeader(){
     doc.setFont("helvetica","bold");
     doc.setFontSize(9);
     doc.setTextColor(75,90,110);
     doc.text("IEGH DOCUHUB",left,28);
-
     doc.setDrawColor(190,200,215);
     doc.line(left,35,pageWidth-right,35);
-
     doc.setFont("helvetica","normal");
-    doc.setFontSize(9);
-    doc.text(
-      "Page "+page,
-      pageWidth-right,
-      pageHeight-26,
-      {align:"right"}
-    );
-
+    doc.text("Page "+page,pageWidth-right,
+      pageHeight-26,{align:"right"});
     doc.setTextColor(30,40,55);
   }
-
-  function newPage() {
-    doc.addPage();
-    page++;
-    y=52;
-    pageHeader();
+  function newPage(){
+    doc.addPage();page++;y=52;pageHeader();
   }
-
-  function ensure(height) {
-    if(y+height>pageHeight-52) {
-      newPage();
-    }
+  function ensure(height){
+    if(y+height>pageHeight-52)newPage();
   }
-
-  function paragraph(text,size=10,gap=8) {
+  function paragraph(text,size=10,gap=8){
     doc.setFont("helvetica","normal");
     doc.setFontSize(size);
-
     const lines=doc.splitTextToSize(
       safePDFText(text),width
     );
-
     const lineHeight=size*1.45;
-    for(const line of lines) {
+    for(const line of lines){
       ensure(lineHeight);
       doc.text(line,left,y);
       y+=lineHeight;
     }
-
     y+=gap;
   }
-
-  function heading(text) {
-    ensure(34);
-    y+=8;
+  function heading(text){
+    ensure(34);y+=8;
     doc.setFont("helvetica","bold");
     doc.setFontSize(13);
     doc.text(safePDFText(text),left,y);
     y+=18;
   }
-
-  function field(label,value) {
+  function field(label,value){
     ensure(18);
     doc.setFont("helvetica","bold");
     doc.setFontSize(10);
@@ -2527,54 +1995,38 @@ async function generatePDF(data) {
     y+=15;
     paragraph(value||"Not specified",10,5);
   }
-
   pageHeader();
-
   doc.setFont("helvetica","bold");
   doc.setFontSize(20);
   doc.setTextColor(25,48,75);
   doc.text("Investigation Report",left,y);
   y+=28;
-
   doc.setTextColor(30,40,55);
 
   heading("Investigation Information");
-
   field("Location",data.loc?.name);
   field("Address",[
-    data.loc?.address,
-    data.loc?.city,
-    data.loc?.state,
-    data.loc?.postal_code
+    data.loc?.address,data.loc?.city,
+    data.loc?.state,data.loc?.postal_code
   ].filter(Boolean).join(", "));
-
-  field("Date",
-    formatDate(data.inv.investigation_date));
-
+  field("Date",formatDate(data.inv.investigation_date));
   field("Scheduled Start",
     formatTime(data.inv.start_time));
-
   field("Status",statusLabel(data.inv.status));
-
   field("Participating Investigators",
     data.investigators.map(memberName).join(", ")||
     "None assigned");
-
   field("Investigation Notes",
     data.inv.notes||"None recorded");
 
   heading("Documented Activity");
-
-  paragraph(
-    "Total recorded events: "+data.events.length
-  );
-
+  paragraph("Total recorded events: "+
+    data.events.length);
   const counts={};
   data.events.forEach(e=>{
     const type=e.event_type||"Unspecified";
     counts[type]=(counts[type]||0)+1;
   });
-
   Object.entries(counts)
     .sort((a,b)=>a[0].localeCompare(b[0]))
     .forEach(([type,count])=>{
@@ -2582,106 +2034,61 @@ async function generatePDF(data) {
     });
 
   heading("Chronological Event Log");
-
-  if(!data.events.length) {
+  if(!data.events.length){
     paragraph("No events were recorded.");
   }
-
   data.events.forEach((e,index)=>{
     ensure(72);
-
     doc.setDrawColor(195,205,215);
     doc.line(left,y,pageWidth-right,y);
     y+=16;
-
     doc.setFont("helvetica","bold");
     doc.setFontSize(11);
-
     const title=(index+1)+". "+
       safePDFText(e.event_type||"Event");
-
-    const titleLines=doc.splitTextToSize(
-      title,width
-    );
-
+    const titleLines=doc.splitTextToSize(title,width);
     titleLines.forEach(line=>{
-      ensure(16);
-      doc.text(line,left,y);
-      y+=15;
+      ensure(16);doc.text(line,left,y);y+=15;
     });
-
     paragraph(timeLabel(e.event_time),10,3);
-
-    paragraph(
-      "Investigator: "+nameById(e.investigator_id),
-      10,3
-    );
-
-    const recorder=e.recorded_by||
-      e.investigator_id;
-
-    if(recorder!==e.investigator_id) {
-      paragraph(
-        "Recorded by: "+nameById(recorder),
-        10,3
-      );
+    paragraph("Investigator: "+
+      nameById(e.investigator_id),10,3);
+    const recorder=e.recorded_by||e.investigator_id;
+    if(recorder!==e.investigator_id){
+      paragraph("Recorded by: "+
+        nameById(recorder),10,3);
     }
-
-    if(e.area) {
-      paragraph("Area: "+e.area,10,3);
-    }
-
-    if(e.notes) {
-      paragraph("Description: "+e.notes,10,5);
-    } else {
-      paragraph("Description: None recorded",10,5);
-    }
-
+    if(e.area)paragraph("Area: "+e.area,10,3);
+    paragraph(e.notes
+      ?"Description: "+e.notes
+      :"Description: None recorded",10,5);
     y+=6;
   });
-
   heading("Report Information");
-
-  paragraph(
-    "Generated: "+timeLabel(
-      new Date().toISOString()
-    )
-  );
-
+  paragraph("Generated: "+
+    timeLabel(new Date().toISOString()));
   paragraph(
     "This report documents recorded investigation "+
     "events. Entries reflect observations submitted "+
     "by investigators and do not independently "+
-    "establish paranormal causes.",
-    9,5
+    "establish paranormal causes.",9,5
   );
-
   doc.save(reportFileName(data,"pdf"));
 }
-
-async function downloadReport(type) {
-  if(reportBusy) return;
-
+async function downloadReport(type){
+  if(reportBusy)return;
   reportBusy=true;
-
   $("downloadExcel").disabled=true;
   $("downloadPDF").disabled=true;
-
-  try {
+  try{
     msg("Preparing complete investigation report...");
-
     const data=await fetchReportData();
-
-    if(type==="excel") {
-      await generateExcel(data);
-    } else {
-      await generatePDF(data);
-    }
-
+    if(type==="excel")await generateExcel(data);
+    else await generatePDF(data);
     msg("Report generated successfully.","good");
-  } catch(e) {
+  }catch(e){
     msg("Report error: "+e.message,"bad");
-  } finally {
+  }finally{
     reportBusy=false;
     $("downloadExcel").disabled=false;
     $("downloadPDF").disabled=false;
@@ -2690,274 +2097,191 @@ async function downloadReport(type) {
 
 /* AUTHENTICATION */
 
-async function signedOut() {
-  user=null;
-  role=null;
-  pending=null;
+async function signedOut(){
+  user=null;role=null;pending=null;
   assignments={};
   historyEvents=[];
   historyInvestigation=null;
   activeInvestigationId=null;
   ++workspaceRequest;
-
+  selectedLocationLetter=null;
   show("loginPanel",true);
   show("navigation",false);
   show("mainMenu",false);
-
   document.querySelectorAll(".page").forEach(p=>{
     show(p.id,false);
   });
 }
-
-async function signedIn() {
+async function signedIn(){
   const {data:{user:authUser},error}=
     await db.auth.getUser();
-
-  if(error||!authUser) {
-    await signedOut();
-    return;
+  if(error||!authUser){
+    await signedOut();return;
   }
-
   const result=await db.from("members")
     .select("id,display_name,role")
-    .eq("id",authUser.id)
-    .single();
-
-  if(result.error||!result.data) {
+    .eq("id",authUser.id).single();
+  if(result.error||!result.data){
     await db.auth.signOut();
     await signedOut();
-    msg("Authorized member profile not found.",
-      "bad");
+    msg("Authorized member profile not found.","bad");
     return;
   }
-
   user=authUser;
   role=result.data.role;
-
   $("accountInfo").textContent=
     memberName(result.data)+" | "+
-    (role==="admin"
-      ?"Administrator":"Investigator");
-
+    (role==="admin"?"Administrator":"Investigator");
   $("connectionInfo").textContent=
     navigator.onLine?"Online":"Offline";
-
   show("loginPanel",false);
   show("navigation",true);
   show("mainMenu",true);
-
-  $("adminMenuOption").disabled=
-    role!=="admin";
-  $("adminMenuOption").hidden=
-    role!=="admin";
+  $("adminMenuOption").disabled=role!=="admin";
+  $("adminMenuOption").hidden=role!=="admin";
   $("mainMenu").value="";
-
   await loadData();
   setPage("investigationsPage");
-
-  if(navigator.onLine) await syncEvents();
+  if(navigator.onLine)await syncEvents();
 }
-
-async function confirmSignOut() {
-  if(!user) return;
-
-  if(!confirm(
-    "Are you sure you want to sign out?"
-  )) return;
-
-  const {error}=await db.auth.signOut();
-
-  if(error) {
-    msg(error.message,"bad");
+async function confirmSignOut(){
+  if(!user)return;
+  if(!confirm("Are you sure you want to sign out?"))
     return;
-  }
-
+  const {error}=await db.auth.signOut();
+  if(error){msg(error.message,"bad");return}
   await signedOut();
   msg("Signed out.");
 }
 
 /* EVENT HANDLERS */
 
-$("mainMenu").addEventListener(
-  "change",async e=>{
-    const action=e.target.value;
-    e.target.value="";
-
-    if(!action||!user) return;
-
-    if(action==="logout") {
-      await confirmSignOut();
-      return;
-    }
-
-    if(action==="sync") {
-      await syncEvents();
-      return;
-    }
-
-    if(action==="admin"&&role!=="admin") return;
-
-    cancelEvent();
-    activeInvestigationId=null;
-    ++workspaceRequest;
-
-    if(action==="admin") setPage("adminPage");
-    if(action==="account") setPage("accountPage");
+$("mainMenu").addEventListener("change",async e=>{
+  const action=e.target.value;
+  e.target.value="";
+  if(!action||!user)return;
+  if(action==="logout"){
+    await confirmSignOut();return;
   }
-);
-
-$("loginForm").addEventListener(
-  "submit",async e=>{
-    e.preventDefault();
-    if(!db) return;
-
-    msg("Signing in...");
-
-    const {error}=await db.auth
-      .signInWithPassword({
-        email:$("email").value.trim(),
-        password:$("password").value
-      });
-
-    $("password").value="";
-
-    if(error) {
-      msg(error.message,"bad");
-      return;
-    }
-
-    await signedIn();
+  if(action==="sync"){
+    await syncEvents();return;
   }
-);
-
-$("logoutButton").addEventListener(
-  "click",confirmSignOut
-);
-
-$("tabs").addEventListener("click",e=>{
-  const b=e.target.closest(
-    "button[data-page]"
-  );
-  if(!b) return;
-
+  if(action==="admin"&&role!=="admin")return;
   cancelEvent();
   activeInvestigationId=null;
   ++workspaceRequest;
+  if(action==="admin")setPage("adminPage");
+  if(action==="account")setPage("accountPage");
+});
+$("loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!db)return;
+  msg("Signing in...");
+  const {error}=await db.auth.signInWithPassword({
+    email:$("email").value.trim(),
+    password:$("password").value
+  });
+  $("password").value="";
+  if(error){msg(error.message,"bad");return}
+  await signedIn();
+});
+$("logoutButton").addEventListener(
+  "click",confirmSignOut
+);
+$("tabs").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-page]");
+  if(!b)return;
+  cancelEvent();
+  activeInvestigationId=null;
+  ++workspaceRequest;
+  if(b.dataset.page==="locationsPage"){
+    resetLocationFilter();
+    show("locationDirectory",true);
+    show("locationProfile",false);
+    show("locationEditor",false);
+  }
   setPage(b.dataset.page);
 });
-
 $("locationForm").addEventListener(
   "submit",saveLocation
 );
-
-$("cancelLocation").addEventListener(
-  "click",()=>show("locationEditor",false)
-);
-
+$("cancelLocation").addEventListener("click",()=>{
+  show("locationEditor",false);
+});
 $("addArea").addEventListener(
   "click",addStructuredArea
 );
-
 $("backToLocations").addEventListener(
   "click",closeLocationProfile
 );
-
 $("closeLocationProfile").addEventListener(
   "click",closeLocationProfile
 );
-
 $("newLocation").addEventListener(
   "click",()=>openLocation()
 );
-
-$("newInvestigation").addEventListener(
-  "click",()=>{
-    if(!locations.length) {
-      msg("Add a location first.","warn");
-      return;
-    }
-    openInvestigation();
+$("newInvestigation").addEventListener("click",()=>{
+  if(!locations.length){
+    msg("Add a location first.","warn");return;
   }
-);
-
+  openInvestigation();
+});
 $("investigationForm").addEventListener(
   "submit",saveInvestigation
 );
-
 $("cancelInvestigation").addEventListener(
   "click",()=>show("investigationEditor",false)
 );
-
 $("saveAssignments").addEventListener(
   "click",saveAssignments
 );
-
 $("cancelAssignments").addEventListener(
   "click",()=>show("assignmentEditor",false)
 );
-
 $("refreshInvestigations").addEventListener(
   "click",loadData
 );
-
 $("backToInvestigations").addEventListener(
   "click",closeWorkspace
 );
-
-$("saveEvent").addEventListener(
-  "click",saveEvent
-);
-
-$("cancelEvent").addEventListener(
-  "click",cancelEvent
-);
-
-$("syncButton").addEventListener(
-  "click",syncEvents
-);
-
+$("saveEvent").addEventListener("click",saveEvent);
+$("cancelEvent").addEventListener("click",cancelEvent);
+$("syncButton").addEventListener("click",syncEvents);
 $("endInvestigation").addEventListener(
   "click",()=>changeInvestigationStatus("completed")
 );
-
 $("reopenInvestigation").addEventListener(
   "click",()=>changeInvestigationStatus("active")
 );
-
 $("downloadExcel").addEventListener(
   "click",()=>downloadReport("excel")
 );
-
 $("downloadPDF").addEventListener(
   "click",()=>downloadReport("pdf")
 );
-
 window.addEventListener("online",()=>{
-  if(!user) return;
+  if(!user)return;
   $("connectionInfo").textContent="Online";
   syncEvents();
 });
-
 window.addEventListener("offline",()=>{
-  if(!user) return;
+  if(!user)return;
   $("connectionInfo").textContent="Offline";
 });
 
-async function init() {
+async function init(){
   renderEventButtons();
-
-  if(!db) {
+  renderAlphabetMenu();
+  if(!db){
     msg("Supabase library could not load.","bad");
     return;
   }
-
-  try {
+  try{
     await signedIn();
-  } catch(e) {
+  }catch(e){
     msg("Initialization error: "+e.message,"bad");
   }
 }
-
 init();
 </script>
 </body>
