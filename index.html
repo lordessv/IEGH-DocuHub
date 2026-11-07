@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -191,14 +192,13 @@ button.selected {
 .workspace-heading {
   border-bottom:1px solid #405b79;
   padding-bottom:12px;
-  margin-bottom:18px;
+  margin-bottom:12px;
 }
-.workspace-heading h2 { margin-bottom:6px; }
 .workspace-heading p { margin:4px 0; }
 .workspace-actions {
   display:flex;
   justify-content:flex-start;
-  margin-bottom:18px;
+  margin-bottom:12px;
 }
 .workspace-actions button {
   width:auto;
@@ -409,7 +409,6 @@ form { min-width:0; }
   </div>
 
   <div class="workspace-heading">
-    <h2>Investigation Workspace</h2>
     <p id="workspaceTitle" class="marker"></p>
     <p id="workspaceDetails" class="muted"></p>
     <span id="workspaceStatus"
@@ -417,11 +416,6 @@ form { min-width:0; }
   </div>
 
   <div id="activeWorkspace">
-    <h2>Quick Event Logger</h2>
-    <p class="muted">
-      Tap an event button to capture its timestamp
-      immediately. Add details afterward.
-    </p>
     <div id="eventButtons"></div>
 
     <div id="eventEntry" class="hidden">
