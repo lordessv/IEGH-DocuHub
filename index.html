@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -665,6 +666,41 @@ function option(select, value, label) {
   select.append(el);
 }
 
+function formatDate(date) {
+  if (!date) return "";
+
+  const [year, month, day] =
+    String(date).split("-").map(Number);
+
+  return new Date(
+    year,
+    month - 1,
+    day
+  ).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+}
+
+function formatTime(time) {
+  if (!time) return "";
+
+  const [hours, minutes] =
+    String(time).split(":").map(Number);
+
+  const hour12 = hours % 12 || 12;
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  return (
+    hour12 +
+    ":" +
+    String(minutes).padStart(2, "0") +
+    " " +
+    ampm
+  );
+}
+
 function queueRead() {
   try {
     const v = JSON.parse(
@@ -681,38 +717,18 @@ function queueWrite(v) {
   renderPending();
   renderHistory();
 }
-function formatDate(date) {
-  if (!date) return "";
 
-  const [year, month, day] = date.split("-").map(Number);
-
-  return new Date(year, month - 1, day)
-    .toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric"
-    });
-}
-function formatTime(time) {
-  if (!time) return "";
-
-  const [hours, minutes] = time.split(":").map(Number);
-
-  const hour12 = hours % 12 || 12;
-  const ampm = hours >= 12 ? "PM" : "AM";
-
-  return `${hour12}:${String(minutes).padStart(2, "0")} ${ampm}`;
-}
 function timeLabel(iso) {
   return new Date(iso).toLocaleString(
-    undefined,
+    "en-US",
     {
       month: "short",
       day: "numeric",
       year: "numeric",
       hour: "numeric",
       minute: "2-digit",
-      second: "2-digit"
+      second: "2-digit",
+      hour12: true
     }
   );
 }
@@ -1184,9 +1200,9 @@ function renderInvestigations() {
     addText(
       card,
       "p",
-      inv.investigation_date +
+      formatDate(inv.investigation_date) +
       " | " +
-      inv.start_time +
+      formatTime(inv.start_time) +
       " | " +
       inv.status,
       "muted"
@@ -1323,7 +1339,7 @@ async function openAssignments(inv) {
   $("assignmentTitle").textContent =
     locationName(inv.location_id) +
     " | " +
-    inv.investigation_date;
+    formatDate(inv.investigation_date);
 
   let assigned;
 
@@ -1585,9 +1601,9 @@ async function openWorkspace(inv) {
     locationName(inv.location_id);
 
   $("workspaceDetails").textContent =
-    inv.investigation_date +
+    formatDate(inv.investigation_date) +
     " | Start: " +
-    inv.start_time +
+    formatTime(inv.start_time) +
     " | " +
     inv.status.toUpperCase();
 
