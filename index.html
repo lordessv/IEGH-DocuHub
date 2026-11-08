@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -165,6 +166,20 @@ button.selected {
 #reportActions button {min-height:55px}
 form {min-width:0}
 
+/* NUMERIC USERNAME LOGIN */
+#username {
+  font-size:1.1rem;
+  letter-spacing:.05em;
+}
+#loginForm button[type="submit"] {
+  width:100%;
+}
+.login-help {
+  font-size:.88rem;
+  margin:8px 0 0;
+  color:#b3c7e1;
+}
+
 /* LOCATION DIRECTORY ALPHABET */
 .alphabet-menu {
   display:flex;
@@ -276,14 +291,36 @@ form {min-width:0}
 <section class="panel" id="loginPanel">
   <h2>Member Login</h2>
   <form id="loginForm">
-    <label>Email</label>
-    <input id="email" type="email"
-      autocomplete="username" required>
-    <label>Password</label>
-    <input id="password" type="password"
-      autocomplete="current-password" required>
+    <label for="username">Username</label>
+    <input
+      id="username"
+      name="username"
+      type="text"
+      inputmode="numeric"
+      pattern="[0-9]{10}"
+      minlength="10"
+      maxlength="10"
+      autocomplete="username"
+      autocapitalize="off"
+      spellcheck="false"
+      placeholder="10-digit username"
+      required
+    >
+    <p class="login-help">
+      Enter your assigned 10-digit username.
+    </p>
+    <label for="password">Password</label>
+    <input
+      id="password"
+      name="password"
+      type="password"
+      autocomplete="current-password"
+      required
+    >
     <div class="actions">
-      <button type="submit">Sign In</button>
+      <button id="loginButton" type="submit">
+        Sign In
+      </button>
     </div>
   </form>
 </section>
@@ -591,6 +628,10 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable__-GbvBCUDmSBlyVOMijkFA_M8tWiUEQ";
 
+const LOGIN_ENDPOINT =
+  SUPABASE_URL.replace(/\/+$/,"")+
+  "/functions/v1/username-login";
+
 const $=id=>document.getElementById(id);
 const show=(id,yes)=>
   $(id).classList.toggle("hidden",!yes);
@@ -634,6 +675,7 @@ let activeInvestigationId=null,pending=null;
 let structuredAreas=[];
 let syncing=false,workspaceRequest=0,reportBusy=false;
 let selectedLocationLetter=null;
+let loginBusy=false;
 
 function msg(text,kind="muted"){
   $("message").textContent=text;
@@ -2153,6 +2195,88 @@ async function confirmSignOut(){
   msg("Signed out.");
 }
 
+/* NUMERIC USERNAME AUTHENTICATION */
+
+async function loginWithUsername(username,password){
+  let response;
+
+  try{
+    response=await fetch(LOGIN_ENDPOINT,{
+      method:"POST",
+      mode:"cors",
+      cache:"no-store",
+      headers:{
+        "Content-Type":"application/json",
+        "apikey":SUPABASE_KEY
+      },
+      body:JSON.stringify({
+        username,
+        password
+      })
+    });
+  }catch{
+    throw new Error(
+      "Unable to reach the login server. "+
+      "Check your internet connection."
+    );
+  }
+
+  let result;
+  try{
+    result=await response.json();
+  }catch{
+    throw new Error(
+      "The login server returned an invalid response."
+    );
+  }
+
+  if(!response.ok){
+    if(response.status===429){
+      throw new Error(
+        "Too many login attempts. "+
+        "Please wait before trying again."
+      );
+    }
+    if(response.status===401){
+      throw new Error(
+        "Invalid username or password."
+      );
+    }
+    if(response.status===503){
+      throw new Error(
+        "Login is temporarily unavailable."
+      );
+    }
+    throw new Error(
+      typeof result?.error==="string"
+        ?result.error
+        :"Login failed. Please try again."
+    );
+  }
+
+  if(
+    typeof result?.access_token!=="string"||
+    typeof result?.refresh_token!=="string"
+  ){
+    throw new Error(
+      "The login server did not return a valid session."
+    );
+  }
+
+  const {data,error}=await db.auth.setSession({
+    access_token:result.access_token,
+    refresh_token:result.refresh_token
+  });
+
+  if(error||!data?.session){
+    throw new Error(
+      "Unable to establish your login session."
+    );
+  }
+
+  return data.session;
+}
+
 /* EVENT HANDLERS */
 
 $("mainMenu").addEventListener("change",async e=>{
@@ -2172,18 +2296,43 @@ $("mainMenu").addEventListener("change",async e=>{
   if(action==="admin")setPage("adminPage");
   if(action==="account")setPage("accountPage");
 });
+
 $("loginForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  if(!db)return;
+  if(!db||loginBusy)return;
+
+  const username=$("username").value.trim();
+  const password=$("password").value;
+
+  if(!/^[0-9]{10}$/.test(username)){
+    msg("Enter your 10-digit username.","bad");
+    return;
+  }
+
+  if(!password){
+    msg("Enter your password.","bad");
+    return;
+  }
+
+  loginBusy=true;
+  $("loginButton").disabled=true;
+  $("loginButton").textContent="Signing In...";
   msg("Signing in...");
-  const {error}=await db.auth.signInWithPassword({
-    email:$("email").value.trim(),
-    password:$("password").value
-  });
-  $("password").value="";
-  if(error){msg(error.message,"bad");return}
-  await signedIn();
+
+  try{
+    await loginWithUsername(username,password);
+    $("password").value="";
+    await signedIn();
+  }catch(error){
+    $("password").value="";
+    msg(error.message||"Unable to sign in.","bad");
+  }finally{
+    loginBusy=false;
+    $("loginButton").disabled=false;
+    $("loginButton").textContent="Sign In";
+  }
 });
+
 $("logoutButton").addEventListener(
   "click",confirmSignOut
 );
