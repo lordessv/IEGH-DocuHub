@@ -2428,6 +2428,10 @@ async function init(){
 }
 init();
 </script>
-  <script src="investigation-details.js"></script>
+  <script>
+  window.supabaseClientForPasswords = db;
+</script>
+<script src="investigation-details.js"></script>
+<script src="password-controls.js"></script>
 </body>
 </html>
