@@ -1544,21 +1544,42 @@ function canLogCurrentInvestigation(){
   return !!user && !!inv && inv.status==="active" &&
     (role==="admin" || loggingAuthorized);
 }
+function canLogEvents(invId) {
+  if (!user) return false;
+  if (role === "admin") return true;
 
+  return Array.isArray(assignments[invId]) &&
+    assignments[invId].includes(user.id);
+}
 function updateWorkspaceControls(){
   const inv=currentInvestigation();
   if(!inv)return;
+
   const active=inv.status==="active";
   const completed=inv.status==="completed";
-  show("activeWorkspace",active&&canLogCurrentInvestigation());
-  show("loggingRestricted",active&&!canLogCurrentInvestigation());
+
+  const canLog=active&&(
+    role==="admin"||
+    (
+      Array.isArray(assignments[inv.id])&&
+      assignments[inv.id].includes(user?.id)
+    )
+  );
+
+  show("activeWorkspace",canLog);
+  show("loggingRestricted",active&&!canLog);
   show("completedNotice",completed);
   show("reportSection",completed);
   show("closeControls",active&&role==="admin");
   show("reopenControls",completed&&role==="admin");
+
   $("workspaceStatus").textContent=statusLabel(inv.status);
   $("workspaceStatus").className=
     "status-pill "+inv.status;
+
+  if(!canLog){
+    cancelEvent();
+  }
 }
 async function openWorkspace(inv){
   if(!["active","completed"].includes(inv.status)){
