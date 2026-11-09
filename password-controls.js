@@ -59,10 +59,6 @@ if (!/[A-Za-z]/.test(password)) {
       return "Password must include at least one number.";
     }
 
-    if (!/[^A-Za-z0-9]/.test(password)) {
-      return "Password must include a special character.";
-    }
-
     return null;
   }
 
@@ -79,7 +75,7 @@ if (!/[A-Za-z]/.test(password)) {
 
         <p class="muted">
           Use at least 8 characters, including
-          one number and one special character.
+          one number.
         </p>
 
         <label for="accountNewPassword">
