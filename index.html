@@ -517,6 +517,9 @@ form {min-width:0}
     <span id="workspaceStatus"
       class="status-pill"></span>
   </div>
+  <div id="loggingRestricted" class="hidden">
+    <p class="muted">Event logging is available to assigned investigators only.</p>
+  </div>
   <div id="activeWorkspace">
     <div id="eventButtons"></div>
     <div id="eventEntry" class="hidden">
@@ -724,6 +727,7 @@ let structuredAreas=[];
 let syncing=false,workspaceRequest=0,reportBusy=false;
 let selectedLocationLetter=null;
 let loginBusy=false;
+let loggingAuthorized=false;
 
 function msg(text,kind="muted"){
   $("message").textContent=text;
@@ -1535,12 +1539,19 @@ function renderInvestigatorOptions(){
   ).forEach(m=>option(select,m.id,memberName(m)));
   select.value=user.id;
 }
+function canLogCurrentInvestigation(){
+  const inv=currentInvestigation();
+  return !!user && !!inv && inv.status==="active" &&
+    (role==="admin" || loggingAuthorized);
+}
+
 function updateWorkspaceControls(){
   const inv=currentInvestigation();
   if(!inv)return;
   const active=inv.status==="active";
   const completed=inv.status==="completed";
-  show("activeWorkspace",active);
+  show("activeWorkspace",active&&canLogCurrentInvestigation());
+  show("loggingRestricted",active&&!canLogCurrentInvestigation());
   show("completedNotice",completed);
   show("reportSection",completed);
   show("closeControls",active&&role==="admin");
@@ -1555,6 +1566,7 @@ async function openWorkspace(inv){
     return;
   }
   cancelEvent();
+  loggingAuthorized=false;
   activeInvestigationId=inv.id;
   historyEvents=[];
   historyInvestigation=null;
@@ -1571,11 +1583,15 @@ async function openWorkspace(inv){
   window.scrollTo({top:0,behavior:"smooth"});
   const requestId=++workspaceRequest;
   try{
-    await loadAssignments(inv.id);
+    const assigned=await loadAssignments(inv.id);
+    if(requestId!==workspaceRequest)return;
+    loggingAuthorized=role==="admin" || assigned.includes(user.id);
+    updateWorkspaceControls();
   }catch(e){
-    if(requestId===workspaceRequest){
-      msg("Assignment error: "+e.message,"warn");
-    }
+    if(requestId!==workspaceRequest)return;
+    loggingAuthorized=false;
+    updateWorkspaceControls();
+    msg("Unable to verify investigation assignment: "+e.message,"warn");
   }
   if(requestId!==workspaceRequest)return;
   await loadEventHistory(inv.id);
@@ -1583,6 +1599,7 @@ async function openWorkspace(inv){
 function closeWorkspace(){
   cancelEvent();
   activeInvestigationId=null;
+  loggingAuthorized=false;
   historyEvents=[];
   historyInvestigation=null;
   ++workspaceRequest;
@@ -1594,6 +1611,9 @@ function captureEvent(type){
     msg("Investigation is not active.","warn");return;
   }
   if(!user)return;
+  if(!canLogCurrentInvestigation()){
+    msg("Only assigned investigators can log events.","warn");return;
+  }
   if(!crypto.randomUUID){
     msg("Secure event IDs unavailable.","bad");return;
   }
@@ -1631,6 +1651,9 @@ function cancelEvent(){
 }
 async function saveEvent(){
   if(!pending||!user)return;
+  if(!canLogCurrentInvestigation()){
+    msg("Only assigned investigators can log events.","bad");return;
+  }
   const inv=currentInvestigation();
   if(!inv||inv.status!=="active"||
      inv.id!==pending.investigation_id){
@@ -1763,6 +1786,28 @@ async function syncEvents(){
         entry.investigator_id;
       if(owner!==user.id){
         remaining.push(entry);continue;
+      }
+      // Preserve unauthorized or unverified markers locally for review.
+      // Never silently delete them or repeatedly attempt a forbidden upload.
+      let authorized=false;
+      if(role==="admin"){
+        authorized=true;
+      }else{
+        const check=await db.from("investigation_members")
+          .select("member_id")
+          .eq("investigation_id",entry.investigation_id)
+          .eq("member_id",user.id).limit(1);
+        if(check.error){
+          remaining.push(entry);
+          if(!firstError)firstError="Could not verify assignment.";
+          continue;
+        }
+        authorized=(check.data||[]).length>0;
+      }
+      if(!authorized){
+        remaining.push(entry);
+        if(!firstError)firstError="An event is awaiting assignment review.";
+        continue;
       }
       const payload={
         id:entry.id,
@@ -2188,10 +2233,12 @@ async function downloadReport(type){
 
 async function signedOut(){
   user=null;role=null;pending=null;
+  loggingAuthorized=false;
   assignments={};
   historyEvents=[];
   historyInvestigation=null;
   activeInvestigationId=null;
+  loggingAuthorized=false;
   ++workspaceRequest;
   selectedLocationLetter=null;
   show("loginPanel",true);
