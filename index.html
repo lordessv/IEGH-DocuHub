@@ -267,84 +267,55 @@ form {min-width:0}
   }
 }
 
-/* COMPACT FIELD WORKSPACE: shared by admin and investigators */
-body:has(#eventsPage:not(.hidden)) header {
-  padding:5px 12px;
-}
-body:has(#eventsPage:not(.hidden)) header h1 {
-  font-size:1rem;
-}
-body:has(#eventsPage:not(.hidden)) .header-menu {
-  min-height:36px;
-  padding:5px 8px;
-}
-body:has(#eventsPage:not(.hidden)) main {
-  padding:5px 8px;
-}
-body:has(#eventsPage:not(.hidden)) #navigation {
-  padding:5px;
-  margin-bottom:5px;
-  border-radius:9px;
-}
-body:has(#eventsPage:not(.hidden)) .tabs {
-  gap:5px;
-}
-body:has(#eventsPage:not(.hidden)) .tabs button {
-  min-height:40px;
-  padding:6px 8px;
-  font-size:clamp(.84rem,2.4vw,1rem);
-}
-#eventsPage {
-  padding:9px 11px;
-  margin-bottom:7px;
-  border-radius:10px;
-}
+/* SHARED INVESTIGATION WORKSPACE: SAME DESIGN FOR ALL ROLES */
+#eventsPage { position:relative; }
 #eventsPage .workspace-actions {
-  margin:0 0 6px;
+  position:absolute;
+  top:clamp(14px,3vw,25px);
+  right:clamp(14px,3vw,25px);
+  margin:0;
+  z-index:1;
 }
 #eventsPage .workspace-actions button {
   min-width:0;
-  min-height:35px;
-  padding:5px 11px;
-  font-size:.87rem;
+  min-height:48px;
+  padding:10px 14px;
+  white-space:nowrap;
+}
+#eventsPage #backToInvestigations { font-size:0; }
+#eventsPage #backToInvestigations::after {
+  content:"← Back";
+  font-size:1rem;
 }
 #eventsPage .workspace-heading {
-  padding:0 0 7px;
-  margin:0 0 7px;
-}
-#eventsPage .workspace-heading p {
-  margin:2px 0;
-  line-height:1.25;
+  padding-top:0;
+  padding-bottom:12px;
+  margin-bottom:12px;
 }
 #eventsPage #workspaceTitle {
-  font-size:clamp(1rem,3vw,1.2rem);
+  display:block;
+  margin:0 0 12px;
+  padding-right:clamp(95px,25%,150px);
+  font-size:clamp(1.12rem,3.5vw,1.5rem);
+  line-height:1.35;
 }
 #eventsPage #workspaceDetails {
-  font-size:.85rem;
+  display:inline;
+  margin:0 8px 0 0;
+  line-height:1.8;
 }
-#eventsPage .status-pill {
-  padding:2px 8px;
-  margin-top:3px;
-  font-size:.75rem;
-}
-#eventsPage .event-group {
-  margin:8px 0 12px;
-}
-#eventsPage .event-group h3 {
-  margin:5px 0 7px;
-  padding-bottom:4px;
-  font-size:1.04rem;
-}
-#eventsPage .grid {
-  gap:7px;
-}
+#eventsPage #workspaceStatus { vertical-align:middle; }
+#eventsPage .event-group { margin:16px 0 22px; }
+#eventsPage .event-group h3 { margin:0 0 12px; }
+#eventsPage .grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
 #eventsPage .grid button {
-  min-height:52px;
-  padding:8px 6px;
+  min-height:66px;
+  padding:10px 7px;
 }
 @media (max-width:440px) {
-  #eventsPage {padding:8px;}
-  #eventsPage .grid button {min-height:50px;}
+  #eventsPage .workspace-actions {top:13px;right:13px;}
+  #eventsPage .workspace-actions button {min-height:44px;padding:8px 11px;}
+  #eventsPage #workspaceTitle {padding-right:98px;}
 }
 
 </style>
@@ -2530,167 +2501,5 @@ window.addEventListener("load", init, {once:true});
 </script>
 <script src="investigation-details.js"></script>
 <script src="password-controls.js"></script>
-
-<style>
-/* IEGH SHARED INVESTIGATION WORKSPACE */
-/* Same layout for admins and investigators */
-
-body:has(#eventsPage:not(.hidden)) header {
-  padding: 8px 4%;
-}
-
-body:has(#eventsPage:not(.hidden)) main {
-  padding: 9px;
-}
-
-body:has(#eventsPage:not(.hidden)) #navigation {
-  padding: 10px;
-  margin-bottom: 12px;
-}
-
-body:has(#eventsPage:not(.hidden)) .tabs button {
-  min-height: 48px;
-  padding: 9px 6px;
-}
-
-#eventsPage {
-  padding: clamp(13px, 3vw, 22px);
-}
-
-#eventsPage .workspace-actions {
-  display: none;
-}
-
-#eventsPage .workspace-heading {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  column-gap: 12px;
-  row-gap: 8px;
-  padding-bottom: 12px;
-  margin-bottom: 12px;
-}
-
-#eventsPage #workspaceTitle {
-  grid-column: 1;
-  margin: 0;
-  font-size: clamp(1.1rem, 3.6vw, 1.45rem);
-  line-height: 1.25;
-  overflow-wrap: anywhere;
-}
-
-#eventsPage #backToInvestigations {
-  grid-column: 2;
-  grid-row: 1;
-  min-width: 0;
-  min-height: 44px;
-  padding: 9px 12px;
-  white-space: nowrap;
-  font-size: clamp(.82rem, 2.8vw, 1rem);
-}
-
-#eventsPage .workspace-meta {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-#eventsPage #workspaceDetails {
-  margin: 0;
-  line-height: 1.35;
-}
-
-#eventsPage #workspaceStatus {
-  margin: 0;
-}
-
-#eventsPage .event-group {
-  margin: 13px 0 18px;
-}
-
-#eventsPage .event-group h3 {
-  margin: 0 0 9px;
-  padding-bottom: 8px;
-}
-
-#eventsPage .grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
-}
-
-#eventsPage .grid button {
-  width: 100%;
-  min-height: 66px;
-  padding: 10px 7px;
-  font-size: clamp(.82rem, 2.6vw, 1rem);
-}
-
-@media (max-width: 440px) {
-  #eventsPage {
-    padding: 12px;
-  }
-
-  #eventsPage #backToInvestigations {
-    padding: 8px 10px;
-  }
-}
-</style>
-
-<script>
-(function () {
-  "use strict";
-
-  function unifyInvestigationLayout() {
-    const heading = document.querySelector(
-      "#eventsPage .workspace-heading"
-    );
-
-    const back = document.getElementById(
-      "backToInvestigations"
-    );
-
-    const title = document.getElementById(
-      "workspaceTitle"
-    );
-
-    const details = document.getElementById(
-      "workspaceDetails"
-    );
-
-    const status = document.getElementById(
-      "workspaceStatus"
-    );
-
-    if (!heading || !back || !title ||
-        !details || !status) return;
-
-    back.textContent = "← Back";
-
-    title.after(back);
-
-    let meta = heading.querySelector(".workspace-meta");
-
-    if (!meta) {
-      meta = document.createElement("div");
-      meta.className = "workspace-meta";
-      heading.append(meta);
-    }
-
-    meta.append(details, status);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      unifyInvestigationLayout,
-      { once: true }
-    );
-  } else {
-    unifyInvestigationLayout();
-  }
-})();
-</script>
 </body>
 </html>
