@@ -2530,5 +2530,167 @@ window.addEventListener("load", init, {once:true});
 </script>
 <script src="investigation-details.js"></script>
 <script src="password-controls.js"></script>
+
+<style>
+/* IEGH SHARED INVESTIGATION WORKSPACE */
+/* Same layout for admins and investigators */
+
+body:has(#eventsPage:not(.hidden)) header {
+  padding: 8px 4%;
+}
+
+body:has(#eventsPage:not(.hidden)) main {
+  padding: 9px;
+}
+
+body:has(#eventsPage:not(.hidden)) #navigation {
+  padding: 10px;
+  margin-bottom: 12px;
+}
+
+body:has(#eventsPage:not(.hidden)) .tabs button {
+  min-height: 48px;
+  padding: 9px 6px;
+}
+
+#eventsPage {
+  padding: clamp(13px, 3vw, 22px);
+}
+
+#eventsPage .workspace-actions {
+  display: none;
+}
+
+#eventsPage .workspace-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 8px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+
+#eventsPage #workspaceTitle {
+  grid-column: 1;
+  margin: 0;
+  font-size: clamp(1.1rem, 3.6vw, 1.45rem);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+#eventsPage #backToInvestigations {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 9px 12px;
+  white-space: nowrap;
+  font-size: clamp(.82rem, 2.8vw, 1rem);
+}
+
+#eventsPage .workspace-meta {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#eventsPage #workspaceDetails {
+  margin: 0;
+  line-height: 1.35;
+}
+
+#eventsPage #workspaceStatus {
+  margin: 0;
+}
+
+#eventsPage .event-group {
+  margin: 13px 0 18px;
+}
+
+#eventsPage .event-group h3 {
+  margin: 0 0 9px;
+  padding-bottom: 8px;
+}
+
+#eventsPage .grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+#eventsPage .grid button {
+  width: 100%;
+  min-height: 66px;
+  padding: 10px 7px;
+  font-size: clamp(.82rem, 2.6vw, 1rem);
+}
+
+@media (max-width: 440px) {
+  #eventsPage {
+    padding: 12px;
+  }
+
+  #eventsPage #backToInvestigations {
+    padding: 8px 10px;
+  }
+}
+</style>
+
+<script>
+(function () {
+  "use strict";
+
+  function unifyInvestigationLayout() {
+    const heading = document.querySelector(
+      "#eventsPage .workspace-heading"
+    );
+
+    const back = document.getElementById(
+      "backToInvestigations"
+    );
+
+    const title = document.getElementById(
+      "workspaceTitle"
+    );
+
+    const details = document.getElementById(
+      "workspaceDetails"
+    );
+
+    const status = document.getElementById(
+      "workspaceStatus"
+    );
+
+    if (!heading || !back || !title ||
+        !details || !status) return;
+
+    back.textContent = "← Back";
+
+    title.after(back);
+
+    let meta = heading.querySelector(".workspace-meta");
+
+    if (!meta) {
+      meta = document.createElement("div");
+      meta.className = "workspace-meta";
+      heading.append(meta);
+    }
+
+    meta.append(details, status);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      unifyInvestigationLayout,
+      { once: true }
+    );
+  } else {
+    unifyInvestigationLayout();
+  }
+})();
+</script>
 </body>
 </html>
