@@ -1541,8 +1541,17 @@ function renderInvestigatorOptions(){
 }
 function canLogCurrentInvestigation(){
   const inv=currentInvestigation();
-  return !!user && !!inv && inv.status==="active" &&
-    (role==="admin" || loggingAuthorized);
+
+  if(!user || !inv || inv.status!=="active"){
+    return false;
+  }
+
+  if(role==="admin"){
+    return true;
+  }
+
+  return Array.isArray(assignments[inv.id]) &&
+    assignments[inv.id].includes(user.id);
 }
 function canLogEvents(invId) {
   if (!user) return false;
@@ -1628,6 +1637,19 @@ function closeWorkspace(){
 }
 function captureEvent(type){
   const inv=currentInvestigation();
+  if(
+  !inv ||
+  (
+    role!=="admin" &&
+    !(
+      Array.isArray(assignments[inv.id]) &&
+      assignments[inv.id].includes(user?.id)
+    )
+  )
+){
+  msg("Read Mode: You are not assigned to this investigation.","warn");
+  return;
+}
   if(!inv||inv.status!=="active"){
     msg("Investigation is not active.","warn");return;
   }
@@ -1676,6 +1698,19 @@ async function saveEvent(){
     msg("Only assigned investigators can log events.","bad");return;
   }
   const inv=currentInvestigation();
+  if(
+  !inv ||
+  (
+    role!=="admin" &&
+    !(
+      Array.isArray(assignments[inv.id]) &&
+      assignments[inv.id].includes(user?.id)
+    )
+  )
+){
+  msg("Read Mode: Event submission is restricted.","warn");
+  return;
+}
   if(!inv||inv.status!=="active"||
      inv.id!==pending.investigation_id){
     msg("Investigation is not active.","bad");return;
