@@ -1,4 +1,3 @@
-
 "use strict";
 
 /*
@@ -53,7 +52,9 @@
     ) {
       return "Password must be 8 to 128 characters.";
     }
-
+if (!/[A-Za-z]/.test(password)) {
+  return "Password must include at least one letter.";
+}
     if (!/[0-9]/.test(password)) {
       return "Password must include at least one number.";
     }
