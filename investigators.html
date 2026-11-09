@@ -501,16 +501,20 @@ async function createInvestigator(event) {
     return;
   }
 
-  if (
-    password.length < 12 ||
-    password.length > 128
-  ) {
-    message(
-      "Password must contain 12 to 128 characters.",
-      "bad"
-    );
-    return;
-  }
+  if (password.length < 8 || password.length > 128) {
+  message("Password must be 8 to 128 characters.", "bad");
+  return;
+}
+
+if (!/[A-Za-z]/.test(password)) {
+  message("Password must include at least one letter.", "bad");
+  return;
+}
+
+if (!/[0-9]/.test(password)) {
+  message("Password must include at least one number.", "bad");
+  return;
+}
 
   if (!confirm(
     "Create an investigator account for " +
