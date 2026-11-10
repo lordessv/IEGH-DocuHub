@@ -542,8 +542,14 @@ form {min-width:0}
             tracked separately.
           </p>
         </div>
-        <label>Room / Area (optional)</label>
-        <select id="eventArea"></select>
+      
+<label>Room / Area (optional)</label>
+<select id="eventArea"></select>
+
+<label class="checkrow">
+  <input type="checkbox" id="rememberEventArea">
+  Remember Current Area
+</label>
         <label>Custom Area (optional)</label>
         <input id="eventCustomArea"
           placeholder="Enter an area">
@@ -1562,6 +1568,69 @@ function renderEventButtons(){
     box.append(section);
   });
 }
+  
+const REMEMBER_AREA_KEY="iegh_remember_area_v1";
+let rememberedEventArea="";
+
+function rememberAreaEnabled(){
+  return $("rememberEventArea")?.checked===true;
+}
+
+function resetRememberedArea(){
+  rememberedEventArea="";
+  if($("eventArea"))$("eventArea").value="";
+  if($("eventCustomArea"))$("eventCustomArea").value="";
+}
+
+function initializeRememberArea(){
+  const checkbox=$("rememberEventArea");
+  if(!checkbox)return;
+
+  checkbox.checked=
+    localStorage.getItem(REMEMBER_AREA_KEY)==="true";
+
+  checkbox.addEventListener("change",()=>{
+    try{
+      localStorage.setItem(
+        REMEMBER_AREA_KEY,
+        String(checkbox.checked)
+      );
+    }catch(e){
+      console.warn("Area preference could not be saved",e);
+    }
+
+    if(!checkbox.checked){
+      rememberedEventArea="";
+    }
+  });
+}
+
+function restoreRememberedArea(){
+  if(!rememberAreaEnabled())return;
+
+  const select=$("eventArea");
+  const custom=$("eventCustomArea");
+  if(!select||!custom)return;
+
+  const matchingOption=Array.from(select.options)
+    .some(o=>o.value===rememberedEventArea);
+
+  if(matchingOption){
+    select.value=rememberedEventArea;
+  }else if(rememberedEventArea){
+    custom.value=rememberedEventArea;
+  }
+}
+
+function saveRememberedArea(){
+  rememberedEventArea=rememberAreaEnabled()
+    ?($("eventCustomArea").value.trim()||
+       $("eventArea").value)
+    :"";
+}
+
+document.addEventListener("DOMContentLoaded",
+  initializeRememberArea);
 function eventAreaOptions(){
   const select=$("eventArea");
   select.replaceChildren();
@@ -1734,8 +1803,9 @@ function captureEvent(type){
     type+" | "+timeLabel(capturedTime);
   $("eventNotes").value="";
   $("eventCustomArea").value="";
-  eventAreaOptions();
-  show("adminAttribution",role==="admin");
+eventAreaOptions();
+restoreRememberedArea();
+show("adminAttribution",role==="admin");
   if(role==="admin")renderInvestigatorOptions();
   show("eventEntry",true);
   document.querySelectorAll("#eventButtons button")
@@ -1799,8 +1869,9 @@ async function saveEvent(){
       "bad");
     return;
   }
-  cancelEvent();
-  msg("Event saved locally.","good");
+ saveRememberedArea();
+cancelEvent();
+msg("Event saved locally.","good");
   if(navigator.onLine)syncEvents();
 }
 function renderPending(){
