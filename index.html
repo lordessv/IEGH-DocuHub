@@ -463,6 +463,15 @@ form {min-width:0}
         Add buildings, sections, floors, and rooms
         as needed.
       </p>
+      <div id="simpleAreasEditor" class="hidden">
+  <label for="simpleAreaNames">Location Areas</label>
+  <p class="muted">
+    Enter one area per line. No floors or buildings required.
+  </p>
+  <textarea id="simpleAreaNames"
+    placeholder="Upper Level&#10;Lower Level&#10;Mausoleum"
+    rows="5"></textarea>
+</div>
       <div id="structuredAreas"></div>
       <div class="actions">
         <button type="button" id="addArea"
@@ -1106,6 +1115,54 @@ function renderStructuredAreas(){
     box.append(card);
   });
 }
+  const SIMPLE_AREA_TYPES = new Set([
+  "cemetery",
+  "outdoor"
+]);
+
+function usesSimpleAreas(){
+  return SIMPLE_AREA_TYPES.has($("locType").value);
+}
+
+function updateAreaEditor(){
+  const simple=usesSimpleAreas();
+
+  show("simpleAreasEditor",simple);
+  show("structuredAreas",!simple);
+  show("addArea",!simple);
+
+  if(simple){
+    const names=structuredAreas.flatMap(area=>{
+      if(area.kind==="outdoor" && !area.floors.length){
+        return area.name ? [area.name] : [];
+      }
+
+      const names=[];
+
+      if(area.name)names.push(area.name);
+
+      area.floors.forEach(floor=>{
+        if(floor.name)names.push(floor.name);
+        names.push(...floor.rooms);
+      });
+
+      return names;
+    });
+
+    $("simpleAreaNames").value=
+      [...new Set(names.filter(Boolean))].join("\n");
+  }
+}
+
+function saveSimpleAreas(){
+  structuredAreas=splitNames(
+    $("simpleAreaNames").value
+  ).map(name=>({
+    name,
+    kind:"outdoor",
+    floors:[]
+  }));
+}
 function addStructuredArea(){
   structuredAreas.push({
     name:"",kind:"building",
@@ -1226,8 +1283,9 @@ function openLocation(loc=null){
     $(id).value=loc?.[key]??
       (id==="locState"?"CA":"");
   });
-  structuredAreas=normalizedAreas(loc?.property_areas);
-  renderStructuredAreas();
+ structuredAreas=normalizedAreas(loc?.property_areas);
+renderStructuredAreas();
+updateAreaEditor();
   $("locationEditorTitle").textContent=
     loc?"Edit Location":"Add Location";
   show("locationEditor",true);
@@ -1240,6 +1298,9 @@ function openLocation(loc=null){
 async function saveLocation(e){
   e.preventDefault();
   if(role!=="admin")return;
+  if(usesSimpleAreas()){
+  saveSimpleAreas();
+}
   const data={
     name:$("locName").value.trim(),
     address:$("locAddress").value.trim(),
@@ -2445,7 +2506,7 @@ async function loginWithUsername(username,password){
 }
 
 /* EVENT HANDLERS */
-
+$("locType").addEventListener("change",updateAreaEditor);
 $("mainMenu").addEventListener("change",async e=>{
   const action=e.target.value;
   e.target.value="";
