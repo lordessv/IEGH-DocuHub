@@ -393,6 +393,13 @@ form {min-width:0}
     <p id="accountInfo"></p>
     <p id="connectionInfo" class="muted"></p>
   </div>
+  <div id="syncOverview" class="account-details" aria-live="polite"></div>
+  <div id="adminSyncDashboard" class="account-details hidden">
+    <h3>Admin Local Sync Dashboard</h3>
+    <p class="muted">Pending markers saved in this browser, including other accounts. Other devices cannot be inspected remotely.</p>
+    <div id="adminSyncEntries"></div>
+    <div class="actions"><button id="adminForceSync">Force Sync All Local Markers</button></div>
+  </div>
   <div class="actions">
     <button class="secondary" id="syncButton">
       Sync Pending Events
@@ -806,6 +813,55 @@ function queueRead(){
 function queueWrite(v){
   localStorage.setItem(QUEUE_KEY,JSON.stringify(v));
   renderPending();renderHistory();
+  renderSyncOverview();
+}
+function localOwner(entry){
+  return entry.recorded_by||entry.investigator_id;
+}
+function investigationLabel(id){
+  const inv=investigations.find(x=>x.id===id);
+  return inv?locationName(inv.location_id)+" | "+formatDate(inv.investigation_date):"Unknown investigation ("+id+")";
+}
+function renderSyncOverview(){
+  const queue=queueRead();
+  const own=queue.filter(x=>localOwner(x)===user?.id);
+  const other=queue.length-own.length;
+  const overview=$("syncOverview");
+  if(overview){
+    overview.textContent="Pending on this device: "+queue.length+
+      " total | "+own.length+" from your account | "+other+" from other accounts.";
+  }
+  const dashboard=$("adminSyncDashboard");
+  if(!dashboard)return;
+  show("adminSyncDashboard",role==="admin");
+  const box=$("adminSyncEntries");
+  box.replaceChildren();
+  if(role!=="admin")return;
+  if(!queue.length){
+    addText(box,"p","No locally pending markers.","good");
+    return;
+  }
+  const grouped=new Map();
+  queue.forEach(entry=>{
+    const key=entry.investigation_id+"|"+localOwner(entry);
+    if(!grouped.has(key))grouped.set(key,{
+      investigation_id:entry.investigation_id,
+      owner:localOwner(entry),entries:[]
+    });
+    grouped.get(key).entries.push(entry);
+  });
+  for(const group of grouped.values()){
+    const card=document.createElement("div");
+    card.className="item";
+    addText(card,"strong",investigationLabel(group.investigation_id));
+    addText(card,"p","Recorded by: "+nameById(group.owner)+
+      " | Pending: "+group.entries.length,"muted");
+    group.entries.forEach(entry=>{
+      addText(card,"p",entry.event_type+" | "+timeLabel(entry.event_time)+
+        " | Witness: "+nameById(entry.investigator_id),"compact");
+    });
+    box.append(card);
+  }
 }
 function locationName(id){
   return locations.find(x=>x.id===id)?.name||
@@ -1198,6 +1254,7 @@ async function loadData(){
   renderInvestigations();
   renderMembers();
   renderPending();
+  renderSyncOverview();
   msg("DocuHub ready.","good");
   return true;
 }
@@ -1894,21 +1951,22 @@ msg("Event saved locally.","good");
 function renderPending(){
   const box=$("pendingEvents");
   box.replaceChildren();
-  const list=queueRead().filter(x=>
-    (x.recorded_by||x.investigator_id)===user?.id&&
-    (!activeInvestigationId||
-     x.investigation_id===activeInvestigationId)
+  const all=queueRead().filter(x=>
+    !activeInvestigationId||x.investigation_id===activeInvestigationId
   );
-  addText(box,"p",
-    list.length+" marker(s) awaiting sync.","muted");
-  list.slice().reverse().slice(0,20).forEach(e=>{
+  const list=role==="admin"?all:all.filter(x=>localOwner(x)===user?.id);
+  addText(box,"p",list.length+" marker(s) awaiting sync on this device"+
+    (role==="admin"?" (all local accounts).":" (your account)."),"muted");
+  list.slice().reverse().slice(0,30).forEach(e=>{
     const card=document.createElement("div");
     card.className="item";
     addText(card,"strong",e.event_type);
     addText(card,"p",timeLabel(e.event_time),"muted");
+    addText(card,"p","Recorded by: "+nameById(localOwner(e))+" | Witness: "+nameById(e.investigator_id),"muted");
     if(e.area)addText(card,"p",e.area);
     box.append(card);
   });
+  renderSyncOverview();
 }
 async function loadEventHistory(invId){
   if(!invId||!db||!user)return;
@@ -1939,7 +1997,7 @@ function renderHistory(){
     ?historyEvents:[];
   const queued=queueRead().filter(x=>
     x.investigation_id===id&&
-    (x.recorded_by||x.investigator_id)===user?.id
+    (role==="admin"||localOwner(x)===user?.id)
   ).map(x=>({...x,_local:true}));
   const ids=new Set(queued.map(x=>x.id));
   const combined=[
@@ -1976,81 +2034,89 @@ function renderHistory(){
     box.append(card);
   });
 }
-async function syncEvents(){
-  if(syncing||!db||!user||!navigator.onLine)return;
+async function syncEvents(forceAll=false){
+  if(syncing||!db||!user)return;
+  if(!navigator.onLine){msg("Offline: pending markers are safe on this device.","warn");return;}
+  const includeOthers=forceAll&&role==="admin";
   syncing=true;
+  $("syncButton").disabled=true;
+  $("adminForceSync").disabled=true;
   try{
     const queue=queueRead();
-    if(!queue.length){
-      renderPending();return;
-    }
+    if(!queue.length){renderPending();msg("No local markers awaiting sync.","good");return;}
     const remaining=[];
-    let uploaded=0,firstError="";
+    let uploaded=0,skipped=0,firstError="";
     for(const entry of queue){
-      const owner=entry.recorded_by||
-        entry.investigator_id;
-      if(owner!==user.id){
-        remaining.push(entry);continue;
+      const owner=localOwner(entry);
+      if(owner!==user.id&&!includeOthers){remaining.push(entry);skipped++;continue;}
+      if(!entry.id||!entry.investigation_id||!entry.investigator_id||!owner){
+        remaining.push(entry);
+        firstError||="A marker has missing identity fields.";
+        continue;
       }
-      // Preserve unauthorized or unverified markers locally for review.
-      // Never silently delete them or repeatedly attempt a forbidden upload.
-      let authorized=false;
-      if(role==="admin"){
-        authorized=true;
-      }else{
+      // Ordinary investigators can only submit their own locally recorded markers.
+      if(role!=="admin"){
         const check=await db.from("investigation_members")
           .select("member_id")
           .eq("investigation_id",entry.investigation_id)
           .eq("member_id",user.id).limit(1);
-        if(check.error){
+        if(check.error||(check.data||[]).length===0){
           remaining.push(entry);
-          if(!firstError)firstError="Could not verify assignment.";
+          firstError||=check.error?.message||"An event is awaiting assignment review.";
           continue;
         }
-        authorized=(check.data||[]).length>0;
-      }
-      if(!authorized){
-        remaining.push(entry);
-        if(!firstError)firstError="An event is awaiting assignment review.";
-        continue;
       }
       const payload={
         id:entry.id,
         investigation_id:entry.investigation_id,
         investigator_id:entry.investigator_id,
+        recorded_by:owner,
+        synced_by:user.id,
         event_type:entry.event_type,
         event_time:entry.event_time,
         area:entry.area||"",
         notes:entry.notes||""
       };
-      const {error}=await db
-        .from("investigation_events").insert(payload);
-      if(error){
-        if(error.code==="23505"){
-          uploaded++;
-        }else{
-          remaining.push(entry);
-          if(!firstError)firstError=error.message;
+      const {error}=await db.from("investigation_events").insert(payload);
+      if(!error){uploaded++;continue;}
+      if(error.code==="23505"){
+        // Do not discard a marker on an unrelated uniqueness conflict.
+        const existing=await db.from("investigation_events")
+          .select("id,investigation_id,investigator_id,recorded_by,event_type,event_time,area,notes")
+          .eq("id",entry.id).maybeSingle();
+        const row=existing.data;
+        if(!existing.error&&row&&
+          row.investigation_id===payload.investigation_id&&
+          row.investigator_id===payload.investigator_id&&
+          row.recorded_by===payload.recorded_by&&
+          row.event_type===payload.event_type&&
+          new Date(row.event_time).getTime()===new Date(payload.event_time).getTime()&&
+          (row.area||"")===(payload.area||"")&&
+          (row.notes||"")===(payload.notes||"")){
+          uploaded++;continue;
         }
-      }else uploaded++;
+      }
+      remaining.push(entry);
+      firstError||=error.message;
     }
+    // Keep markers added during upload; remove only those confirmed synced.
     const currentQueue=queueRead();
     const processed=new Set(queue.map(x=>x.id));
-    const newEntries=currentQueue.filter(
-      x=>!processed.has(x.id)
-    );
+    const newEntries=currentQueue.filter(x=>!processed.has(x.id));
     queueWrite([...remaining,...newEntries]);
-    if(firstError){
-      msg("Some events remain pending: "+
-        firstError,"warn");
-    }else if(uploaded){
-      msg(uploaded+" event(s) synchronized.","good");
-    }
-    if(activeInvestigationId){
-      await loadEventHistory(activeInvestigationId);
-    }
+    const status=uploaded+" marker(s) synchronized. "+remaining.length+
+      " still pending on this device.";
+    if(firstError)msg(status+" First error: "+firstError,"warn");
+    else if(skipped)msg(status+" Use Admin Force Sync to upload other accounts' markers.","warn");
+    else msg(status,"good");
+    if(activeInvestigationId)await loadEventHistory(activeInvestigationId);
+  }catch(e){
+    msg("Sync interrupted. Local markers preserved: "+e.message,"bad");
   }finally{
     syncing=false;
+    $("syncButton").disabled=false;
+    $("adminForceSync").disabled=false;
+    renderSyncOverview();
   }
 }
 
@@ -2074,10 +2140,16 @@ async function changeInvestigationStatus(nextStatus){
     );
 
     if(local.length){
-      msg(
-        "Synchronize pending event markers before ending the investigation.",
-        "warn"
-      );
+      const byOwner=new Map();
+      local.forEach(x=>{
+        const owner=localOwner(x);
+        byOwner.set(owner,(byOwner.get(owner)||0)+1);
+      });
+      const details=[...byOwner].map(([owner,count])=>
+        nameById(owner)+": "+count).join("; ");
+      msg("Cannot end investigation: "+local.length+
+        " unsynchronized marker(s) on this device. "+details+
+        ". Open Account > Admin Local Sync Dashboard and use Force Sync All Local Markers.","warn");
       return;
     }
   }
@@ -2546,6 +2618,7 @@ async function signedIn(){
   $("adminMenuOption").hidden=role!=="admin";
   $("mainMenu").value="";
   await loadData();
+  renderSyncOverview();
   setPage("investigationsPage");
   if(navigator.onLine)await syncEvents();
 }
@@ -2651,7 +2724,9 @@ $("mainMenu").addEventListener("change",async e=>{
     await confirmSignOut();return;
   }
   if(action==="sync"){
-    await syncEvents();return;
+    setPage("accountPage");
+    renderSyncOverview();
+    return;
   }
   if(action==="admin"&&role!=="admin")return;
   cancelEvent();
@@ -2758,7 +2833,14 @@ $("backToInvestigations").addEventListener(
 );
 $("saveEvent").addEventListener("click",saveEvent);
 $("cancelEvent").addEventListener("click",cancelEvent);
-$("syncButton").addEventListener("click",syncEvents);
+$("syncButton").addEventListener("click",()=>syncEvents(false));
+$("adminForceSync").addEventListener("click",async()=>{
+  if(role!=="admin"||!user)return;
+  const count=queueRead().length;
+  if(!count){msg("No local markers awaiting sync.","good");return;}
+  if(!confirm("Force sync "+count+" locally pending marker(s) from all accounts on this device? Original recorder attribution will be preserved."))return;
+  await syncEvents(true);
+});
 $("endInvestigation").addEventListener(
   "click",()=>changeInvestigationStatus("completed")
 );
