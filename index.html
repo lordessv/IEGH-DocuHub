@@ -1433,6 +1433,15 @@ async function saveInvestigation(e){
         statusLabel(data.status)+"?"
       ))return;
     }
+    if(existing?.status==="completed"&&data.status!=="completed"){
+      const reason=prompt("Reason for reopening this investigation:");
+      if(reason===null)return;
+      if(!reason.trim()){
+        msg("A reopening reason is required.","warn");
+        return;
+      }
+      data.reopening_reason=reason.trim();
+    }
   }
   const r=editingInvestigation
     ?await db.from("investigations").update(data)
@@ -1586,8 +1595,13 @@ function initializeRememberArea(){
   const checkbox=$("rememberEventArea");
   if(!checkbox)return;
 
-  checkbox.checked=
-    localStorage.getItem(REMEMBER_AREA_KEY)==="true";
+  try{
+    checkbox.checked=
+      localStorage.getItem(REMEMBER_AREA_KEY)==="true";
+  }catch(e){
+    checkbox.checked=false;
+    console.warn("Area preference unavailable",e);
+  }
 
   checkbox.addEventListener("change",()=>{
     try{
@@ -1726,6 +1740,9 @@ async function openWorkspace(inv){
     return;
   }
   cancelEvent();
+  if(activeInvestigationId!==inv.id){
+    resetRememberedArea();
+  }
   loggingAuthorized=false;
   activeInvestigationId=inv.id;
   historyEvents=[];
