@@ -401,6 +401,7 @@ form {min-width:0}
     <div class="actions"><button id="adminForceSync">Force Sync All Local Markers</button></div>
   </div>
   <div class="actions">
+    <button class="secondary" id="backupQueue">Backup Pending Markers (.json)</button>
     <button class="secondary" id="syncButton">
       Sync Pending Events
     </button>
@@ -536,6 +537,8 @@ form {min-width:0}
   <div id="loggingRestricted" class="hidden">
     <p class="muted">Event logging is available to assigned investigators only.</p>
   </div>
+  <div id="loggerSyncStatus" class="account-details" aria-live="polite"></div>
+  <div id="investigationSummary" class="report-section"></div>
   <div id="activeWorkspace">
     <div id="eventButtons"></div>
     <div id="eventEntry" class="hidden">
@@ -598,7 +601,18 @@ form {min-width:0}
   </div>
   <h3>Investigation Event History</h3>
   <div id="eventHistory"></div>
-  <h3>Pending Local Markers</h3>
+     <div id="eventCorrectionPanel" class="report-section hidden">
+     <h3>Correct Event</h3>
+     <p id="correctionOriginal" class="muted"></p>
+     <label>Event Type</label><select id="correctionType"></select>
+     <label>Corrected Date and Time</label><input type="datetime-local" id="correctionTime" step="1">
+     <label>Room / Area</label><input id="correctionArea">
+     <label>Description</label><textarea id="correctionNotes"></textarea>
+     <label>Reason for Correction (required)</label><textarea id="correctionReason" required></textarea>
+     <div class="actions"><button id="submitCorrection">Save Correction</button><button id="cancelCorrection" class="secondary">Cancel</button></div>
+     <div id="correctionAudit" class="muted"></div>
+   </div>
+   <h3>Pending Local Markers</h3>
   <div id="pendingEvents"></div>
   <div id="closeControls" class="hidden">
     <div class="report-section">
@@ -750,6 +764,8 @@ let syncing=false,workspaceRequest=0,reportBusy=false;
 let selectedLocationLetter=null;
 let loginBusy=false;
 let loggingAuthorized=false;
+let editingEventId=null, auditCache={};
+let syncStatusText="Ready";
 
 function msg(text,kind="muted"){
   $("message").textContent=text;
@@ -811,9 +827,13 @@ function queueRead(){
   }catch{return []}
 }
 function queueWrite(v){
-  localStorage.setItem(QUEUE_KEY,JSON.stringify(v));
+  // Verify durable write before treating a marker as saved.
+  const serialized=JSON.stringify(v);
+  localStorage.setItem(QUEUE_KEY,serialized);
+  if(localStorage.getItem(QUEUE_KEY)!==serialized)throw new Error("Queue storage verification failed");
   renderPending();renderHistory();
   renderSyncOverview();
+  renderLoggerSyncStatus();
 }
 function localOwner(entry){
   return entry.recorded_by||entry.investigator_id;
@@ -863,6 +883,100 @@ function renderSyncOverview(){
     box.append(card);
   }
 }
+function renderLoggerSyncStatus(){
+  const el=$("loggerSyncStatus");
+  if(!el)return;
+  const all=queueRead(), inv=activeInvestigationId;
+  const count=all.filter(x=>x.investigation_id===inv && (role==="admin"||localOwner(x)===user?.id)).length;
+  const state=navigator.onLine?"Online":"Offline";
+  el.textContent="Connection: "+state+" | "+count+" pending marker(s) for this investigation on this device | "+(syncing?"Syncing...":syncStatusText);
+  el.className="account-details "+(navigator.onLine?"good":"warn");
+}
+function eventEffectiveTime(e){return e.corrected_event_time||e.event_time;}
+function formatLocalDateTime(iso){
+  const d=new Date(iso);
+  if(Number.isNaN(d.getTime()))return "";
+  const pad=n=>String(n).padStart(2,"0");
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds());
+}
+function renderInvestigationSummary(){
+  const box=$("investigationSummary");
+  if(!box)return;
+  box.replaceChildren();
+  addText(box,"h3","Investigation Activity Summary");
+  if(historyInvestigation!==activeInvestigationId){addText(box,"p","Loading synchronized events...","muted");return;}
+  const events=historyEvents;
+  addText(box,"p",events.length+" synchronized event(s)"+(events.length===200?" shown (first 200 only)":""),"marker");
+  const sections=[["Activity Type",e=>e.event_type||"Unspecified"],["Area",e=>e.area||"Unspecified"],["Investigator",e=>nameById(e.investigator_id)]];
+  for(const [title,keyFn] of sections){
+    const counts=new Map();
+    for(const event of events){const key=keyFn(event);counts.set(key,(counts.get(key)||0)+1);}
+    addText(box,"h4",title);
+    if(!counts.size)addText(box,"p","No synchronized activity yet.","muted");
+    [...counts].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).forEach(([name,count])=>addText(box,"p",name+": "+count,"compact"));
+  }
+}
+function canCorrectEvent(e){
+  const inv=currentInvestigation();
+  return !!(user&&e&&!e._local&&inv?.status==="active"&&(role==="admin"||e.recorded_by===user.id));
+}
+async function loadCorrectionAudit(eventId){
+  const box=$("correctionAudit");box.replaceChildren();
+  const {data,error}=await db.from("investigation_event_audit")
+    .select("changed_at,changed_by,reason,old_values,new_values")
+    .eq("event_id",eventId).order("changed_at",{ascending:false}).limit(30);
+  if(error){addText(box,"p","Audit history unavailable: "+error.message,"warn");return;}
+  addText(box,"h4","Correction History");
+  if(!(data||[]).length)addText(box,"p","No previous corrections.","muted");
+  (data||[]).forEach(a=>{
+    const card=document.createElement("div");card.className="item";
+    addText(card,"strong",timeLabel(a.changed_at)+" | "+nameById(a.changed_by));
+    addText(card,"p","Reason: "+a.reason);
+    addText(card,"p","Before: "+JSON.stringify(a.old_values),"muted");
+    addText(card,"p","After: "+JSON.stringify(a.new_values),"muted");
+    box.append(card);
+  });
+}
+function openEventCorrection(e){
+  if(!canCorrectEvent(e))return;
+  editingEventId=e.id;
+  const select=$("correctionType");select.replaceChildren();
+  const types=[...new Set([...Object.values(EVENT_GROUPS).flat(),e.event_type])];
+  types.forEach(type=>option(select,type,type));select.value=e.event_type;
+  $("correctionTime").value=formatLocalDateTime(eventEffectiveTime(e));
+  $("correctionArea").value=e.area||"";
+  $("correctionNotes").value=e.notes||"";
+  $("correctionReason").value="";
+  $("correctionOriginal").textContent="Original timestamp (never changed): "+timeLabel(e.event_time);
+  show("eventCorrectionPanel",true);
+  loadCorrectionAudit(e.id);
+  $("eventCorrectionPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function closeEventCorrection(){editingEventId=null;show("eventCorrectionPanel",false);}
+async function submitEventCorrection(){
+  if(!editingEventId||!user)return;
+  const event=historyEvents.find(x=>x.id===editingEventId);
+  if(!canCorrectEvent(event)){msg("Event is not editable.","warn");return;}
+  const reason=$("correctionReason").value.trim();
+  const local=$("correctionTime").value;
+  const corrected=new Date(local);
+  if(!reason||!local||Number.isNaN(corrected.getTime())){msg("Valid corrected time and a reason are required.","warn");return;}
+  const button=$("submitCorrection");button.disabled=true;
+  try{
+    const {data,error}=await db.rpc("docuhub_correct_event",{
+      p_event_id:editingEventId,p_event_type:$("correctionType").value,
+      p_corrected_event_time:corrected.toISOString(),
+      p_area:$("correctionArea").value.trim(),
+      p_notes:$("correctionNotes").value.trim(),p_reason:reason
+    });
+    if(error)throw error;
+    closeEventCorrection();
+    await loadEventHistory(event.investigation_id);
+    msg("Correction saved. Original event and audit history preserved.","good");
+  }catch(e){msg("Correction failed: "+e.message,"bad");}
+  finally{button.disabled=false;}
+}
+
 function locationName(id){
   return locations.find(x=>x.id===id)?.name||
     "Unknown location";
@@ -1255,6 +1369,7 @@ async function loadData(){
   renderMembers();
   renderPending();
   renderSyncOverview();
+  renderLoggerSyncStatus();
   msg("DocuHub ready.","good");
   return true;
 }
@@ -1483,6 +1598,11 @@ async function saveInvestigation(e){
     const existing=investigations.find(
       x=>x.id===editingInvestigation
     );
+    if(existing?.status==="completed"&&data.status==="completed" &&
+       (existing.location_id!==data.location_id||existing.investigation_date!==data.investigation_date||
+        String(existing.start_time||"").slice(0,5)!==data.start_time||String(existing.notes||"")!==data.notes)){
+      msg("Completed investigations are locked. Reactivate before editing.","warn");return;
+    }
     if(existing?.status!==data.status){
       if(!confirm(
         "Change investigation status from "+
@@ -1524,6 +1644,7 @@ async function loadAssignments(invId){
 }
 async function openAssignments(inv){
   if(role!=="admin")return;
+  if(inv.status==="completed"){msg("Completed investigations are locked. Reactivate before changing assignments.","warn");return;}
   assigningInvestigation=inv.id;
   $("assignmentTitle").textContent=
     locationName(inv.location_id)+" | "+
@@ -1797,6 +1918,7 @@ async function openWorkspace(inv){
     return;
   }
   cancelEvent();
+  closeEventCorrection();
   if(activeInvestigationId!==inv.id){
     resetRememberedArea();
   }
@@ -1814,6 +1936,7 @@ async function openWorkspace(inv){
   eventAreaOptions();
   renderHistory();
   renderPending();
+  renderLoggerSyncStatus();
   window.scrollTo({top:0,behavior:"smooth"});
   const requestId=++workspaceRequest;
   try{
@@ -1834,8 +1957,10 @@ function closeWorkspace(){
   cancelEvent();
   activeInvestigationId=null;
   loggingAuthorized=false;
+  closeEventCorrection();
   historyEvents=[];
   historyInvestigation=null;
+  closeEventCorrection();
   ++workspaceRequest;
   setPage("investigationsPage");
 }
@@ -1983,10 +2108,12 @@ async function loadEventHistory(invId){
   historyEvents=data||[];
   historyInvestigation=invId;
   renderHistory();
+  renderInvestigationSummary();
 }
 function renderHistory(){
   const box=$("eventHistory");
   box.replaceChildren();
+  renderInvestigationSummary();
   const id=activeInvestigationId;
   if(!id){
     addText(box,"p",
@@ -2003,7 +2130,7 @@ function renderHistory(){
   const combined=[
     ...queued,...synced.filter(x=>!ids.has(x.id))
   ].sort((a,b)=>
-    new Date(b.event_time)-new Date(a.event_time)
+    new Date(eventEffectiveTime(b))-new Date(eventEffectiveTime(a))
   );
   if(!combined.length){
     addText(box,"p","No events recorded.","muted");
@@ -2016,7 +2143,8 @@ function renderHistory(){
     const card=document.createElement("div");
     card.className="item";
     addText(card,"strong",e.event_type);
-    addText(card,"p",timeLabel(e.event_time),"marker");
+    addText(card,"p",timeLabel(eventEffectiveTime(e)),"marker");
+    if(e.corrected_event_time)addText(card,"p","Original: "+timeLabel(e.event_time)+" (corrected)","muted");
     addText(card,"p",
       "Investigator: "+nameById(e.investigator_id),
       "muted");
@@ -2031,6 +2159,7 @@ function renderHistory(){
       e._local?"Pending synchronization":
         "Synchronized",
       "event-status "+(e._local?"warn":"good"));
+    if(canCorrectEvent(e))addButton(card,"Correct Event / View Audit",()=>openEventCorrection(e));
     box.append(card);
   });
 }
@@ -2038,7 +2167,7 @@ async function syncEvents(forceAll=false){
   if(syncing||!db||!user)return;
   if(!navigator.onLine){msg("Offline: pending markers are safe on this device.","warn");return;}
   const includeOthers=forceAll&&role==="admin";
-  syncing=true;
+  syncing=true;syncStatusText="Syncing";renderLoggerSyncStatus();
   $("syncButton").disabled=true;
   $("adminForceSync").disabled=true;
   try{
@@ -2106,17 +2235,20 @@ async function syncEvents(forceAll=false){
     queueWrite([...remaining,...newEntries]);
     const status=uploaded+" marker(s) synchronized. "+remaining.length+
       " still pending on this device.";
+    syncStatusText=firstError?"Sync needs attention":(remaining.length?"Some markers pending":"All local markers synced");
     if(firstError)msg(status+" First error: "+firstError,"warn");
     else if(skipped)msg(status+" Use Admin Force Sync to upload other accounts' markers.","warn");
     else msg(status,"good");
     if(activeInvestigationId)await loadEventHistory(activeInvestigationId);
   }catch(e){
+    syncStatusText="Sync interrupted";
     msg("Sync interrupted. Local markers preserved: "+e.message,"bad");
   }finally{
     syncing=false;
     $("syncButton").disabled=false;
     $("adminForceSync").disabled=false;
     renderSyncOverview();
+    renderLoggerSyncStatus();
   }
 }
 
@@ -2251,8 +2383,9 @@ async function fetchAllEvents(invId){
       );
     }
   }
-  return all;
+  return all.sort((a,b)=>new Date(eventEffectiveTime(a))-new Date(eventEffectiveTime(b)));
 }
+
 async function fetchReportData(){
   const inv=currentInvestigation();
   if(!inv||inv.status!=="completed"){
@@ -2301,15 +2434,17 @@ async function fetchReportData(){
 function reportRows(data){
   return data.events.map((e,index)=>({
     "No.":index+1,
-    "Date":new Date(e.event_time)
+    "Date":new Date(eventEffectiveTime(e))
       .toLocaleDateString("en-US",{
         month:"short",day:"numeric",year:"numeric"
       }),
-    "Time":new Date(e.event_time)
+    "Time":new Date(eventEffectiveTime(e))
       .toLocaleTimeString("en-US",{
         hour:"numeric",minute:"2-digit",
         second:"2-digit",hour12:true
       }),
+    "Original Timestamp":timeLabel(e.event_time),
+    "Corrected Timestamp":e.corrected_event_time?timeLabel(e.corrected_event_time):"",
     "Event Type":e.event_type||"",
     "Investigator":nameById(e.investigator_id),
     "Recorded By":nameById(
@@ -2359,14 +2494,14 @@ async function generateExcel(data){
   const events=XLSX.utils.json_to_sheet(
     reportRows(data),{
       header:[
-        "No.","Date","Time","Event Type",
+        "No.","Date","Time","Original Timestamp","Corrected Timestamp","Event Type",
         "Investigator","Recorded By",
         "Room / Area","Description","Event ID"
       ]
     }
   );
   events["!cols"]=[
-    {wch:7},{wch:18},{wch:16},
+    {wch:7},{wch:18},{wch:16},{wch:24},{wch:24},
     {wch:26},{wch:22},{wch:22},
     {wch:34},{wch:75},{wch:40}
   ];
@@ -2509,7 +2644,8 @@ async function generatePDF(data){
     titleLines.forEach(line=>{
       ensure(16);doc.text(line,left,y);y+=15;
     });
-    paragraph(timeLabel(e.event_time),10,3);
+    paragraph(timeLabel(eventEffectiveTime(e)),10,3);
+    if(e.corrected_event_time)paragraph("Original timestamp: "+timeLabel(e.event_time),9,3);
     paragraph("Investigator: "+
       nameById(e.investigator_id),10,3);
     const recorder=e.recorded_by||e.investigator_id;
@@ -2833,7 +2969,18 @@ $("backToInvestigations").addEventListener(
 );
 $("saveEvent").addEventListener("click",saveEvent);
 $("cancelEvent").addEventListener("click",cancelEvent);
+$("submitCorrection").addEventListener("click",submitEventCorrection);
+$("cancelCorrection").addEventListener("click",closeEventCorrection);
 $("syncButton").addEventListener("click",()=>syncEvents(false));
+$("backupQueue").addEventListener("click",()=>{
+  const queue=queueRead().filter(x=>role==="admin"||localOwner(x)===user?.id);
+  if(!queue.length){msg("No locally pending markers to back up.","good");return;}
+  const blob=new Blob([JSON.stringify({exported_at:new Date().toISOString(),markers:queue},null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="IEGH_Pending_Markers_"+new Date().toISOString().slice(0,10)+".json";
+  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  msg("Pending marker backup downloaded. Keep it private.","good");
+});
 $("adminForceSync").addEventListener("click",async()=>{
   if(role!=="admin"||!user)return;
   const count=queueRead().length;
@@ -2856,11 +3003,13 @@ $("downloadPDF").addEventListener(
 window.addEventListener("online",()=>{
   if(!user)return;
   $("connectionInfo").textContent="Online";
+  renderLoggerSyncStatus();
   syncEvents();
 });
 window.addEventListener("offline",()=>{
   if(!user)return;
   $("connectionInfo").textContent="Offline";
+  renderLoggerSyncStatus();
 });
 
 async function init(){
