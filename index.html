@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#101827">
 <title>IEGH DocuHub</title>
+<!-- Bulk UI update: location editor, correction areas, pending markers, admin menu -->
 <style>
 :root {
   font-family:system-ui,-apple-system,sans-serif;
@@ -397,8 +398,8 @@ form {min-width:0}
   <div class="account-details">
     <p id="accountInfo"></p>
     <p id="connectionInfo" class="muted"></p>
-  </div>
-  <div id="syncOverview" class="account-details" aria-live="polite"></div>
+  </div>   <div id="syncOverview" class="account-details" aria-live="polite"></div>
+   <details class="account-details"><summary>Pending Local Markers</summary><div id="pendingEvents"></div></details>
   <div id="adminSyncDashboard" class="account-details hidden">
     <h3>Admin Local Sync Dashboard</h3>
     <p class="muted">Pending markers saved in this browser, including other accounts. Other devices cannot be inspected remotely.</p>
@@ -470,12 +471,8 @@ form {min-width:0}
         </option>
         <option value="mixed">Mixed Property</option>
         <option value="other">Other</option>
-      </select>
-      <h3>Buildings, Floors &amp; Areas</h3>
-      <p class="muted">
-        Add buildings, sections, floors, and rooms
-        as needed.
-      </p>
+      </select>      <h3>Floors, Rooms &amp; Areas</h3>
+       <p class="muted">Add floors and their rooms directly. Building names are optional for multi-building sites.</p>
       <div id="simpleAreasEditor" class="hidden">
   <label for="simpleAreaNames">Location Areas</label>
   <p class="muted">
@@ -488,8 +485,7 @@ form {min-width:0}
       <div id="structuredAreas"></div>
       <div class="actions">
         <button type="button" id="addArea"
-          class="secondary">
-          + Add Building / Section
+          class="secondary">           + Add Floor / Level
         </button>
       </div>
       <label>Property Description</label>
@@ -499,8 +495,7 @@ form {min-width:0}
       <label>Reported Paranormal Activity</label>
       <textarea id="locActivity"></textarea>
       <label>Additional Floors / Rooms Notes</label>
-      <textarea id="locRooms"></textarea>
-      <label>Exterior Areas / Notes</label>
+      <textarea id="locRooms"></textarea>      <label>Outdoor Areas (one per line)</label>
       <textarea id="locExterior"></textarea>
       <label>Access Notes</label>
       <textarea id="locAccess"></textarea>
@@ -613,15 +608,12 @@ form {min-width:0}
      <h3>Correct Event</h3>
      <p id="correctionOriginal" class="muted"></p>
      <label>Event Type</label><select id="correctionType"></select>
-     <label>Corrected Date and Time</label><input type="datetime-local" id="correctionTime" step="1">
-     <label>Room / Area</label><input id="correctionArea">
+     <label>Corrected Date and Time</label><input type="datetime-local" id="correctionTime" step="1">      <label>Room / Area</label><select id="correctionArea"></select>
      <label>Description</label><textarea id="correctionNotes"></textarea>
      <label>Reason for Correction (required)</label><textarea id="correctionReason" required></textarea>
      <div class="actions"><button id="submitCorrection">Save Correction</button><button id="cancelCorrection" class="secondary">Cancel</button></div>
      <div id="correctionAudit" class="muted"></div>
-   </div>
-   <h3>Pending Local Markers</h3>
-  <div id="pendingEvents"></div>
+   </div>   <!-- Pending markers are listed on Account, not duplicated in the logger. -->
   <div id="closeControls" class="hidden">
     <div class="report-section">
       <h3>Administrator Controls</h3>
@@ -945,6 +937,20 @@ async function loadCorrectionAudit(eventId){
     box.append(card);
   });
 }
+function populateCorrectionAreaOptions(selected=""){
+  const select=$("correctionArea");
+  select.replaceChildren();
+  option(select,"","No area selected");
+  const known=new Set([""]);
+  const add=value=>{
+    if(value&&!known.has(value)){known.add(value);option(select,value,value);}
+  };
+  getLocationAreaNames(currentLocation()).forEach(add);
+  // Keep historic free-text areas selectable without changing stored records.
+  add(selected);
+  select.value=selected;
+}
+
 function openEventCorrection(e){
   if(!canCorrectEvent(e))return;
   resetCorrectionPanel();
@@ -952,8 +958,7 @@ function openEventCorrection(e){
   const select=$("correctionType");select.replaceChildren();
   const types=[...new Set([...Object.values(EVENT_GROUPS).flat(),e.event_type])];
   types.forEach(type=>option(select,type,type));select.value=e.event_type;
-  $("correctionTime").value=formatLocalDateTime(eventEffectiveTime(e));
-  $("correctionArea").value=e.area||"";
+  $("correctionTime").value=formatLocalDateTime(eventEffectiveTime(e));   populateCorrectionAreaOptions(e.area||"");
   $("correctionNotes").value=e.notes||"";
   $("correctionReason").value="";
   $("correctionOriginal").textContent="Original timestamp (never changed): "+timeLabel(e.event_time);
@@ -1192,12 +1197,10 @@ function viewLocation(loc){
   sections.forEach((section,index)=>{
     const sectionBox=document.createElement("div");
     sectionBox.className="profile-subsection";
-    addText(sectionBox,"strong",
-      section.name||"Section "+(index+1));
-    addText(sectionBox,"p",
-      section.kind==="outdoor"?"Outdoor Section":
-      section.kind==="building"?"Building":
-      "Other Section","muted");
+    addText(sectionBox,"strong",       section.name||(section.floors.length?"Floors & Rooms":"Area "+(index+1)));
+    addText(sectionBox,"p",       section.kind==="outdoor"?"Outdoor Area":
+       section.kind==="building"?"Indoor Areas":
+       "Other Area","muted");
 
     section.floors.forEach(floor=>{
       const floorBox=document.createElement("div");
@@ -1246,85 +1249,75 @@ function renderStructuredAreas(){
   const box=$("structuredAreas");
   box.replaceChildren();
   if(!structuredAreas.length){
-    addText(box,"p",
-      "No buildings or sections added yet.","muted");
+    addText(box,"p","No floors added yet.","muted");
   }
   structuredAreas.forEach((area,index)=>{
     const card=document.createElement("div");
     card.className="area-row";
-    addText(card,"h4","Building / Section "+(index+1));
-    addText(card,"label","Building / Section Name");
-    const name=document.createElement("input");
-    name.value=area.name;
-    name.placeholder="Main House, North Grounds";
-    name.addEventListener("input",()=>{
-      area.name=name.value;
-    });
-    card.append(name);
-
-    addText(card,"label","Area Type");
-    const kind=document.createElement("select");
-    option(kind,"building","Building");
-    option(kind,"outdoor","Outdoor Section");
-    option(kind,"other","Other Section");
-    kind.value=area.kind;
-    kind.addEventListener("change",()=>{
-      area.kind=kind.value;
-    });
-    card.append(kind);
-
+    // Existing multi-building profiles keep their section names and types.
+    // New single-building profiles need no extra building-name field.
+    if(area.name || area.kind!=="building"){
+      addText(card,"label","Building / Section (optional)");
+      const name=document.createElement("input");
+      name.value=area.name;
+      name.placeholder="Main House, North Wing";
+      name.addEventListener("input",()=>{area.name=name.value;});
+      card.append(name);
+      const kind=document.createElement("select");
+      option(kind,"building","Building");
+      option(kind,"outdoor","Outdoor Section");
+      option(kind,"other","Other Section");
+      kind.value=area.kind;
+      kind.addEventListener("change",()=>{area.kind=kind.value;});
+      card.append(kind);
+    }
     area.floors.forEach((floor,fi)=>{
       const floorBox=document.createElement("div");
       floorBox.className="item";
       const fields=document.createElement("div");
       fields.className="area-fields";
-
       const a=document.createElement("div");
       addText(a,"label","Floor / Level");
       const floorInput=document.createElement("input");
       floorInput.value=floor.name;
       floorInput.placeholder="First Floor, Basement";
-      floorInput.addEventListener("input",()=>{
-        floor.name=floorInput.value;
-      });
+      floorInput.addEventListener("input",()=>{floor.name=floorInput.value;});
       a.append(floorInput);
-
       const b=document.createElement("div");
-      addText(b,"label","Rooms / Areas");
+      addText(b,"label","Rooms / Areas (one per line)");
       const rooms=document.createElement("textarea");
       rooms.value=floor.rooms.join("\n");
-      rooms.placeholder="One room per line";
-      rooms.addEventListener("input",()=>{
-        floor.rooms=splitNames(rooms.value);
-      });
+      rooms.placeholder="Living Room\nKitchen\nHallway";
+      rooms.addEventListener("input",()=>{floor.rooms=splitNames(rooms.value);});
       b.append(rooms);
       fields.append(a,b);
       floorBox.append(fields);
-
       const actions=document.createElement("div");
       actions.className="actions";
-      addButton(actions,"Remove Floor / Level",()=>{
+      addButton(actions,"Remove Floor",()=>{
         area.floors.splice(fi,1);
+        if(!area.floors.length && !area.name){structuredAreas.splice(index,1);}
         renderStructuredAreas();
       });
       floorBox.append(actions);
       card.append(floorBox);
     });
-
-    const actions=document.createElement("div");
-    actions.className="actions";
-    addButton(actions,"+ Add Floor / Level",()=>{
-      area.floors.push({name:"",rooms:[]});
-      renderStructuredAreas();
-    });
-    addButton(actions,"Remove Section",()=>{
-      structuredAreas.splice(index,1);
-      renderStructuredAreas();
-    });
-    card.append(actions);
+    // Legacy sections may have multiple floors; keep adding to those sections.
+    if(area.name){
+      const actions=document.createElement("div");
+      actions.className="actions";
+      addButton(actions,"+ Add Floor to Section",()=>{
+        area.floors.push({name:"",rooms:[]});renderStructuredAreas();
+      });
+      addButton(actions,"Remove Section",()=>{
+        structuredAreas.splice(index,1);renderStructuredAreas();
+      });
+      card.append(actions);
+    }
     box.append(card);
   });
 }
+
   const SIMPLE_AREA_TYPES = new Set([
   "cemetery",
   "outdoor"
@@ -1365,19 +1358,12 @@ function updateAreaEditor(){
 }
 
 function saveSimpleAreas(){
-  structuredAreas=splitNames(
-    $("simpleAreaNames").value
-  ).map(name=>({
-    name,
-    kind:"outdoor",
-    floors:[]
-  }));
+  const names=splitNames($("simpleAreaNames").value);
+  structuredAreas=names.map(name=>({name,kind:"outdoor",floors:[]}));
 }
 function addStructuredArea(){
-  structuredAreas.push({
-    name:"",kind:"building",
-    floors:[{name:"",rooms:[]}]
-  });
+  // New floors are direct entries, no mandatory building/section name.
+  structuredAreas.push({name:"",kind:"building",floors:[{name:"",rooms:[]}]});
   renderStructuredAreas();
 }
 
@@ -1451,9 +1437,8 @@ function renderLocations(){
     }
     const areas=normalizedAreas(loc.property_areas);
     if(areas.length){
-      addText(card,"p",
-        areas.map(x=>x.name||"Unnamed section")
-          .join(", "),"muted");
+      addText(card,"p",         areas.flatMap(x=>x.name?[x.name]:x.floors.map(f=>f.name).filter(Boolean))
+           .join(", "),"muted");
     }
 
     const actions=document.createElement("div");
@@ -1509,10 +1494,9 @@ updateAreaEditor();
 
 async function saveLocation(e){
   e.preventDefault();
-  if(role!=="admin")return;
-  if(usesSimpleAreas()){
-  saveSimpleAreas();
-}
+  if(role!=="admin")return;  if(usesSimpleAreas()){
+    saveSimpleAreas();
+  }
   const data={
     name:$("locName").value.trim(),
     address:$("locAddress").value.trim(),
@@ -1857,31 +1841,34 @@ function saveRememberedArea(){
 
 document.addEventListener("DOMContentLoaded",
   initializeRememberArea);
+function getLocationAreaNames(loc){
+  if(!loc)return [];
+  const seen=new Set(),result=[];
+  const add=text=>{
+    text=String(text||"").trim();
+    if(text&&!seen.has(text)){seen.add(text);result.push(text);}
+  };
+  normalizedAreas(loc.property_areas).forEach(section=>{
+    // A legacy named section remains part of its original hierarchy.
+    if(section.name)add(section.name);
+    section.floors.forEach(floor=>{
+      const prefix=[section.name,floor.name].filter(Boolean).join(" / ");
+      add(prefix);
+      floor.rooms.forEach(room=>add([prefix,room].filter(Boolean).join(" / ")));
+    });
+  });
+  // Exterior areas are available even for buildings with indoor floors.
+  splitNames(String(loc.exterior_areas||"")).forEach(add);
+  return result;
+}
+
 function eventAreaOptions(){
   const select=$("eventArea");
   select.replaceChildren();
   option(select,"","No area selected");
-  const loc=currentLocation();
-  if(!loc)return;
-  const seen=new Set();
-  const add=text=>{
-    if(!text||seen.has(text))return;
-    seen.add(text);option(select,text,text);
-  };
-  normalizedAreas(loc.property_areas)
-    .forEach(section=>{
-      const name=section.name||"Unnamed section";
-      add(name);
-      section.floors.forEach(floor=>{
-        const prefix=[name,floor.name]
-          .filter(Boolean).join(" / ");
-        add(prefix);
-        floor.rooms.forEach(room=>{
-          add([prefix,room].filter(Boolean).join(" / "));
-        });
-      });
-    });
+  getLocationAreaNames(currentLocation()).forEach(name=>option(select,name,name));
 }
+
 function renderInvestigatorOptions(){
   const select=$("eventInvestigator");
   select.replaceChildren();
@@ -2791,9 +2778,14 @@ async function signedIn(){
   }
   show("loginPanel",false);
   show("navigation",true);
-  show("mainMenu",true);
-  $("adminMenuOption").disabled=role!=="admin";
-  $("adminMenuOption").hidden=role!=="admin";
+  show("mainMenu",true);   const adminOption=$("adminMenuOption");
+   if(role==="admin"){
+     if(!adminOption.isConnected){
+       $("mainMenu").insertBefore(adminOption,$("mainMenu").querySelector('option[value="sync"]'));
+     }
+   }else{
+     adminOption.remove();
+   }
   $("mainMenu").value="";
   await loadData();
   renderSyncOverview();
