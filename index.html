@@ -1968,53 +1968,101 @@ async function syncEvents(){
 
 /* ADMIN CLOSEOUT */
 
+
 async function changeInvestigationStatus(nextStatus){
   if(role!=="admin"||!user)return;
+
   const inv=currentInvestigation();
   if(!inv)return;
+
   const isClosing=nextStatus==="completed";
+
   if(isClosing&&inv.status!=="active")return;
   if(!isClosing&&inv.status!=="completed")return;
+
   if(isClosing){
     const local=queueRead().filter(x=>
       x.investigation_id===inv.id
     );
+
     if(local.length){
-      msg("This device has pending event markers. "+
-        "Synchronize them before ending the investigation.",
-        "warn");
+      msg(
+        "Synchronize pending event markers before ending the investigation.",
+        "warn"
+      );
       return;
     }
   }
-  const question=isClosing
-    ?"End this investigation?\n\n"+
-      "Event logging will close. Existing records "+
-      "will remain available."
-    :"Reactivate this investigation?\n\n"+
-      "Event logging will become available again.";
-  if(!confirm(question))return;
+
+  let reopeningReason="";
+
+  if(isClosing){
+    if(!confirm(
+      "End this investigation?\n\n" +
+      "Event logging will close. Existing records will remain available."
+    ))return;
+  }else{
+    const answer=prompt(
+      "Reason for reopening this investigation:"
+    );
+
+    if(answer===null)return;
+
+    reopeningReason=answer.trim();
+
+    if(!reopeningReason){
+      msg("A reopening reason is required.","warn");
+      return;
+    }
+  }
+
   const button=isClosing
-    ?$("endInvestigation"):$("reopenInvestigation");
+    ?$("endInvestigation")
+    :$("reopenInvestigation");
+
   button.disabled=true;
+
   try{
+    const changes={status:nextStatus};
+
+    if(!isClosing){
+      changes.reopening_reason=reopeningReason;
+    }
+
     const {data,error}=await db
       .from("investigations")
-      .update({status:nextStatus})
-      .eq("id",inv.id).eq("status",inv.status)
-      .select("id,status").single();
+      .update(changes)
+      .eq("id",inv.id)
+      .eq("status",inv.status)
+      .select("id,status")
+      .single();
+
     if(error)throw error;
+
     if(!data||data.status!==nextStatus){
-      throw new Error("Status change was not confirmed.");
+      throw new Error(
+        "Status change was not confirmed."
+      );
     }
+
     inv.status=nextStatus;
+
     cancelEvent();
     renderInvestigations();
     updateWorkspaceControls();
-    msg(isClosing
-      ?"Investigation completed successfully."
-      :"Investigation reactivated.","good");
+
+    msg(
+      isClosing
+        ?"Investigation completed successfully."
+        :"Investigation reopened. Reason recorded.",
+      "good"
+    );
+
   }catch(e){
-    msg("Status change failed: "+e.message,"bad");
+    msg(
+      "Status change failed: "+e.message,
+      "bad"
+    );
   }finally{
     button.disabled=false;
   }
