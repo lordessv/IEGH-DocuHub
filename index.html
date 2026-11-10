@@ -318,6 +318,11 @@ form {min-width:0}
   #eventsPage #workspaceTitle {padding-right:98px;}
 }
 
+
+/* Compact event history status and actions */
+.event-inline-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}
+.event-inline-controls .event-status{margin:0}
+.event-inline-button{min-height:32px;padding:5px 9px;border:1px solid #526b8a;border-radius:6px;background:#304862;color:#c7e5ff;font-size:.8rem;font-weight:500}
 </style>
 </head>
 <body>
@@ -942,6 +947,7 @@ async function loadCorrectionAudit(eventId){
 }
 function openEventCorrection(e){
   if(!canCorrectEvent(e))return;
+  resetCorrectionPanel();
   editingEventId=e.id;
   const select=$("correctionType");select.replaceChildren();
   const types=[...new Set([...Object.values(EVENT_GROUPS).flat(),e.event_type])];
@@ -954,6 +960,31 @@ function openEventCorrection(e){
   show("eventCorrectionPanel",true);
   loadCorrectionAudit(e.id);
   $("eventCorrectionPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function openEventAudit(e){
+  editingEventId=null;
+  $("correctionOriginal").textContent="Audit history for "+e.event_type+" | "+timeLabel(e.event_time);
+  show("eventCorrectionPanel",true);
+  $("eventCorrectionPanel").querySelector("h3").textContent="Event Audit";
+  ["correctionType","correctionTime","correctionArea","correctionNotes","correctionReason"].forEach(id=>{
+    const field=$(id);
+    field.classList.add("hidden");
+    const label=field.previousElementSibling;
+    if(label&&label.tagName==="LABEL")label.classList.add("hidden");
+  });
+  show("submitCorrection",false);
+  loadCorrectionAudit(e.id);
+  $("eventCorrectionPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function resetCorrectionPanel(){
+  $("eventCorrectionPanel").querySelector("h3").textContent="Correct Event";
+  ["correctionType","correctionTime","correctionArea","correctionNotes","correctionReason"].forEach(id=>{
+    const field=$(id);
+    field.classList.remove("hidden");
+    const label=field.previousElementSibling;
+    if(label&&label.tagName==="LABEL")label.classList.remove("hidden");
+  });
+  show("submitCorrection",true);
 }
 function closeEventCorrection(){editingEventId=null;show("eventCorrectionPanel",false);}
 async function submitEventCorrection(){
@@ -2089,6 +2120,7 @@ function renderPending(){
     const card=document.createElement("div");
     card.className="item";
     addText(card,"strong",e.event_type);
+    addText(card,"p","Investigation: "+investigationLabel(e.investigation_id),"muted");
     addText(card,"p",timeLabel(e.event_time),"muted");
     addText(card,"p","Recorded by: "+nameById(localOwner(e))+" | Witness: "+nameById(e.investigator_id),"muted");
     if(e.area)addText(card,"p",e.area);
@@ -2158,11 +2190,18 @@ function renderHistory(){
     }
     if(e.area)addText(card,"p","Area: "+e.area);
     if(e.notes)addText(card,"p",e.notes);
-    addText(card,"span",
-      e._local?"Pending synchronization":
-        "Synchronized",
+    const controls=document.createElement("div");
+    controls.className="event-inline-controls";
+    addText(controls,"span",
+      e._local?"Pending synchronization":"Synchronized",
       "event-status "+(e._local?"warn":"good"));
-    if(canCorrectEvent(e))addButton(card,"Correct Event / View Audit",()=>openEventCorrection(e));
+    if(canCorrectEvent(e)){
+      addButton(controls,"Correct Event",()=>openEventCorrection(e),"event-inline-button");
+      addButton(controls,"View Audit",()=>openEventAudit(e),"event-inline-button");
+    }else if(!e._local){
+      addButton(controls,"View Audit",()=>openEventAudit(e),"event-inline-button");
+    }
+    card.append(controls);
     box.append(card);
   });
 }
