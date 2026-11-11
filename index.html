@@ -324,6 +324,53 @@ form {min-width:0}
 .event-inline-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}
 .event-inline-controls .event-status{margin:0}
 .event-inline-button{min-height:32px;padding:5px 9px;border:1px solid #526b8a;border-radius:6px;background:#304862;color:#c7e5ff;font-size:.8rem;font-weight:500}
+
+/* INVESTIGATION WORKSPACE CLEANUP */
+#eventsPage .workspace-heading {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:8px;
+  padding-top:0;
+}
+#eventsPage #workspaceTitle {
+  margin:0;
+  padding-right:0;
+  overflow-wrap:anywhere;
+}
+#eventsPage #workspaceDetails {
+  display:block;
+  margin:0;
+  line-height:1.5;
+}
+#eventsPage .workspace-actions {
+  position:static;
+  margin-bottom:18px;
+}
+#eventsPage .workspace-actions button {
+  min-height:48px;
+  font-size:.95rem;
+}
+#eventsPage .event-group {margin:20px 0;}
+#eventsPage .grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+#eventsPage .grid button {
+  width:100%;
+  min-height:68px;
+  padding:12px 8px;
+  line-height:1.3;
+  overflow-wrap:anywhere;
+}
+@media (min-width:700px) {
+  #eventsPage .grid {grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media (max-width:380px) {
+  #eventsPage .grid {gap:7px;}
+  #eventsPage .grid button {font-size:.82rem;padding:10px 5px;}
+}
 </style>
 </head>
 <body>
@@ -599,7 +646,6 @@ form {min-width:0}
   </div>
   <h3>Investigation Event History</h3>
   <div id="eventHistory"></div>
-  <div id="investigationSummary" class="hidden"></div>
      <div id="eventCorrectionPanel" class="report-section hidden">
      <h3>Correct Event</h3>
      <p id="correctionOriginal" class="muted"></p>
@@ -900,23 +946,6 @@ function formatLocalDateTime(iso){
   if(Number.isNaN(d.getTime()))return "";
   const pad=n=>String(n).padStart(2,"0");
   return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds());
-}
-function renderInvestigationSummary(){
-  const box=$("investigationSummary");
-  if(!box)return;
-  box.replaceChildren();
-  addText(box,"h3","Investigation Activity Summary");
-  if(historyInvestigation!==activeInvestigationId){addText(box,"p","Loading synchronized events...","muted");return;}
-  const events=historyEvents;
-  addText(box,"p",events.length+" synchronized event(s)"+(events.length===200?" shown (first 200 only)":""),"marker");
-  const sections=[["Activity Type",e=>e.event_type||"Unspecified"],["Area",e=>e.area||"Unspecified"],["Investigator",e=>nameById(e.investigator_id)]];
-  for(const [title,keyFn] of sections){
-    const counts=new Map();
-    for(const event of events){const key=keyFn(event);counts.set(key,(counts.get(key)||0)+1);}
-    addText(box,"h4",title);
-    if(!counts.size)addText(box,"p","No synchronized activity yet.","muted");
-    [...counts].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).forEach(([name,count])=>addText(box,"p",name+": "+count,"compact"));
-  }
 }
 function canCorrectEvent(e){
   const inv=currentInvestigation();
@@ -2141,12 +2170,10 @@ async function loadEventHistory(invId){
     new Date(eventEffectiveTime(b))-new Date(eventEffectiveTime(a)));
   historyInvestigation=invId;
   renderHistory();
-  renderInvestigationSummary();
 }
 function renderHistory(){
   const box=$("eventHistory");
   box.replaceChildren();
-  renderInvestigationSummary();
   const id=activeInvestigationId;
   if(!id){
     addText(box,"p",
