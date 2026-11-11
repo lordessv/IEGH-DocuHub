@@ -398,8 +398,9 @@ form {min-width:0}
   <div class="account-details">
     <p id="accountInfo"></p>
     <p id="connectionInfo" class="muted"></p>
-  </div>   <div id="syncOverview" class="account-details" aria-live="polite"></div>
-   <details class="account-details"><summary>Pending Local Markers</summary><div id="pendingEvents"></div></details>
+  </div>
+  <div id="syncOverview" class="account-details" aria-live="polite"></div>
+  <details id="pendingDetails" class="account-details hidden"><summary>Review Pending Markers</summary><div id="pendingEvents"></div></details>
   <div id="adminSyncDashboard" class="account-details hidden">
     <h3>Admin Local Sync Dashboard</h3>
     <p class="muted">Pending markers saved in this browser, including other accounts. Other devices cannot be inspected remotely.</p>
@@ -411,10 +412,8 @@ form {min-width:0}
     <button class="secondary" id="syncButton">
       Sync Pending Events
     </button>
-    <button class="secondary" id="logoutButton">
-      Sign Out
-    </button>
   </div>
+  <div class="actions"><button class="secondary" id="logoutButton">Sign Out</button></div>
 </section>
 
 <section class="panel hidden page" id="locationsPage">
@@ -770,6 +769,9 @@ let syncStatusText="Ready";
 function msg(text,kind="muted"){
   $("message").textContent=text;
   $("message").className=kind;
+  const accountVisible=!$("accountPage").classList.contains("hidden");
+  const routineSync=/^(No local markers awaiting sync|\d+ marker\(s\) synchronized\.)/.test(String(text));
+  $("message").parentElement.classList.toggle("hidden",accountVisible&&kind==="good"&&routineSync);
 }
 function addText(parent,tag,value,cls){
   const el=document.createElement(tag);
@@ -848,12 +850,15 @@ function renderSyncOverview(){
   const other=queue.length-own.length;
   const overview=$("syncOverview");
   if(overview){
-    overview.textContent="Pending on this device: "+queue.length+
-      " total | "+own.length+" from your account | "+other+" from other accounts.";
+    overview.textContent=queue.length
+      ?own.length+" pending marker(s) from your account"+(role==="admin"&&other?" | "+other+" from other accounts":"")
+      :"All events synchronized";
+    overview.classList.toggle("good",queue.length===0);
   }
+  show("pendingDetails",queue.length>0);
   const dashboard=$("adminSyncDashboard");
   if(!dashboard)return;
-  show("adminSyncDashboard",role==="admin");
+  show("adminSyncDashboard",role==="admin"&&queue.length>0);
   const box=$("adminSyncEntries");
   box.replaceChildren();
   if(role!=="admin")return;
@@ -1041,6 +1046,7 @@ function currentLocation(){
   );
 }
 function setPage(id){
+  $("message").parentElement.classList.remove("hidden");
   if(id==="adminPage"&&role!=="admin")return;
   if(id==="eventsPage"&&!activeInvestigationId)return;
   document.querySelectorAll(".page").forEach(p=>{
@@ -2101,8 +2107,9 @@ function renderPending(){
     !activeInvestigationId||x.investigation_id===activeInvestigationId
   );
   const list=role==="admin"?all:all.filter(x=>localOwner(x)===user?.id);
-  addText(box,"p",list.length+" marker(s) awaiting sync on this device"+
-    (role==="admin"?" (all local accounts).":" (your account)."),"muted");
+  if(!list.length){
+    addText(box,"p","No markers awaiting synchronization.","muted");
+  }
   list.slice().reverse().slice(0,30).forEach(e=>{
     const card=document.createElement("div");
     card.className="item";
