@@ -599,10 +599,7 @@ form {min-width:0}
   </div>
   <h3>Investigation Event History</h3>
   <div id="eventHistory"></div>
-  <details class="report-section" style="margin-top:12px">
-    <summary style="cursor:pointer;font-weight:700">Investigation Activity Summary</summary>
-    <div id="investigationSummary"></div>
-  </details>
+  <div id="investigationSummary" class="hidden"></div>
      <div id="eventCorrectionPanel" class="report-section hidden">
      <h3>Correct Event</h3>
      <p id="correctionOriginal" class="muted"></p>
@@ -2124,17 +2121,24 @@ function renderPending(){
 }
 async function loadEventHistory(invId){
   if(!invId||!db||!user)return;
-  const {data,error}=await db
-    .from("investigation_events").select("*")
-    .eq("investigation_id",invId)
-    .order("event_time",{ascending:false})
-    .limit(200);
+  const inv=investigations.find(x=>x.id===invId);
+  const {data,error}=inv?.status==="completed"
+    ?await db.rpc("docuhub_read_completed_events",{p_investigation_id:invId})
+    :await db.from("investigation_events").select("*")
+      .eq("investigation_id",invId)
+      .order("event_time",{ascending:false})
+      .limit(200);
   if(activeInvestigationId!==invId)return;
   if(error){
+    historyEvents=[];
+    historyInvestigation=null;
+    $("eventHistory").replaceChildren();
+    addText($("eventHistory"),"p","Unable to load event history: "+error.message,"bad");
     msg("Event history error: "+error.message,"warn");
     return;
   }
-  historyEvents=data||[];
+  historyEvents=(data||[]).slice().sort((a,b)=>
+    new Date(eventEffectiveTime(b))-new Date(eventEffectiveTime(a)));
   historyInvestigation=invId;
   renderHistory();
   renderInvestigationSummary();
@@ -2399,6 +2403,15 @@ async function changeInvestigationStatus(nextStatus){
 /* REPORTS */
 
 async function fetchAllEvents(invId){
+  const inv=investigations.find(x=>x.id===invId);
+  if(inv?.status==="completed"){
+    const {data,error}=await db.rpc("docuhub_read_completed_events",{
+      p_investigation_id:invId
+    });
+    if(error)throw error;
+    return (data||[]).sort((a,b)=>
+      new Date(eventEffectiveTime(a))-new Date(eventEffectiveTime(b)));
+  }
   const all=[],pageSize=500;
   let start=0;
   while(true){
@@ -2446,6 +2459,9 @@ async function fetchReportData(){
   const [events,assigned]=await Promise.all([
     fetchAllEvents(inv.id),loadAssignments(inv.id)
   ]);
+  if(events.length===0){
+    throw new Error("No synchronized events were returned. Report export stopped to avoid an incomplete report.");
+  }
   const localPending=queueRead().filter(x=>
     x.investigation_id===inv.id
   );
