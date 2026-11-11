@@ -371,6 +371,10 @@ form {min-width:0}
   #eventsPage .grid {gap:7px;}
   #eventsPage .grid button {font-size:.82rem;padding:10px 5px;}
 }
+/* Simplified location profile layout */
+.layout-level{margin:16px 0 20px;min-width:0}
+.layout-level>strong{display:block;font-size:1.05rem;margin-bottom:8px}
+.layout-sections{border-left:2px solid #79b6e8;margin-left:8px;padding-left:16px;display:grid;gap:5px;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -1208,36 +1212,32 @@ function viewLocation(loc){
 
   const areas=document.createElement("div");
   areas.className="profile-section";
-  addText(areas,"h4","Buildings, Floors & Areas");
-  const sections=normalizedAreas(loc.property_areas);
-  if(!sections.length){
-    addText(areas,"p",
-      "No structured areas recorded.","muted");
-  }
-  sections.forEach((section,index)=>{
-    const sectionBox=document.createElement("div");
-    sectionBox.className="profile-subsection";
-    addText(sectionBox,"strong",       section.name||(section.floors.length?"Floors & Rooms":"Area "+(index+1)));
-    addText(sectionBox,"p",       section.kind==="outdoor"?"Outdoor Area":
-       section.kind==="building"?"Indoor Areas":
-       "Other Area","muted");
-
-    section.floors.forEach(floor=>{
-      const floorBox=document.createElement("div");
-      floorBox.className="profile-subsection";
-      addText(floorBox,"strong",
-        floor.name||"Unnamed Level");
-      if(floor.rooms.length){
-        addText(floorBox,"p",floor.rooms.join(", "));
+  addText(areas,"h4","Layout");
+  const layout=normalizedAreas(loc.property_areas);
+  let shown=0;
+  layout.forEach(area=>{
+    // Old records may contain nested building labels. Show only the
+    // actual level and its rooms, never the storage hierarchy.
+    const floors=area.floors.length ? area.floors :
+      (area.name ? [{name:area.name,rooms:[]}] : []);
+    floors.forEach(floor=>{
+      const level=document.createElement("div");
+      level.className="layout-level";
+      addText(level,"strong",floor.name||area.name||"Unnamed Area");
+      const rooms=Array.isArray(floor.rooms)?floor.rooms:[];
+      if(rooms.length){
+        const list=document.createElement("div");
+        list.className="layout-sections";
+        rooms.forEach(room=>{
+          if(String(room).trim())addText(list,"div",String(room).trim());
+        });
+        level.append(list);
       }
-      sectionBox.append(floorBox);
+      areas.append(level);
+      shown++;
     });
-    areas.append(sectionBox);
   });
-  profileField(areas,"Additional Floors / Rooms Notes",
-    loc.floors_and_rooms);
-  profileField(areas,"Exterior Areas / Notes",
-    loc.exterior_areas);
+  if(!shown)addText(areas,"p","No layout recorded.","muted");
   box.append(areas);
 
   const access=document.createElement("div");
