@@ -2593,142 +2593,91 @@ function safePDFText(value){
     .replace(/[^\x20-\x7E\n]/g,"?");
 }
 async function generatePDF(data){
-  if(!window.jspdf?.jsPDF){
-    throw new Error("PDF library unavailable.");
+  if(!window.jspdf?.jsPDF)throw new Error("PDF library unavailable.");
+  const doc=new window.jspdf.jsPDF({unit:"pt",format:"letter"});
+  const W=612,H=792,L=48,R=48,C=W-L-R,B=H-55;
+  const ink=[35,48,66],muted=[90,105,123],navy=[27,54,85],rule=[209,218,228];
+  let y=58,page=1;
+  const clean=value=>safePDFText(value);
+  function setColor(rgb){doc.setTextColor(...rgb);}
+  function chrome(){
+    doc.setFillColor(...navy);doc.rect(0,0,W,7,"F");
+    doc.setFont("helvetica","bold");doc.setFontSize(8);setColor(muted);
+    doc.text("IEGH  /  INVESTIGATION DOCUMENTATION",L,31);
+    doc.setDrawColor(...rule);doc.line(L,39,W-R,39);
+    doc.setFont("helvetica","normal");doc.text("Page "+page,W-R,H-27,{align:"right"});
+    setColor(ink);
   }
-  const doc=new window.jspdf.jsPDF({
-    unit:"pt",format:"letter"
-  });
-  const pageWidth=612,pageHeight=792;
-  const left=48,right=48,width=pageWidth-left-right;
-  let y=52,page=1;
-
-  function pageHeader(){
-    doc.setFont("helvetica","bold");
-    doc.setFontSize(9);
-    doc.setTextColor(75,90,110);
-    doc.text("IEGH DOCUHUB",left,28);
-    doc.setDrawColor(190,200,215);
-    doc.line(left,35,pageWidth-right,35);
-    doc.setFont("helvetica","normal");
-    doc.text("Page "+page,pageWidth-right,
-      pageHeight-26,{align:"right"});
-    doc.setTextColor(30,40,55);
-  }
-  function newPage(){
-    doc.addPage();page++;y=52;pageHeader();
-  }
-  function ensure(height){
-    if(y+height>pageHeight-52)newPage();
-  }
-  function paragraph(text,size=10,gap=8){
-    doc.setFont("helvetica","normal");
-    doc.setFontSize(size);
-    const lines=doc.splitTextToSize(
-      safePDFText(text),width
-    );
-    const lineHeight=size*1.45;
-    for(const line of lines){
-      ensure(lineHeight);
-      doc.text(line,left,y);
-      y+=lineHeight;
+  function next(){doc.addPage();page++;y=58;chrome();}
+  function need(h){if(y+h>B)next();}
+  function lines(value,max=C){return doc.splitTextToSize(clean(value),max);}
+  function text(value,{size=10,bold=false,indent=0,after=6,color=ink}={}){
+    doc.setFont("helvetica",bold?"bold":"normal");doc.setFontSize(size);setColor(color);
+    const lh=size*1.43;
+    for(const line of lines(value,C-indent)){
+      need(lh);doc.text(line,L+indent,y);y+=lh;
     }
-    y+=gap;
+    y+=after;setColor(ink);
   }
-  function heading(text){
-    ensure(34);y+=8;
-    doc.setFont("helvetica","bold");
-    doc.setFontSize(13);
-    doc.text(safePDFText(text),left,y);
-    y+=18;
+  function section(name){
+    need(37);y+=13;
+    doc.setDrawColor(...rule);doc.line(L,y,W-R,y);y+=21;
+    text(name.toUpperCase(),{size:10,bold:true,after:8,color:navy});
   }
-  function field(label,value){
-    ensure(18);
-    doc.setFont("helvetica","bold");
-    doc.setFontSize(10);
-    doc.text(safePDFText(label),left,y);
-    y+=15;
-    paragraph(value||"Not specified",10,5);
+  function detail(label,value){
+    need(32);text(label.toUpperCase(),{size:8,bold:true,after:3,color:muted});
+    text(value||"Not recorded",{size:10,after:10});
   }
-  pageHeader();
-  doc.setFont("helvetica","bold");
-  doc.setFontSize(20);
-  doc.setTextColor(25,48,75);
-  doc.text("Investigation Report",left,y);
-  y+=28;
-  doc.setTextColor(30,40,55);
-
-  heading("Investigation Information");
-  field("Location",data.loc?.name);
-  field("Address",[
-    data.loc?.address,data.loc?.city,
-    data.loc?.state,data.loc?.postal_code
-  ].filter(Boolean).join(", "));
-  field("Date",formatDate(data.inv.investigation_date));
-  field("Scheduled Start",
-    formatTime(data.inv.start_time));
-  field("Status",statusLabel(data.inv.status));
-  field("Participating Investigators",
-    data.investigators.map(memberName).join(", ")||
-    "None assigned");
-  field("Investigation Notes",
-    data.inv.notes||"None recorded");
-
-  heading("Documented Activity");
-  paragraph("Total recorded events: "+
-    data.events.length);
-  const counts={};
+  function countList(map,empty){
+    const entries=Object.entries(map).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+    if(!entries.length){text(empty,{color:muted});return;}
+    entries.forEach(([name,count])=>{
+      need(20);doc.setFont("helvetica","normal");doc.setFontSize(10);
+      const label=lines(name,C-65);const lh=14;
+      label.forEach((line,i)=>{need(lh);doc.text(line,L+8,y);if(i===0){doc.setFont("helvetica","bold");doc.text(String(count),W-R-8,y,{align:"right"});doc.setFont("helvetica","normal");}y+=lh;});
+      y+=4;
+    });
+  }
+  chrome();
+  text("INVESTIGATION REPORT",{size:21,bold:true,after:7,color:navy});
+  text(data.loc?.name||"Unnamed Location",{size:14,bold:true,after:6});
+  text(formatDate(data.inv.investigation_date)+"  |  "+statusLabel(data.inv.status),{size:9,color:muted,after:14});
+  section("Investigation Overview");
+  detail("Location Address",[data.loc?.address,data.loc?.city,data.loc?.state,data.loc?.postal_code].filter(Boolean).join(", "));
+  detail("Investigation Date",formatDate(data.inv.investigation_date));
+  detail("Scheduled Start",formatTime(data.inv.start_time));
+  detail("Participating Investigators",data.investigators.map(memberName).join(", ")||"None assigned");
+  detail("Investigation Notes",data.inv.notes||"None recorded");
+  section("Activity Summary");
+  text("Total documented events: "+data.events.length,{size:11,bold:true,after:12});
+  const byType={},byArea={};
   data.events.forEach(e=>{
     const type=e.event_type||"Unspecified";
-    counts[type]=(counts[type]||0)+1;
+    const area=String(e.area||"").trim()||"Area not specified";
+    byType[type]=(byType[type]||0)+1;
+    byArea[area]=(byArea[area]||0)+1;
   });
-  Object.entries(counts)
-    .sort((a,b)=>a[0].localeCompare(b[0]))
-    .forEach(([type,count])=>{
-      paragraph(type+": "+count,10,2);
-    });
-
-  heading("Chronological Event Log");
-  if(!data.events.length){
-    paragraph("No events were recorded.");
-  }
+  text("BY EVENT TYPE",{size:9,bold:true,color:muted,after:7});
+  countList(byType,"No event types recorded.");
+  y+=8;
+  text("BY RECORDED AREA",{size:9,bold:true,color:muted,after:7});
+  countList(byArea,"No areas recorded.");
+  section("Chronological Event Log");
   data.events.forEach((e,index)=>{
-    ensure(72);
-    doc.setDrawColor(195,205,215);
-    doc.line(left,y,pageWidth-right,y);
-    y+=16;
-    doc.setFont("helvetica","bold");
-    doc.setFontSize(11);
-    const title=(index+1)+". "+
-      safePDFText(e.event_type||"Event");
-    const titleLines=doc.splitTextToSize(title,width);
-    titleLines.forEach(line=>{
-      ensure(16);doc.text(line,left,y);y+=15;
-    });
-    paragraph(timeLabel(eventEffectiveTime(e)),10,3);
-    if(e.corrected_event_time)paragraph("Original timestamp: "+timeLabel(e.event_time),9,3);
-    paragraph("Investigator: "+
-      nameById(e.investigator_id),10,3);
+    need(86);
+    doc.setFillColor(243,246,250);doc.rect(L,y-11,C,24,"F");
+    text(String(index+1).padStart(3,"0")+"   "+(e.event_type||"Unspecified Event"),{size:10,bold:true,after:5,color:navy});
+    text("Time: "+timeLabel(eventEffectiveTime(e)),{size:9,after:3});
+    if(e.corrected_event_time)text("Original timestamp: "+timeLabel(e.event_time),{size:9,after:3,color:muted});
+    text("Investigator: "+nameById(e.investigator_id),{size:9,after:3});
     const recorder=e.recorded_by||e.investigator_id;
-    if(recorder!==e.investigator_id){
-      paragraph("Recorded by: "+
-        nameById(recorder),10,3);
-    }
-    if(e.area)paragraph("Area: "+e.area,10,3);
-    paragraph(e.notes
-      ?"Description: "+e.notes
-      :"Description: None recorded",10,5);
-    y+=6;
+    if(recorder!==e.investigator_id)text("Recorded by: "+nameById(recorder),{size:9,after:3});
+    if(e.area)text("Area: "+e.area,{size:9,after:3});
+    text("Description: "+(e.notes||"None recorded"),{size:9,after:13});
   });
-  heading("Report Information");
-  paragraph("Generated: "+
-    timeLabel(new Date().toISOString()));
-  paragraph(
-    "This report documents recorded investigation "+
-    "events. Entries reflect observations submitted "+
-    "by investigators and do not independently "+
-    "establish paranormal causes.",9,5
-  );
+  section("Report Information");
+  detail("Generated",timeLabel(new Date().toISOString()));
+  text("This report contains documented observations from the investigation. Recorded activity does not independently establish a paranormal cause.",{size:9,color:muted,after:4});
   doc.save(reportFileName(data,"pdf"));
 }
 async function downloadReport(type){
