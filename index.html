@@ -2755,6 +2755,89 @@ async function downloadReport(type){
   }
 }
 
+/* First-login recovery: independent of optional password-controls.js. */
+function installFirstLoginFallback(){
+  if(window.IEGHPasswordControls?.showFirstLogin)return;
+  let panel=document.getElementById("firstLoginPasswordPanel");
+  if(!panel){
+    panel=document.createElement("section");
+    panel.id="firstLoginPasswordPanel";
+    panel.className="panel hidden";
+    panel.innerHTML=`
+      <h2>Set Your Personal Password</h2>
+      <p class="muted">Replace your temporary password before accessing DocuHub.</p>
+      <form id="firstLoginPasswordForm">
+        <label for="firstLoginCurrentPassword">Temporary Password</label>
+        <input id="firstLoginCurrentPassword" type="password" autocomplete="current-password" required>
+        <label for="firstLoginNewPassword">New Password</label>
+        <input id="firstLoginNewPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
+        <label for="firstLoginConfirmPassword">Confirm New Password</label>
+        <input id="firstLoginConfirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
+        <p class="muted">Use 8 to 128 characters, including at least one letter and one number.</p>
+        <label style="display:flex;align-items:center;gap:10px;margin:10px 0 16px">
+          <input id="firstLoginShowPasswords" type="checkbox" style="width:22px;height:22px;min-height:22px"> Show Passwords
+        </label>
+        <div class="actions"><button type="submit" id="firstLoginSubmitButton">Save New Password</button></div>
+        <p id="firstLoginPasswordStatus" class="muted" role="status" aria-live="polite"></p>
+      </form>
+      <div class="actions"><button type="button" id="firstLoginSignOut" class="secondary">Sign Out</button></div>`;
+    document.getElementById("loginPanel").insertAdjacentElement("afterend",panel);
+  }
+  const form=panel.querySelector("#firstLoginPasswordForm");
+  const status=panel.querySelector("#firstLoginPasswordStatus");
+  const current=panel.querySelector("#firstLoginCurrentPassword");
+  const next=panel.querySelector("#firstLoginNewPassword");
+  const confirm=panel.querySelector("#firstLoginConfirmPassword");
+  const submit=panel.querySelector("#firstLoginSubmitButton");
+  if(!form||!status||!current||!next||!confirm||!submit)return;
+  const toggle=panel.querySelector("#firstLoginShowPasswords");
+  if(toggle)toggle.addEventListener("change",()=>{
+    [current,next,confirm].forEach(el=>el.type=toggle.checked?"text":"password");
+  });
+  const controls={
+    showFirstLogin(){
+      show("loginPanel",false);show("navigation",false);show("mainMenu",false);
+      document.querySelectorAll(".page").forEach(p=>show(p.id,false));
+      panel.classList.remove("hidden");
+    },
+    hideFirstLogin(){
+      panel.classList.add("hidden");form.reset();status.textContent="";
+      status.className="muted";
+    }
+  };
+  window.IEGHPasswordControls=controls;
+  form.addEventListener("submit",async event=>{
+    event.preventDefault();
+    const password=next.value;
+    const invalid=password.length<8||password.length>128||
+      !/[A-Za-z]/.test(password)||!/[0-9]/.test(password);
+    const fail=message=>{status.textContent=message;status.className="bad";};
+    if(invalid)return fail("Password must be 8 to 128 characters and contain a letter and a number.");
+    if(password!==confirm.value)return fail("New passwords do not match.");
+    if(password===current.value)return fail("Choose a different password from your temporary password.");
+    if(!navigator.onLine)return fail("An internet connection is required.");
+    submit.disabled=true;submit.textContent="Saving...";
+    status.textContent="Updating your password...";status.className="muted";
+    try{
+      const {data,error}=await db.auth.getSession();
+      if(error||!data.session)throw new Error("Please sign in again.");
+      const response=await fetch("https://wuhshzfxdhsxpehbhuvn.supabase.co/functions/v1/complete-first-login",{
+        method:"POST",mode:"cors",cache:"no-store",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+data.session.access_token},
+        body:JSON.stringify({current_password:current.value,new_password:password})
+      });
+      const result=await response.json();
+      if(!response.ok||result.success!==true)throw new Error(result.error||"Unable to complete password setup.");
+      status.textContent="Password updated. Opening DocuHub...";status.className="good";
+      await db.auth.signOut();window.location.reload();
+    }catch(e){fail("Password change failed: "+e.message);}
+    finally{submit.disabled=false;submit.textContent="Save New Password";}
+  });
+  panel.querySelector("#firstLoginSignOut").addEventListener("click",async()=>{
+    try{await db.auth.signOut();}finally{window.location.reload();}
+  });
+}
+
 /* AUTHENTICATION */
 
 async function signedOut(){
@@ -2796,6 +2879,12 @@ async function signedIn(){
   $("connectionInfo").textContent=navigator.onLine?"Online":"Offline";
 
   if(result.data.must_change_password===true){
+    // Ensure first-login controls are available even if the optional
+    // password-controls.js initializer failed on this browser.
+    if(!window.IEGHPasswordControls ||
+       typeof window.IEGHPasswordControls.showFirstLogin!=="function"){
+      installFirstLoginFallback();
+    }
     const controls=window.IEGHPasswordControls;
     if(!controls||typeof controls.showFirstLogin!=="function"){
       show("loginPanel",false);
