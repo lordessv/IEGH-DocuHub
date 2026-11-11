@@ -517,22 +517,10 @@ form {min-width:0}
         </option>
         <option value="mixed">Mixed Property</option>
         <option value="other">Other</option>
-      </select>      <h3>Floors, Rooms &amp; Areas</h3>
-       <p class="muted">Add floors and their rooms directly. Building names are optional for multi-building sites.</p>
-      <div id="simpleAreasEditor" class="hidden">
-  <label for="simpleAreaNames">Location Areas</label>
-  <p class="muted">
-    Enter one area per line. No floors or buildings required.
-  </p>
-  <textarea id="simpleAreaNames"
-    placeholder="Upper Level&#10;Lower Level&#10;Mausoleum"
-    rows="5"></textarea>
-</div>
+      </select>
       <div id="structuredAreas"></div>
       <div class="actions">
-        <button type="button" id="addArea"
-          class="secondary">           + Add Floor / Level
-        </button>
+        <button type="button" id="addArea" class="secondary">+ Add Area / Level</button>
       </div>
       <label>Property Description</label>
       <textarea id="locDescription"></textarea>
@@ -1280,121 +1268,64 @@ function viewLocation(loc){
 function renderStructuredAreas(){
   const box=$("structuredAreas");
   box.replaceChildren();
-  if(!structuredAreas.length){
-    addText(box,"p","No floors added yet.","muted");
-  }
   structuredAreas.forEach((area,index)=>{
+    const floor=area.floors[0];
+    if(!floor)return;
     const card=document.createElement("div");
     card.className="area-row";
-    // Existing multi-building profiles keep their section names and types.
-    // New single-building profiles need no extra building-name field.
-    if(area.name || area.kind!=="building"){
-      addText(card,"label","Building / Section (optional)");
-      const name=document.createElement("input");
-      name.value=area.name;
-      name.placeholder="Main House, North Wing";
-      name.addEventListener("input",()=>{area.name=name.value;});
-      card.append(name);
-      const kind=document.createElement("select");
-      option(kind,"building","Building");
-      option(kind,"outdoor","Outdoor Section");
-      option(kind,"other","Other Section");
-      kind.value=area.kind;
-      kind.addEventListener("change",()=>{area.kind=kind.value;});
-      card.append(kind);
-    }
-    area.floors.forEach((floor,fi)=>{
-      const floorBox=document.createElement("div");
-      floorBox.className="item";
-      const fields=document.createElement("div");
-      fields.className="area-fields";
-      const a=document.createElement("div");
-      addText(a,"label","Floor / Level");
-      const floorInput=document.createElement("input");
-      floorInput.value=floor.name;
-      floorInput.placeholder="First Floor, Basement";
-      floorInput.addEventListener("input",()=>{floor.name=floorInput.value;});
-      a.append(floorInput);
-      const b=document.createElement("div");
-      addText(b,"label","Rooms / Areas (one per line)");
-      const rooms=document.createElement("textarea");
-      rooms.value=floor.rooms.join("\n");
-      rooms.placeholder="Living Room\nKitchen\nHallway";
-      rooms.addEventListener("input",()=>{floor.rooms=splitNames(rooms.value);});
-      b.append(rooms);
-      fields.append(a,b);
-      floorBox.append(fields);
-      const actions=document.createElement("div");
-      actions.className="actions";
-      addButton(actions,"Remove Floor",()=>{
-        area.floors.splice(fi,1);
-        if(!area.floors.length && !area.name){structuredAreas.splice(index,1);}
-        renderStructuredAreas();
-      });
-      floorBox.append(actions);
-      card.append(floorBox);
+    const fields=document.createElement("div");
+    fields.className="area-fields";
+    const a=document.createElement("div");
+    addText(a,"label","Area / Level");
+    const level=document.createElement("input");
+    level.type="text";
+    level.value=floor.name;
+    level.placeholder="First Floor, Basement, Courtyard";
+    level.addEventListener("input",()=>{floor.name=level.value;});
+    a.append(level);
+    const b=document.createElement("div");
+    addText(b,"label","Section (one per line)");
+    const sections=document.createElement("textarea");
+    sections.rows=4;
+    sections.value=floor.rooms.join("\n");
+    sections.placeholder="Dining Room\nHallway\nStaircase";
+    sections.addEventListener("input",()=>{floor.rooms=splitNames(sections.value);});
+    b.append(sections);
+    fields.append(a,b);
+    card.append(fields);
+    const actions=document.createElement("div");
+    actions.className="actions";
+    addButton(actions,"Remove Area / Level",()=>{
+      structuredAreas.splice(index,1);
+      renderStructuredAreas();
     });
-    // Legacy sections may have multiple floors; keep adding to those sections.
-    if(area.name){
-      const actions=document.createElement("div");
-      actions.className="actions";
-      addButton(actions,"+ Add Floor to Section",()=>{
-        area.floors.push({name:"",rooms:[]});renderStructuredAreas();
-      });
-      addButton(actions,"Remove Section",()=>{
-        structuredAreas.splice(index,1);renderStructuredAreas();
-      });
-      card.append(actions);
-    }
+    card.append(actions);
     box.append(card);
   });
 }
 
-  const SIMPLE_AREA_TYPES = new Set([
-  "cemetery",
-  "outdoor"
-]);
-
-function usesSimpleAreas(){
-  return SIMPLE_AREA_TYPES.has($("locType").value);
-}
-
-function updateAreaEditor(){
-  const simple=usesSimpleAreas();
-
-  show("simpleAreasEditor",simple);
-  show("structuredAreas",!simple);
-  show("addArea",!simple);
-
-  if(simple){
-    const names=structuredAreas.flatMap(area=>{
-      if(area.kind==="outdoor" && !area.floors.length){
-        return area.name ? [area.name] : [];
-      }
-
-      const names=[];
-
-      if(area.name)names.push(area.name);
-
-      area.floors.forEach(floor=>{
-        if(floor.name)names.push(floor.name);
-        names.push(...floor.rooms);
-      });
-
-      return names;
+// Existing multi-building records are displayed as editable Area / Level rows.
+// Keep their labels in the level name so information is not silently discarded.
+function editableAreas(value){
+  const result=[];
+  normalizedAreas(value).forEach(area=>{
+    if(!area.floors.length){
+      if(area.name)result.push({name:"",kind:"building",floors:[{name:area.name,rooms:[]}]});
+      return;
+    }
+    area.floors.forEach(floor=>{
+      const label=[area.name,floor.name].filter(Boolean).join(" / ");
+      result.push({name:"",kind:"building",floors:[{name:label,rooms:[...floor.rooms]}]});
     });
-
-    $("simpleAreaNames").value=
-      [...new Set(names.filter(Boolean))].join("\n");
-  }
+  });
+  return result;
 }
-
-function saveSimpleAreas(){
-  const names=splitNames($("simpleAreaNames").value);
-  structuredAreas=names.map(name=>({name,kind:"outdoor",floors:[]}));
+function updateAreaEditor(){
+  show("structuredAreas",true);
+  show("addArea",true);
 }
+function usesSimpleAreas(){return false;}
 function addStructuredArea(){
-  // New floors are direct entries, no mandatory building/section name.
   structuredAreas.push({name:"",kind:"building",floors:[{name:"",rooms:[]}]});
   renderStructuredAreas();
 }
@@ -1512,7 +1443,7 @@ function openLocation(loc=null){
     $(id).value=loc?.[key]??
       (id==="locState"?"CA":"");
   });
- structuredAreas=normalizedAreas(loc?.property_areas);
+ structuredAreas=editableAreas(loc?.property_areas);
 renderStructuredAreas();
 updateAreaEditor();
   $("locationEditorTitle").textContent=
@@ -1898,7 +1829,26 @@ function eventAreaOptions(){
   const select=$("eventArea");
   select.replaceChildren();
   option(select,"","No area selected");
-  getLocationAreaNames(currentLocation()).forEach(name=>option(select,name,name));
+  const loc=currentLocation();
+  if(!loc)return;
+  normalizedAreas(loc.property_areas).forEach(area=>{
+    if(!area.floors.length){
+      if(area.name)option(select,area.name,area.name);
+      return;
+    }
+    area.floors.forEach(floor=>{
+      const level=[area.name,floor.name].filter(Boolean).join(" / ");
+      const group=document.createElement("optgroup");
+      group.label=level||"Other Area";
+      if(level)option(group,level,"General / Unspecified");
+      floor.rooms.forEach(room=>{
+        const full=[level,room].filter(Boolean).join(" / ");
+        option(group,full,room);
+      });
+      select.append(group);
+    });
+  });
+  splitNames(String(loc.exterior_areas||"")).forEach(name=>option(select,name,name));
 }
 
 function renderInvestigatorOptions(){
