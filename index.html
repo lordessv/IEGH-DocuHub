@@ -2801,14 +2801,13 @@ async function signedIn(){
   }
   show("loginPanel",false);
   show("navigation",true);
-  show("mainMenu",true);   const adminOption=$("adminMenuOption");
-   if(role==="admin"){
-     if(!adminOption.isConnected){
-       $("mainMenu").insertBefore(adminOption,$("mainMenu").querySelector('option[value="sync"]'));
-     }
-   }else{
-     adminOption.remove();
-   }
+  show("mainMenu",true);
+  // Keep the option in the DOM across account changes and sign-ins.
+  const adminOption=$("adminMenuOption");
+  if(adminOption){
+    adminOption.disabled=role!=="admin";
+    adminOption.hidden=role!=="admin";
+  }
   $("mainMenu").value="";
   await loadData();
   renderSyncOverview();
