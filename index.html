@@ -375,6 +375,38 @@ form {min-width:0}
 .layout-level{margin:16px 0 20px;min-width:0}
 .layout-level>strong{display:block;font-size:1.05rem;margin-bottom:8px}
 .layout-sections{border-left:2px solid #79b6e8;margin-left:8px;padding-left:16px;display:grid;gap:5px;overflow-wrap:anywhere}
+
+/* Compact investigation header: Back and status share one row. */
+#eventsPage .workspace-actions {
+  position:static;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:0 0 10px;
+}
+#eventsPage .workspace-actions button {
+  min-height:40px;
+  padding:7px 12px;
+}
+#eventsPage #workspaceStatus {
+  margin:0;
+  flex-shrink:0;
+}
+#eventsPage .workspace-heading {
+  display:block;
+  padding:0 0 10px;
+  margin:0 0 10px;
+}
+#eventsPage #workspaceTitle {
+  margin:0 0 4px;
+  padding:0;
+}
+#eventsPage #workspaceDetails {
+  display:block;
+  margin:0;
+  line-height:1.35;
+}
 </style>
 </head>
 <body>
@@ -565,12 +597,12 @@ form {min-width:0}
       id="backToInvestigations">
       ← Back to Investigations
     </button>
+    <span id="workspaceStatus"
+      class="status-pill"></span>
   </div>
   <div class="workspace-heading">
     <p id="workspaceTitle" class="marker"></p>
     <p id="workspaceDetails" class="muted"></p>
-    <span id="workspaceStatus"
-      class="status-pill"></span>
   </div>
   <div id="loggingRestricted" class="hidden">
     <p class="muted">Event logging is available to assigned investigators only.</p>
