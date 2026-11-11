@@ -2624,32 +2624,91 @@ async function generatePDF(data){
     doc.setDrawColor(...rule);doc.line(L,y,W-R,y);y+=21;
     text(name.toUpperCase(),{size:10,bold:true,after:8,color:navy});
   }
-  function detail(label,value){
-    need(32);text(label.toUpperCase(),{size:8,bold:true,after:3,color:muted});
-    text(value||"Not recorded",{size:10,after:10});
+  const gutter=22,colW=(C-gutter)/2;
+  function columnText(label,value,x,width){
+    doc.setFont("helvetica","bold");doc.setFontSize(8);setColor(muted);
+    const labelLines=doc.splitTextToSize(clean(label.toUpperCase()),width);
+    doc.setFont("helvetica","normal");doc.setFontSize(10);setColor(ink);
+    const valueLines=doc.splitTextToSize(clean(value||"Not recorded"),width);
+    return {labelLines,valueLines,height:labelLines.length*11+4+valueLines.length*14+12};
   }
-  function countList(map,empty){
-    const entries=Object.entries(map).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
-    if(!entries.length){text(empty,{color:muted});return;}
+  function drawColumn(item,x,top){
+    doc.setFont("helvetica","bold");doc.setFontSize(8);setColor(muted);
+    item.labelLines.forEach((line,i)=>doc.text(line,x,top+i*11));
+    doc.setFont("helvetica","normal");doc.setFontSize(10);setColor(ink);
+    const valueTop=top+item.labelLines.length*11+4;
+    item.valueLines.forEach((line,i)=>doc.text(line,x,valueTop+i*14));
+  }
+  function detailRow(left,right){
+    const a=columnText(left[0],left[1],L,colW);
+    const b=right?columnText(right[0],right[1],L+colW+gutter,colW):null;
+    const height=Math.max(a.height,b?.height||0);
+    need(height);const top=y;drawColumn(a,L,top);
+    if(b)drawColumn(b,L+colW+gutter,top);
+    y=top+height;
+  }
+  function fullDetail(label,value){
+    const item=columnText(label,value,L,C);
+    need(item.height);drawColumn(item,L,y);y+=item.height;
+  }
+  function countEntries(map){
+    return Object.entries(map).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+  }
+  function countPanel(title,entries,empty,x,top){
+    doc.setFont("helvetica","bold");doc.setFontSize(9);setColor(muted);
+    doc.text(title,x,top);let pos=top+19;
+    if(!entries.length)entries=[[empty,""]];
     entries.forEach(([name,count])=>{
-      need(20);doc.setFont("helvetica","normal");doc.setFontSize(10);
-      const label=lines(name,C-65);const lh=14;
-      label.forEach((line,i)=>{need(lh);doc.text(line,L+8,y);if(i===0){doc.setFont("helvetica","bold");doc.text(String(count),W-R-8,y,{align:"right"});doc.setFont("helvetica","normal");}y+=lh;});
-      y+=4;
+      doc.setFont("helvetica","normal");doc.setFontSize(9);setColor(ink);
+      const rows=doc.splitTextToSize(clean(name),colW-31);
+      rows.forEach((line,i)=>doc.text(line,x+3,pos+i*13));
+      if(count!==""){
+        doc.setFont("helvetica","bold");doc.text(String(count),x+colW-3,pos,{align:"right"});
+      }
+      pos+=rows.length*13+6;
     });
+    return pos;
+  }
+  function panelHeight(entries,empty){
+    const items=entries.length?entries:[[empty,""]];
+    doc.setFont("helvetica","normal");doc.setFontSize(9);
+    return 19+items.reduce((sum,[name])=>sum+doc.splitTextToSize(clean(name),colW-31).length*13+6,0);
+  }
+  function twoColumnCounts(leftEntries,rightEntries){
+    // Keep both columns synchronized and paginate in chunks so nothing clips off the page.
+    let i=0,j=0;
+    while(i<leftEntries.length||j<rightEntries.length||(!i&&!j)){
+      const available=B-y-8;
+      let a=[],b=[];
+      const l=leftEntries.length?leftEntries:[["No event types recorded.",""]];
+      const r=rightEntries.length?rightEntries:[["No areas recorded.",""]];
+      const heightOf=(arr)=>panelHeight(arr,"");
+      while(i<l.length && heightOf([...a,l[i]])<=available){a.push(l[i++]);}
+      while(j<r.length && heightOf([...b,r[j]])<=available){b.push(r[j++]);}
+      if(!a.length&&!b.length){next();continue;}
+      const top=y;
+      const h1=countPanel(i===a.length?"BY EVENT TYPE":"BY EVENT TYPE (CONT.)",a,"",L,top);
+      const h2=countPanel(j===b.length?"BY RECORDED AREA":"BY RECORDED AREA (CONT.)",b,"",L+colW+gutter,top);
+      y=Math.max(h1,h2)+10;
+    }
   }
   chrome();
   text("INVESTIGATION REPORT",{size:21,bold:true,after:7,color:navy});
   text(data.loc?.name||"Unnamed Location",{size:14,bold:true,after:6});
   text(formatDate(data.inv.investigation_date)+"  |  "+statusLabel(data.inv.status),{size:9,color:muted,after:14});
   section("Investigation Overview");
-  detail("Location Address",[data.loc?.address,data.loc?.city,data.loc?.state,data.loc?.postal_code].filter(Boolean).join(", "));
-  detail("Investigation Date",formatDate(data.inv.investigation_date));
-  detail("Scheduled Start",formatTime(data.inv.start_time));
-  detail("Participating Investigators",data.investigators.map(memberName).join(", ")||"None assigned");
-  detail("Investigation Notes",data.inv.notes||"None recorded");
+  const street=String(data.loc?.address||"").trim();
+  const locality=[data.loc?.city,data.loc?.state].filter(Boolean).join(", ");
+  const cityLine=[locality,data.loc?.postal_code].filter(Boolean).join(" ");
+  const fullAddress=[street,cityLine].filter(Boolean).join(", ");
+  fullDetail("Location Address",fullAddress);
+  detailRow(["Investigation Date",formatDate(data.inv.investigation_date)],
+            ["Scheduled Start",formatTime(data.inv.start_time)]);
+  detailRow(["Status",statusLabel(data.inv.status)],
+            ["Documented Events",String(data.events.length)]);
+  fullDetail("Participating Investigators",data.investigators.map(memberName).join(", ")||"None assigned");
+  if(data.inv.notes)fullDetail("Investigation Notes",data.inv.notes);
   section("Activity Summary");
-  text("Total documented events: "+data.events.length,{size:11,bold:true,after:12});
   const byType={},byArea={};
   data.events.forEach(e=>{
     const type=e.event_type||"Unspecified";
@@ -2657,11 +2716,7 @@ async function generatePDF(data){
     byType[type]=(byType[type]||0)+1;
     byArea[area]=(byArea[area]||0)+1;
   });
-  text("BY EVENT TYPE",{size:9,bold:true,color:muted,after:7});
-  countList(byType,"No event types recorded.");
-  y+=8;
-  text("BY RECORDED AREA",{size:9,bold:true,color:muted,after:7});
-  countList(byArea,"No areas recorded.");
+  twoColumnCounts(countEntries(byType),countEntries(byArea));
   section("Chronological Event Log");
   data.events.forEach((e,index)=>{
     need(86);
@@ -2676,7 +2731,7 @@ async function generatePDF(data){
     text("Description: "+(e.notes||"None recorded"),{size:9,after:13});
   });
   section("Report Information");
-  detail("Generated",timeLabel(new Date().toISOString()));
+  fullDetail("Generated",timeLabel(new Date().toISOString()));
   text("This report contains documented observations from the investigation. Recorded activity does not independently establish a paranormal cause.",{size:9,color:muted,after:4});
   doc.save(reportFileName(data,"pdf"));
 }
