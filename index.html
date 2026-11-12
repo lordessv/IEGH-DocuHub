@@ -321,7 +321,10 @@ form {min-width:0}
 
 
 /* Tiny synchronization symbols, aligned to the right of each event header */
-#eventsPage #eventHistory summary{display:flex;align-items:center;gap:7px}
+#eventsPage #eventHistory summary{display:flex;align-items:center;gap:7px;list-style:none}
+#eventsPage #eventHistory summary::-webkit-details-marker{display:none}
+#eventsPage #eventHistory .event-accordion-triangle{display:inline-block;width:0;height:0;flex:0 0 auto;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:7px solid currentColor;color:#b9d3eb}
+#eventsPage #eventHistory details[open] .event-accordion-triangle{border-bottom:0;border-top:7px solid currentColor}
 #eventsPage #eventHistory .event-summary-label{flex:1;min-width:0}
 .sync-symbol{display:inline-flex;width:12px;height:12px;flex:0 0 12px;align-items:center;justify-content:center;vertical-align:middle}
 .sync-symbol svg{display:block;width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
@@ -2227,8 +2230,11 @@ function renderHistory(){
     header.style.fontWeight="600";
     const summaryLabel=document.createElement("span");
     summaryLabel.className="event-summary-label";
-    summaryLabel.textContent=e.event_type+" | "+timeLabel(eventEffectiveTime(e))+
-      (e.area?" | "+e.area:"");
+    const eventDate=new Date(eventEffectiveTime(e));
+    const headerTime=Number.isNaN(eventDate.getTime())
+      ?String(eventEffectiveTime(e))
+      :eventDate.toLocaleString("en-US",{month:"long",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit",second:"2-digit",hour12:true});
+    summaryLabel.textContent=e.event_type+" | "+headerTime+" | "+nameById(e.investigator_id);
     const syncIcon=document.createElement("span");
     const failed=e._local&&e._syncFailed;
     syncIcon.className="sync-symbol "+(failed?"sync-error":e._local?"sync-wait":"sync-ok");
@@ -2239,7 +2245,10 @@ function renderHistory(){
         :'<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="m4.8 8 2.2 2.2 4.3-4.5"/></svg>';
     syncIcon.setAttribute("aria-label",failed?"Not synced, needs attention":e._local?"Pending synchronization":"Synced");
     syncIcon.title=syncIcon.getAttribute("aria-label");
-    header.append(summaryLabel,syncIcon);
+    const triangle=document.createElement("span");
+    triangle.className="event-accordion-triangle";
+    triangle.setAttribute("aria-hidden","true");
+    header.append(triangle,summaryLabel,syncIcon);
     card.append(header);
     const body=document.createElement("div");
     body.style.paddingTop="10px";
