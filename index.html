@@ -320,6 +320,13 @@ form {min-width:0}
 }
 
 
+/* Tiny synchronization symbols, aligned to the right of each event header */
+#eventsPage #eventHistory summary{display:flex;align-items:center;gap:7px}
+#eventsPage #eventHistory .event-summary-label{flex:1;min-width:0}
+.sync-symbol{display:inline-flex;width:12px;height:12px;flex:0 0 12px;align-items:center;justify-content:center;vertical-align:middle}
+.sync-symbol svg{display:block;width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.sync-ok{color:#39b86a}.sync-wait{color:#e5b83b}.sync-error{color:#ed6060}
+.sync-legend-item{display:inline-flex;align-items:center;gap:5px}
 /* Compact event history status and actions */
 .event-inline-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}
 .event-inline-controls .event-status{margin:0}
@@ -705,9 +712,9 @@ form {min-width:0}
     </div>
   </div>
   <div id="eventSyncLegend" class="muted compact" aria-label="Event synchronization status legend" style="border-top:1px solid var(--border, #555);margin-top:18px;padding:12px 0 4px;font-size:.78rem;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center">
-    <span><span style="color:#39b86a;font-weight:bold" aria-hidden="true">✓</span> Synced</span>
-    <span><span style="color:#e5b83b;font-weight:bold" aria-hidden="true">◷</span> Pending</span>
-    <span><span style="color:#ed6060;font-weight:bold" aria-hidden="true">!</span> Not synced (needs attention)</span>
+    <span class="sync-legend-item"><span class="sync-symbol sync-ok" aria-hidden="true"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="m4.8 8 2.2 2.2 4.3-4.5"/></svg></span> Synced</span>
+    <span class="sync-legend-item"><span class="sync-symbol sync-wait" aria-hidden="true"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.2v4.1l2.7 1.5"/></svg></span> Pending</span>
+    <span class="sync-legend-item"><span class="sync-symbol sync-error" aria-hidden="true"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.1v5.2"/><circle cx="8" cy="11.8" r=".45" fill="currentColor" stroke="none"/></svg></span> Not synced (needs attention)</span>
   </div>
 </section>
 
@@ -2218,15 +2225,21 @@ function renderHistory(){
     header.style.cursor="pointer";
     header.style.padding="4px 0";
     header.style.fontWeight="600";
+    const summaryLabel=document.createElement("span");
+    summaryLabel.className="event-summary-label";
+    summaryLabel.textContent=e.event_type+" | "+timeLabel(eventEffectiveTime(e))+
+      (e.area?" | "+e.area:"");
     const syncIcon=document.createElement("span");
     const failed=e._local&&e._syncFailed;
-    syncIcon.textContent=e._local?(failed?"!":"◷"):"✓";
-    syncIcon.style.cssText="display:inline-block;min-width:1.3em;font-weight:800;color:"+
-      (failed?"#ed6060":e._local?"#e5b83b":"#39b86a");
+    syncIcon.className="sync-symbol "+(failed?"sync-error":e._local?"sync-wait":"sync-ok");
+    syncIcon.innerHTML=failed
+      ?'<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.1v5.2"/><circle cx="8" cy="11.8" r=".45" fill="currentColor" stroke="none"/></svg>'
+      :e._local
+        ?'<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.2v4.1l2.7 1.5"/></svg>'
+        :'<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="m4.8 8 2.2 2.2 4.3-4.5"/></svg>';
     syncIcon.setAttribute("aria-label",failed?"Not synced, needs attention":e._local?"Pending synchronization":"Synced");
     syncIcon.title=syncIcon.getAttribute("aria-label");
-    header.append(syncIcon,document.createTextNode(e.event_type+" | "+timeLabel(eventEffectiveTime(e))+
-      (e.area?" | "+e.area:"")));
+    header.append(summaryLabel,syncIcon);
     card.append(header);
     const body=document.createElement("div");
     body.style.paddingTop="10px";
