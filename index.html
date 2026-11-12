@@ -633,7 +633,8 @@ form {min-width:0}
           placeholder="Enter an area">
         <label>Description (optional)</label>
         <textarea id="eventNotes"
-          placeholder="What happened?"></textarea>
+          placeholder="What happened?" aria-describedby="eventNotesWordCount"></textarea>
+        <div id="eventNotesWordCount" class="muted compact" aria-live="polite">0 / 350 words</div>
         <div class="actions">
           <button id="saveEvent">Log Event</button>
           <button class="secondary"
@@ -675,7 +676,8 @@ form {min-width:0}
      <p id="correctionOriginal" class="muted"></p>
      <label>Event Type</label><select id="correctionType"></select>
      <label>Corrected Date and Time</label><input type="datetime-local" id="correctionTime" step="1">      <label>Room / Area</label><select id="correctionArea"></select>
-     <label>Description</label><textarea id="correctionNotes"></textarea>
+     <label>Description</label><textarea id="correctionNotes" aria-describedby="correctionNotesWordCount"></textarea>
+     <div id="correctionNotesWordCount" class="muted compact" aria-live="polite">0 / 350 words</div>
      <label>Reason for Correction (required)</label><textarea id="correctionReason" required></textarea>
      <div class="actions"><button id="submitCorrection">Save Correction</button><button id="cancelCorrection" class="secondary">Cancel</button></div>
      <div id="correctionAudit" class="muted"></div>
@@ -701,6 +703,11 @@ form {min-width:0}
         Reactivate Investigation
       </button>
     </div>
+  </div>
+  <div id="eventSyncLegend" class="muted compact" aria-label="Event synchronization status legend" style="border-top:1px solid var(--border, #555);margin-top:18px;padding:12px 0 4px;font-size:.78rem;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center">
+    <span><span style="color:#39b86a;font-weight:bold" aria-hidden="true">✓</span> Synced</span>
+    <span><span style="color:#e5b83b;font-weight:bold" aria-hidden="true">◷</span> Pending</span>
+    <span><span style="color:#ed6060;font-weight:bold" aria-hidden="true">!</span> Not synced (needs attention)</span>
   </div>
 </section>
 
@@ -971,6 +978,25 @@ function formatLocalDateTime(iso){
   const pad=n=>String(n).padStart(2,"0");
   return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds());
 }
+const EVENT_DETAIL_WORD_LIMIT=350;
+function eventWordCount(value){return (value.trim().match(/\S+/g)||[]).length;}
+function enforceEventWordLimit(fieldId,counterId){
+  const field=$(fieldId),counter=$(counterId);
+  if(!field||!counter)return true;
+  const value=field.value;
+  const matches=[...value.matchAll(/\S+/g)];
+  if(matches.length>EVENT_DETAIL_WORD_LIMIT){
+    const last=matches[EVENT_DETAIL_WORD_LIMIT-1];
+    field.value=value.slice(0,last.index+last[0].length);
+  }
+  const count=eventWordCount(field.value);
+  counter.textContent=count+" / "+EVENT_DETAIL_WORD_LIMIT+" words";
+  return count<=EVENT_DETAIL_WORD_LIMIT;
+}
+function updateEventWordCounters(){
+  enforceEventWordLimit("eventNotes","eventNotesWordCount");
+  enforceEventWordLimit("correctionNotes","correctionNotesWordCount");
+}
 function canCorrectEvent(e){
   const inv=currentInvestigation();
   return !!(user&&e&&!e._local&&inv?.status==="active"&&(role==="admin"||e.recorded_by===user.id));
@@ -1015,6 +1041,7 @@ function openEventCorrection(e){
   types.forEach(type=>option(select,type,type));select.value=e.event_type;
   $("correctionTime").value=formatLocalDateTime(eventEffectiveTime(e));   populateCorrectionAreaOptions(e.area||"");
   $("correctionNotes").value=e.notes||"";
+  updateEventWordCounters();
   $("correctionReason").value="";
   $("correctionOriginal").textContent="Original timestamp (never changed): "+timeLabel(e.event_time);
   show("eventCorrectionPanel",true);
@@ -1055,6 +1082,7 @@ async function submitEventCorrection(){
   const local=$("correctionTime").value;
   const corrected=new Date(local);
   if(!reason||!local||Number.isNaN(corrected.getTime())){msg("Valid corrected time and a reason are required.","warn");return;}
+  updateEventWordCounters();
   const button=$("submitCorrection");button.disabled=true;
   try{
     const {data,error}=await db.rpc("docuhub_correct_event",{
@@ -2036,6 +2064,7 @@ function captureEvent(type){
   $("eventTime").textContent=
     type+" | "+timeLabel(capturedTime);
   $("eventNotes").value="";
+  updateEventWordCounters();
   $("eventCustomArea").value="";
 eventAreaOptions();
 restoreRememberedArea();
@@ -2086,6 +2115,7 @@ async function saveEvent(){
   if(selected!==user.id&&!allowed.includes(selected)){
     msg("Investigator is not assigned.","bad");return;
   }
+  updateEventWordCounters();
   const entry={
     ...pending,
     investigator_id:selected,
@@ -2182,33 +2212,44 @@ function renderHistory(){
     combined.length+
     " event(s) displayed, newest first.","muted");
   combined.forEach(e=>{
-    const card=document.createElement("div");
+    const card=document.createElement("details");
     card.className="item";
-    addText(card,"strong",e.event_type);
-    addText(card,"p",timeLabel(eventEffectiveTime(e)),"marker");
-    if(e.corrected_event_time)addText(card,"p","Original: "+timeLabel(e.event_time)+" (corrected)","muted");
-    addText(card,"p",
-      "Investigator: "+nameById(e.investigator_id),
-      "muted");
+    const header=document.createElement("summary");
+    header.style.cursor="pointer";
+    header.style.padding="4px 0";
+    header.style.fontWeight="600";
+    const syncIcon=document.createElement("span");
+    const failed=e._local&&e._syncFailed;
+    syncIcon.textContent=e._local?(failed?"!":"◷"):"✓";
+    syncIcon.style.cssText="display:inline-block;min-width:1.3em;font-weight:800;color:"+
+      (failed?"#ed6060":e._local?"#e5b83b":"#39b86a");
+    syncIcon.setAttribute("aria-label",failed?"Not synced, needs attention":e._local?"Pending synchronization":"Synced");
+    syncIcon.title=syncIcon.getAttribute("aria-label");
+    header.append(syncIcon,document.createTextNode(e.event_type+" | "+timeLabel(eventEffectiveTime(e))+
+      (e.area?" | "+e.area:"")));
+    card.append(header);
+    const body=document.createElement("div");
+    body.style.paddingTop="10px";
+    if(e.corrected_event_time)addText(body,"p","Original: "+timeLabel(e.event_time)+" (corrected)","muted");
+    addText(body,"p","Investigator: "+nameById(e.investigator_id),"muted");
     const recorder=e.recorded_by||e.investigator_id;
     if(recorder!==e.investigator_id){
-      addText(card,"p",
-        "Recorded by: "+nameById(recorder),"muted");
+      addText(body,"p","Recorded by: "+nameById(recorder),"muted");
     }
-    if(e.area)addText(card,"p","Area: "+e.area);
-    if(e.notes)addText(card,"p",e.notes);
+    if(e.area)addText(body,"p","Area: "+e.area);
+    if(e.notes)addText(body,"p",e.notes);
     const controls=document.createElement("div");
     controls.className="event-inline-controls";
-    addText(controls,"span",
-      e._local?"Pending synchronization":"Synchronized",
-      "event-status "+(e._local?"warn":"good"));
+    addText(controls,"span",e._local?(e._syncFailed?"Not synced: needs attention":"Pending synchronization"):"Synchronized",
+      "event-status "+(e._local?(e._syncFailed?"bad":"warn"):"good"));
     if(canCorrectEvent(e)){
       addButton(controls,"Correct Event",()=>openEventCorrection(e),"event-inline-button");
       addButton(controls,"View Audit",()=>openEventAudit(e),"event-inline-button");
     }else if(!e._local){
       addButton(controls,"View Audit",()=>openEventAudit(e),"event-inline-button");
     }
-    card.append(controls);
+    body.append(controls);
+    card.append(body);
     box.append(card);
   });
 }
@@ -2228,7 +2269,7 @@ async function syncEvents(forceAll=false){
       const owner=localOwner(entry);
       if(owner!==user.id&&!includeOthers){remaining.push(entry);skipped++;continue;}
       if(!entry.id||!entry.investigation_id||!entry.investigator_id||!owner){
-        remaining.push(entry);
+        remaining.push({...entry,_syncFailed:true});
         firstError||="A marker has missing identity fields.";
         continue;
       }
@@ -2239,7 +2280,7 @@ async function syncEvents(forceAll=false){
           .eq("investigation_id",entry.investigation_id)
           .eq("member_id",user.id).limit(1);
         if(check.error||(check.data||[]).length===0){
-          remaining.push(entry);
+          remaining.push({...entry,_syncFailed:true});
           firstError||=check.error?.message||"An event is awaiting assignment review.";
           continue;
         }
@@ -2274,7 +2315,7 @@ async function syncEvents(forceAll=false){
           uploaded++;continue;
         }
       }
-      remaining.push(entry);
+      remaining.push({...entry,_syncFailed:true});
       firstError||=error.message;
     }
     // Keep markers added during upload; remove only those confirmed synced.
@@ -3125,6 +3166,10 @@ $("refreshInvestigations").addEventListener(
 $("backToInvestigations").addEventListener(
   "click",closeWorkspace
 );
+["eventNotes","correctionNotes"].forEach(id=>{
+  const counter=id==="eventNotes"?"eventNotesWordCount":"correctionNotesWordCount";
+  $(id).addEventListener("input",()=>enforceEventWordLimit(id,counter));
+});
 $("saveEvent").addEventListener("click",saveEvent);
 $("cancelEvent").addEventListener("click",cancelEvent);
 $("submitCorrection").addEventListener("click",submitEventCorrection);
