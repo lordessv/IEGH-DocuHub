@@ -720,6 +720,7 @@ form {min-width:0}
     Delete Investigation
   </button>
 </div>
+<p id="deleteInvestigationFeedback" class="muted" role="status" aria-live="polite" style="margin-top:10px"></p>
     </div>
   </div>
   <div id="eventSyncLegend" class="muted compact" aria-label="Event synchronization status legend" style="border-top:1px solid var(--border, #555);margin-top:18px;padding:12px 0 4px;font-size:.78rem;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center">
@@ -3227,77 +3228,75 @@ $("endInvestigation").addEventListener(
 $("reopenInvestigation").addEventListener(
   "click",()=>changeInvestigationStatus("active")
 );
-  $("deleteInvestigation").addEventListener("click", async () => {
-  if (role !== "admin" || !user) return;
+$("deleteInvestigation").addEventListener("click", async () => {
+  const feedback = $("deleteInvestigationFeedback");
+  const button = $("deleteInvestigation");
+  const report = (message, kind = "bad") => {
+    feedback.textContent = message;
+    feedback.className = kind;
+    msg(message, kind);
+  };
+  feedback.textContent = "";
 
-  const inv = currentInvestigation();
-  if (!inv) return;
-
-  const location = locations.find(
-    x => x.id === inv.location_id
-  );
-
-  const name = location?.name || "Unknown Location";
-  const date = inv.investigation_date;
-
-  const pendingMarkers = queueRead().filter(
-    x => x.investigation_id === inv.id
-  );
-
-  if (pendingMarkers.length) {
-    msg(
-      "Cannot delete: " + pendingMarkers.length +
-      " unsynchronized local marker(s) belong to this investigation.",
-      "warn"
-    );
+  if (role !== "admin" || !user) {
+    report("Only a signed-in administrator can delete an investigation.");
     return;
   }
 
-  const confirmed = confirm(
+  const inv = currentInvestigation();
+  if (!inv) {
+    report("No investigation is selected. Reopen the investigation and try again.");
+    return;
+  }
+
+  const name = locationName(inv.location_id) || "Unknown Location";
+  const date = formatDate(inv.investigation_date);
+  const pendingMarkers = queueRead().filter(x => x.investigation_id === inv.id);
+
+  // Always give immediate feedback in the same panel as the button.
+  // Previously, an early return for pending markers appeared to do nothing
+  // because the message was only written to the global status area.
+  if (pendingMarkers.length) {
+    report("Deletion blocked: " + pendingMarkers.length +
+      " unsynchronized marker(s) are stored on this device for " +
+      name + ". Sync or back up and resolve those markers first.", "warn");
+    return;
+  }
+
+  if (!window.confirm(
     "PERMANENTLY DELETE INVESTIGATION?\n\n" +
-    name + "\n" +
-    date + "\n\n" +
-    "All associated events, evidence, reports, " +
-    "assignments and environmental records will be deleted.\n\n" +
+    name + "\n" + date + "\n\n" +
+    "Associated investigation records will be permanently removed.\n\n" +
     "THIS CANNOT BE UNDONE."
-  );
+  )) return;
 
-  if (!confirmed) return;
+  if (window.prompt(
+    "Type DELETE to permanently remove:\n" + name + " (" + date + ")"
+  ) !== "DELETE") {
+    report("Deletion cancelled. Type DELETE exactly to confirm.", "muted");
+    return;
+  }
 
-  const verification = prompt(
-    "Type DELETE to permanently remove:\n" +
-    name + " (" + date + ")"
-  );
-
-  if (verification !== "DELETE") return;
-
-  const button = $("deleteInvestigation");
   button.disabled = true;
-
+  report("Deleting investigation…", "muted");
   try {
-    const { data, error } = await db.rpc(
-      "admin_delete_investigation",
-      { p_investigation_id: inv.id }
-    );
-
+    const { data, error } = await db.rpc("admin_delete_investigation", {
+      p_investigation_id: inv.id
+    });
     if (error) throw error;
-    if (data !== true) {
-      throw new Error("Investigation was not deleted.");
-    }
+    if (data !== true) throw new Error(
+      "The deletion function did not confirm success. Check that the Supabase admin_delete_investigation RPC is installed and returns true."
+    );
 
     activeInvestigationId = null;
     historyInvestigation = null;
     historyEvents = [];
-
     delete assignments[inv.id];
-
     await loadData();
     setPage("investigationsPage");
-
-    msg("Investigation permanently deleted.", "good");
-
+    msg("Investigation permanently deleted: " + name + " (" + date + ").", "good");
   } catch (e) {
-    msg("Deletion failed: " + e.message, "bad");
+    report("Deletion failed: " + (e?.message || String(e)));
   } finally {
     button.disabled = false;
   }
