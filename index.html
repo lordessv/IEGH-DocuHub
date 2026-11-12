@@ -3227,6 +3227,81 @@ $("endInvestigation").addEventListener(
 $("reopenInvestigation").addEventListener(
   "click",()=>changeInvestigationStatus("active")
 );
+  $("deleteInvestigation").addEventListener("click", async () => {
+  if (role !== "admin" || !user) return;
+
+  const inv = currentInvestigation();
+  if (!inv) return;
+
+  const location = locations.find(
+    x => x.id === inv.location_id
+  );
+
+  const name = location?.name || "Unknown Location";
+  const date = inv.investigation_date;
+
+  const pendingMarkers = queueRead().filter(
+    x => x.investigation_id === inv.id
+  );
+
+  if (pendingMarkers.length) {
+    msg(
+      "Cannot delete: " + pendingMarkers.length +
+      " unsynchronized local marker(s) belong to this investigation.",
+      "warn"
+    );
+    return;
+  }
+
+  const confirmed = confirm(
+    "PERMANENTLY DELETE INVESTIGATION?\n\n" +
+    name + "\n" +
+    date + "\n\n" +
+    "All associated events, evidence, reports, " +
+    "assignments and environmental records will be deleted.\n\n" +
+    "THIS CANNOT BE UNDONE."
+  );
+
+  if (!confirmed) return;
+
+  const verification = prompt(
+    "Type DELETE to permanently remove:\n" +
+    name + " (" + date + ")"
+  );
+
+  if (verification !== "DELETE") return;
+
+  const button = $("deleteInvestigation");
+  button.disabled = true;
+
+  try {
+    const { data, error } = await db.rpc(
+      "admin_delete_investigation",
+      { p_investigation_id: inv.id }
+    );
+
+    if (error) throw error;
+    if (data !== true) {
+      throw new Error("Investigation was not deleted.");
+    }
+
+    activeInvestigationId = null;
+    historyInvestigation = null;
+    historyEvents = [];
+
+    delete assignments[inv.id];
+
+    await loadData();
+    setPage("investigationsPage");
+
+    msg("Investigation permanently deleted.", "good");
+
+  } catch (e) {
+    msg("Deletion failed: " + e.message, "bad");
+  } finally {
+    button.disabled = false;
+  }
+});
 $("downloadExcel").addEventListener(
   "click",()=>downloadReport("excel")
 );
