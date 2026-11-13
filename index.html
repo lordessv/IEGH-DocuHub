@@ -723,6 +723,10 @@ form {min-width:0}
 <p id="deleteInvestigationFeedback" class="muted" role="status" aria-live="polite" style="margin-top:10px"></p>
     </div>
   </div>
+  <details id="weatherDetails" class="report-section" style="margin-top:18px">
+    <summary style="cursor:pointer;font-weight:700;padding:6px 0">Weather &amp; Environmental Conditions</summary>
+    <div id="weatherContent" class="muted" style="padding:12px 0" aria-live="polite">Open an investigation to view recorded weather.</div>
+  </details>
   <div id="eventSyncLegend" class="muted compact" aria-label="Event synchronization status legend" style="border-top:1px solid var(--border, #555);margin-top:18px;padding:12px 0 4px;font-size:.78rem;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center">
     <span class="sync-legend-item"><span class="sync-symbol sync-ok" aria-hidden="true"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="m4.8 8 2.2 2.2 4.3-4.5"/></svg></span> Synced</span>
     <span class="sync-legend-item"><span class="sync-symbol sync-wait" aria-hidden="true"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.2v4.1l2.7 1.5"/></svg></span> Pending</span>
@@ -2019,6 +2023,8 @@ async function openWorkspace(inv){
   renderHistory();
   renderPending();
   renderLoggerSyncStatus();
+  $("weatherDetails").open=false;
+  void showWorkspaceWeather(inv.id);
   window.scrollTo({top:0,behavior:"smooth"});
   const requestId=++workspaceRequest;
   try{
@@ -2516,6 +2522,42 @@ async function fetchAllEvents(invId){
   return all.sort((a,b)=>new Date(eventEffectiveTime(a))-new Date(eventEffectiveTime(b)));
 }
 
+// Weather is read from the existing investigation_weather table without assuming column names.
+const WEATHER_INTERNAL_FIELDS=new Set(["id","investigation_id","created_at","updated_at","created_by"]);
+const WEATHER_LABELS={temperature:"Temperature",temperature_f:"Temperature (°F)",temperature_c:"Temperature (°C)",humidity:"Humidity",humidity_percent:"Humidity (%)",wind_speed:"Wind speed",wind_direction:"Wind direction",cloud_cover:"Cloud cover",pressure:"Atmospheric pressure",atmospheric_pressure:"Atmospheric pressure",conditions:"Conditions",weather_conditions:"Conditions",moon_phase:"Moon phase",moon_illumination:"Moon illumination",sunset:"Sunset",captured_at:"Captured at",recorded_at:"Recorded at",observation_time:"Observation time"};
+function weatherPairs(weather){
+  if(!weather)return [];
+  return Object.entries(weather).filter(([key,value])=>
+    !WEATHER_INTERNAL_FIELDS.has(key)&&value!==null&&value!==""&&
+    typeof value!=="object"
+  ).map(([key,value])=>[WEATHER_LABELS[key]||key.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase()),String(value)]);
+}
+async function fetchInvestigationWeather(investigationId){
+  const {data,error}=await db.from("investigation_weather")
+    .select("*").eq("investigation_id",investigationId);
+  if(error)throw new Error("Unable to retrieve saved investigation weather: "+error.message);
+  return data||[];
+}
+async function showWorkspaceWeather(investigationId){
+  const box=$("weatherContent");
+  box.textContent="Loading recorded weather…";
+  try{
+    const records=await fetchInvestigationWeather(investigationId);
+    if(activeInvestigationId!==investigationId)return;
+    box.replaceChildren();
+    if(!records.length){box.textContent="No weather snapshot has been recorded for this investigation.";return;}
+    records.forEach((record,index)=>{
+      if(records.length>1){const heading=document.createElement("h4");heading.textContent="Weather snapshot "+(index+1);box.append(heading);}
+      const pairs=weatherPairs(record);
+      if(!pairs.length){const note=document.createElement("p");note.textContent="No weather values recorded.";box.append(note);}
+      pairs.forEach(([label,value])=>{
+        const line=document.createElement("p");line.style.margin="5px 0";
+        const strong=document.createElement("strong");strong.textContent=label+": ";
+        line.append(strong,document.createTextNode(value));box.append(line);
+      });
+    });
+  }catch(error){if(activeInvestigationId===investigationId)box.textContent=error.message;}
+}
 async function fetchReportData(){
   const inv=currentInvestigation();
   if(!inv||inv.status!=="completed"){
@@ -2537,8 +2579,8 @@ async function fetchReportData(){
       "This investigation is no longer completed."
     );
   }
-  const [events,assigned]=await Promise.all([
-    fetchAllEvents(inv.id),loadAssignments(inv.id)
+  const [events,assigned,weather]=await Promise.all([
+    fetchAllEvents(inv.id),loadAssignments(inv.id),fetchInvestigationWeather(inv.id)
   ]);
   if(events.length===0){
     throw new Error("No synchronized events were returned. Report export stopped to avoid an incomplete report.");
@@ -2557,6 +2599,7 @@ async function fetchReportData(){
     inv:latest,
     loc:locations.find(x=>x.id===latest.location_id),
     events,
+    weather,
     investigators:members.filter(m=>
       assigned.includes(m.id)
     ).sort((a,b)=>
@@ -2618,6 +2661,14 @@ async function generateExcel(data){
     ["Report Generated",
       timeLabel(new Date().toISOString())]
   ];
+  details.push(["WEATHER & ENVIRONMENTAL CONDITIONS"]);
+  if(!data.weather.length)details.push(["Weather","No weather snapshot recorded"]);
+  data.weather.forEach((record,index)=>{
+    if(data.weather.length>1)details.push(["Snapshot",index+1]);
+    const pairs=weatherPairs(record);
+    if(!pairs.length)details.push(["Weather","No weather values recorded"]);
+    pairs.forEach(pair=>details.push(pair));
+  });
   const summary=XLSX.utils.aoa_to_sheet(details);
   summary["!cols"]=[{wch:24},{wch:85}];
   XLSX.utils.book_append_sheet(
@@ -2780,6 +2831,14 @@ async function generatePDF(data){
             ["Documented Events",String(data.events.length)]);
   fullDetail("Participating Investigators",data.investigators.map(memberName).join(", ")||"None assigned");
   if(data.inv.notes)fullDetail("Investigation Notes",data.inv.notes);
+  section("Weather & Environmental Conditions");
+  if(!data.weather.length)text("No weather snapshot recorded.",{size:9,color:muted});
+  data.weather.forEach((record,index)=>{
+    if(data.weather.length>1)fullDetail("Weather Snapshot",String(index+1));
+    const pairs=weatherPairs(record);
+    if(!pairs.length)text("No weather values recorded.",{size:9,color:muted});
+    pairs.forEach(([label,value])=>fullDetail(label,value));
+  });
   section("Activity Summary");
   const byType={},byArea={};
   data.events.forEach(e=>{
