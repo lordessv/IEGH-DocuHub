@@ -2527,10 +2527,70 @@ const WEATHER_INTERNAL_FIELDS=new Set(["id","investigation_id","created_at","upd
 const WEATHER_LABELS={temperature:"Temperature",temperature_f:"Temperature (°F)",temperature_c:"Temperature (°C)",humidity:"Humidity",humidity_percent:"Humidity (%)",wind_speed:"Wind speed",wind_direction:"Wind direction",cloud_cover:"Cloud cover",pressure:"Atmospheric pressure",atmospheric_pressure:"Atmospheric pressure",conditions:"Conditions",weather_conditions:"Conditions",moon_phase:"Moon phase",moon_illumination:"Moon illumination",sunset:"Sunset",captured_at:"Captured at",recorded_at:"Recorded at",observation_time:"Observation time"};
 function weatherPairs(weather){
   if(!weather)return [];
-  return Object.entries(weather).filter(([key,value])=>
-    !WEATHER_INTERNAL_FIELDS.has(key)&&value!==null&&value!==""&&
-    typeof value!=="object"
-  ).map(([key,value])=>[WEATHER_LABELS[key]||key.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase()),String(value)]);
+
+  const pairs=[];
+
+  const add=(label,value,unit="")=>{
+    if(value===null||value===undefined||value==="")return;
+    pairs.push([label,String(value)+unit]);
+  };
+
+  const localDateTime=value=>{
+    if(!value)return "";
+    const date=new Date(value);
+    if(Number.isNaN(date.getTime()))return String(value);
+    return date.toLocaleString("en-US",{
+      month:"short",
+      day:"numeric",
+      year:"numeric",
+      hour:"numeric",
+      minute:"2-digit",
+      second:"2-digit",
+      hour12:true
+    });
+  };
+
+  const localSunset=value=>{
+    if(!value)return "";
+    const date=new Date(value);
+    if(Number.isNaN(date.getTime()))return String(value);
+    return date.toLocaleString("en-US",{
+      month:"short",
+      day:"numeric",
+      year:"numeric",
+      hour:"numeric",
+      minute:"2-digit",
+      hour12:true
+    });
+  };
+
+  add("Conditions",weather.conditions);
+  add("Captured",localDateTime(weather.captured_at));
+
+  add("Temperature",weather.temperature_f,"°F");
+  add("Feels Like",weather.feels_like_f,"°F");
+  add("Humidity",weather.humidity_percent,"%");
+
+  if(weather.atmospheric_pressure_hpa!==null &&
+     weather.atmospheric_pressure_hpa!==undefined){
+    add(
+      "Atmospheric Pressure",
+      Math.round(Number(weather.atmospheric_pressure_hpa)),
+      " hPa"
+    );
+  }
+
+  add("Wind",weather.wind_mph," mph");
+  add("Moon Phase",weather.moon_phase);
+  add(
+    "Moon Illumination",
+    weather.moon_illumination_percent,
+    "%"
+  );
+
+  add("Sunset",localSunset(weather.sunset_time));
+
+  return pairs;
 }
 async function fetchInvestigationWeather(investigationId){
   const {data,error}=await db.from("investigation_weather")
