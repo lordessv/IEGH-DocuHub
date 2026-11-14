@@ -1749,6 +1749,7 @@ async function saveInvestigation(e){
     const existing=investigations.find(
       x=>x.id===editingInvestigation
     );
+    if(!canSetInvestigationStatus(editingInvestigation,data.status))return;
     if(existing?.status==="completed"&&data.status==="completed" &&
        (existing.location_id!==data.location_id||existing.investigation_date!==data.investigation_date||
         String(existing.start_time||"").slice(0,5)!==data.start_time||String(existing.notes||"")!==data.notes)){
@@ -2468,6 +2469,14 @@ async function syncEvents(forceAll=false){
 /* ADMIN CLOSEOUT */
 
 
+function canSetInvestigationStatus(investigationId,nextStatus){
+  if(nextStatus!=="completed")return true;
+  const count=queueRead().filter(x=>x.investigation_id===investigationId).length;
+  if(!count)return true;
+  msg("Cannot finalize investigation: "+count+" pending local marker(s) on this device. Sync them first.","warn");
+  return false;
+}
+
 async function changeInvestigationStatus(nextStatus){
   if(role!=="admin"||!user)return;
   const inv=currentInvestigation();
@@ -2477,12 +2486,7 @@ async function changeInvestigationStatus(nextStatus){
   if(!transitions[previous]?.includes(nextStatus)){
     msg("This status transition is not permitted.","warn");return;
   }
-  if(nextStatus==="completed"){
-    const local=queueRead().filter(x=>x.investigation_id===inv.id);
-    if(local.length){
-      msg("Cannot finalize investigation: "+local.length+" pending local marker(s) on this device. Sync them first.","warn");return;
-    }
-  }
+  if(!canSetInvestigationStatus(inv.id,nextStatus))return;
   const prompts={
     concluded:"Conclude fieldwork? Event logging will close, but evidence submissions will remain open.",
     completed:"Finalize investigation? Evidence submissions will close and records will lock.",
@@ -2806,152 +2810,171 @@ function safePDFText(value){
 async function generatePDF(data){
   if(!window.jspdf?.jsPDF)throw new Error("PDF library unavailable.");
   const doc=new window.jspdf.jsPDF({unit:"pt",format:"letter"});
-  const W=612,H=792,L=48,R=48,C=W-L-R,B=H-55;
-  const ink=[35,48,66],muted=[90,105,123],navy=[27,54,85],rule=[209,218,228];
-  let y=58,page=1;
-  const clean=value=>safePDFText(value);
-  function setColor(rgb){doc.setTextColor(...rgb);}
+  const W=612,H=792,L=44,R=44,C=W-L-R,B=742,TOP=83;
+  const ink=[30,38,48],muted=[85,95,108],rule=[170,179,190];
+  let y=TOP;
+  const clean=value=>safePDFText(String(value??"").replace(/°/g," deg ")).replace(/ deg /g,"°");
+  function style(size=10,bold=false,color=ink){
+    doc.setFont("helvetica",bold?"bold":"normal");doc.setFontSize(size);doc.setTextColor(...color);
+  }
   function chrome(){
-    doc.setFillColor(...navy);doc.rect(0,0,W,7,"F");
-    doc.setFont("helvetica","bold");doc.setFontSize(8);setColor(muted);
-    doc.text("IEGH  /  INVESTIGATION DOCUMENTATION",L,31);
-    doc.setDrawColor(...rule);doc.line(L,39,W-R,39);
-    doc.setFont("helvetica","normal");doc.text("Page "+page,W-R,H-27,{align:"right"});
-    setColor(ink);
+    style(25,true);doc.text("IEGH",L,49);
+    style(11,true);doc.text("INVESTIGATION REPORT",W-R,49,{align:"right"});
+    doc.setDrawColor(...rule);doc.setLineWidth(.6);doc.line(L,61,W-R,61);
   }
-  function next(){doc.addPage();page++;y=58;chrome();}
-  function need(h){if(y+h>B)next();}
-  function lines(value,max=C){return doc.splitTextToSize(clean(value),max);}
-  function text(value,{size=10,bold=false,indent=0,after=6,color=ink}={}){
-    doc.setFont("helvetica",bold?"bold":"normal");doc.setFontSize(size);setColor(color);
-    const lh=size*1.43;
-    for(const line of lines(value,C-indent)){
-      need(lh);doc.text(line,L+indent,y);y+=lh;
-    }
-    y+=after;setColor(ink);
-  }
-  function section(name){
-    need(37);y+=13;
-    doc.setDrawColor(...rule);doc.line(L,y,W-R,y);y+=21;
-    text(name.toUpperCase(),{size:10,bold:true,after:8,color:navy});
-  }
-  const gutter=22,colW=(C-gutter)/2;
-  function columnText(label,value,x,width){
-    doc.setFont("helvetica","bold");doc.setFontSize(8);setColor(muted);
-    const labelLines=doc.splitTextToSize(clean(label.toUpperCase()),width);
-    doc.setFont("helvetica","normal");doc.setFontSize(10);setColor(ink);
-    const valueLines=doc.splitTextToSize(clean(value||"Not recorded"),width);
-    return {labelLines,valueLines,height:labelLines.length*11+4+valueLines.length*14+12};
-  }
-  function drawColumn(item,x,top){
-    doc.setFont("helvetica","bold");doc.setFontSize(8);setColor(muted);
-    item.labelLines.forEach((line,i)=>doc.text(line,x,top+i*11));
-    doc.setFont("helvetica","normal");doc.setFontSize(10);setColor(ink);
-    const valueTop=top+item.labelLines.length*11+4;
-    item.valueLines.forEach((line,i)=>doc.text(line,x,valueTop+i*14));
-  }
-  function detailRow(left,right){
-    const a=columnText(left[0],left[1],L,colW);
-    const b=right?columnText(right[0],right[1],L+colW+gutter,colW):null;
-    const height=Math.max(a.height,b?.height||0);
-    need(height);const top=y;drawColumn(a,L,top);
-    if(b)drawColumn(b,L+colW+gutter,top);
-    y=top+height;
-  }
-  function fullDetail(label,value){
-    const item=columnText(label,value,L,C);
-    need(item.height);drawColumn(item,L,y);y+=item.height;
-  }
-  function countEntries(map){
-    return Object.entries(map).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
-  }
-  function countPanel(title,entries,empty,x,top){
-    doc.setFont("helvetica","bold");doc.setFontSize(9);setColor(muted);
-    doc.text(title,x,top);let pos=top+19;
-    if(!entries.length)entries=[[empty,""]];
-    entries.forEach(([name,count])=>{
-      doc.setFont("helvetica","normal");doc.setFontSize(9);setColor(ink);
-      const rows=doc.splitTextToSize(clean(name),colW-31);
-      rows.forEach((line,i)=>doc.text(line,x+3,pos+i*13));
-      if(count!==""){
-        doc.setFont("helvetica","bold");doc.text(String(count),x+colW-3,pos,{align:"right"});
+  function next(){doc.addPage();chrome();y=TOP;}
+  function need(height){if(y+height>B)next();}
+  // Measure every word with its actual font so bold labels and regular values wrap together.
+  function wrap(runs,width,size=10){
+    const lines=[];let line=[],used=0;
+    function push(){lines.push(line);line=[];used=0;}
+    for(const run of runs){
+      const words=clean(run.text).split(/(\n|[ \t]+)/).filter(Boolean);
+      for(let word of words){
+        if(word==='\n'){push();continue;}
+        style(size,!!run.bold);
+        const space=/^[ \t]+$/.test(word);
+        if(space)word=' ';
+        let w=doc.getTextWidth(word);
+        if(used+w>width&&line.length){push();if(space)continue;}
+        if(space&&!line.length)continue;
+        // Break unusually long words/URLs instead of allowing horizontal overflow.
+        if(w>width){
+          for(const ch of word){
+            const cw=doc.getTextWidth(ch);
+            if(used+cw>width&&line.length)push();
+            line.push({text:ch,bold:!!run.bold});used+=cw;
+          }
+        }else{line.push({text:word,bold:!!run.bold});used+=w;}
       }
-      pos+=rows.length*13+6;
-    });
-    return pos;
-  }
-  function panelHeight(entries,empty){
-    const items=entries.length?entries:[[empty,""]];
-    doc.setFont("helvetica","normal");doc.setFontSize(9);
-    return 19+items.reduce((sum,[name])=>sum+doc.splitTextToSize(clean(name),colW-31).length*13+6,0);
-  }
-  function twoColumnCounts(leftEntries,rightEntries){
-    // Keep both columns synchronized and paginate in chunks so nothing clips off the page.
-    let i=0,j=0;
-    while(i<leftEntries.length||j<rightEntries.length||(!i&&!j)){
-      const available=B-y-8;
-      let a=[],b=[];
-      const l=leftEntries.length?leftEntries:[["No event types recorded.",""]];
-      const r=rightEntries.length?rightEntries:[["No areas recorded.",""]];
-      const heightOf=(arr)=>panelHeight(arr,"");
-      while(i<l.length && heightOf([...a,l[i]])<=available){a.push(l[i++]);}
-      while(j<r.length && heightOf([...b,r[j]])<=available){b.push(r[j++]);}
-      if(!a.length&&!b.length){next();continue;}
-      const top=y;
-      const h1=countPanel(i===a.length?"BY EVENT TYPE":"BY EVENT TYPE (CONT.)",a,"",L,top);
-      const h2=countPanel(j===b.length?"BY RECORDED AREA":"BY RECORDED AREA (CONT.)",b,"",L+colW+gutter,top);
-      y=Math.max(h1,h2)+10;
     }
+    if(line.length)push();
+    return lines.length?lines:[[]];
+  }
+  function rows(runs,width=C,size=10,after=5){
+    const wrapped=wrap(runs,width,size);
+    return wrapped.map((runs,i)=>({runs,size,height:size*1.38+(i===wrapped.length-1?after:0)}));
+  }
+  function plain(value,width=C,size=10,bold=false,after=5){return rows([{text:value,bold}],width,size,after);}
+  function labeled(label,value,width=C,size=10,after=5){
+    return rows([{text:label+": ",bold:true},{text:value}],width,size,after);
+  }
+  function draw(row,x,top){
+    let at=x;
+    for(const run of row.runs){style(row.size,run.bold);doc.text(run.text,at,top+row.size);at+=doc.getTextWidth(run.text);}
+  }
+  function flow(list){for(const row of list){need(row.height);draw(row,L,y);y+=row.height;}}
+  function section(title,following=32){
+    need(35+following);y+=9;
+    style(12,true);doc.text(title,L,y+12);y+=19;
+    doc.setDrawColor(...rule);doc.line(L,y,W-R,y);y+=10;
   }
   chrome();
-  text("INVESTIGATION REPORT",{size:21,bold:true,after:7,color:navy});
-  text(data.loc?.name||"Unnamed Location",{size:14,bold:true,after:6});
-  text(formatDate(data.inv.investigation_date)+"  |  "+statusLabel(data.inv.status),{size:9,color:muted,after:14});
-  section("Investigation Overview");
-  const street=String(data.loc?.address||"").trim();
+  const gap=20,leftWidth=(C-gap)*.60,weatherWidth=C-gap-leftWidth,weatherX=L+leftWidth+gap;
+  const left=[...plain(data.loc?.name||"Unnamed Location",leftWidth,16,true,9)];
+  if(data.loc?.address)left.push(...plain(data.loc.address,leftWidth,10,false,4));
   const locality=[data.loc?.city,data.loc?.state].filter(Boolean).join(", ");
   const cityLine=[locality,data.loc?.postal_code].filter(Boolean).join(" ");
-  const fullAddress=[street,cityLine].filter(Boolean).join(", ");
-  fullDetail("Location Address",fullAddress);
-  detailRow(["Investigation Date",formatDate(data.inv.investigation_date)],
-            ["Scheduled Start",formatTime(data.inv.start_time)]);
-  detailRow(["Status",statusLabel(data.inv.status)],
-            ["Documented Events",String(data.events.length)]);
-  fullDetail("Participating Investigators",data.investigators.map(memberName).join(", ")||"None assigned");
-  if(data.inv.notes)fullDetail("Investigation Notes",data.inv.notes);
-  section("Weather & Environmental Conditions");
-  if(!data.weather.length)text("No weather snapshot recorded.",{size:9,color:muted});
-  data.weather.forEach((record,index)=>{
-    if(data.weather.length>1)fullDetail("Weather Snapshot",String(index+1));
+  if(cityLine)left.push(...plain(cityLine,leftWidth,10,false,13));
+  left.push(...rows([{text:formatDate(data.inv.investigation_date)+"  |  "},{text:"Start: ",bold:true},{text:formatTime(data.inv.start_time)}],leftWidth,10,8));
+  left.push(...rows([{text:"Status: ",bold:true},{text:statusLabel(data.inv.status)+"   |   "},{text:"Events: ",bold:true},{text:String(data.events.length)}],leftWidth,9,5));
+  const weather=[];
+  if(!data.weather?.length)weather.push(...plain("No weather snapshot recorded.",weatherWidth-22,9));
+  (data.weather||[]).forEach((record,index)=>{
+    if(data.weather.length>1)weather.push(...plain("Snapshot "+(index+1),weatherWidth-22,9,true));
     const pairs=weatherPairs(record);
-    if(!pairs.length)text("No weather values recorded.",{size:9,color:muted});
-    pairs.forEach(([label,value])=>fullDetail(label,value));
+    if(!pairs.length)weather.push(...plain("No weather values recorded.",weatherWidth-22,9));
+    pairs.forEach(([label,value])=>weather.push(...labeled(label,value,weatherWidth-22,9,3)));
   });
-  section("Activity Summary");
-  const byType={},byArea={};
+  let li=0,wi=0;
+  while(li<left.length||wi<weather.length){
+    const top=y;let ly=top,wy=top+35;
+    while(li<left.length&&ly+left[li].height<=B-10){draw(left[li],L,ly);ly+=left[li++].height;}
+    if(wi<weather.length){
+      const start=wi;
+      while(wi<weather.length&&wy+weather[wi].height<=B-10){draw(weather[wi],weatherX+11,wy);wy+=weather[wi++].height;}
+      style(9,true);doc.text(start?"WEATHER & CONDITIONS (CONT.)":"WEATHER & CONDITIONS",weatherX+11,top+19);
+      doc.setDrawColor(...rule);doc.roundedRect(weatherX,top,weatherWidth,wy-top+9,5,5,"S");
+      wy+=9;
+    }else wy=top;
+    y=Math.max(ly,wy)+12;
+    if(li<left.length||wi<weather.length)next();
+  }
+  need(40);
+  flow(plain("Investigators",C,10,true,4));
+  const names=[...(data.investigators||[])].sort((a,b)=>memberName(a).localeCompare(memberName(b))).map(memberName);
+  flow(plain(names.join(", ")||"None assigned",C,10,false,7));
+  if(data.inv.notes)flow(labeled("Investigation Notes",data.inv.notes,C,10,7));
+  section("Activity Summary",55);
+  const byType=new Map(),byArea=new Map();
   data.events.forEach(e=>{
-    const type=e.event_type||"Unspecified";
-    const area=String(e.area||"").trim()||"Area not specified";
-    byType[type]=(byType[type]||0)+1;
-    byArea[area]=(byArea[area]||0)+1;
+    const type=e.event_type||"Unspecified",area=String(e.area||"").trim()||"Area not specified";
+    byType.set(type,(byType.get(type)||0)+1);byArea.set(area,(byArea.get(area)||0)+1);
   });
-  twoColumnCounts(countEntries(byType),countEntries(byArea));
-  section("Chronological Event Log");
-  data.events.forEach((e,index)=>{
-    need(86);
-    doc.setFillColor(243,246,250);doc.rect(L,y-11,C,24,"F");
-    text(String(index+1).padStart(3,"0")+"   "+(e.event_type||"Unspecified Event"),{size:10,bold:true,after:5,color:navy});
-    text("Time: "+timeLabel(eventEffectiveTime(e)),{size:9,after:3});
-    if(e.corrected_event_time)text("Original timestamp: "+timeLabel(e.event_time),{size:9,after:3,color:muted});
-    text("Investigator: "+nameById(e.investigator_id),{size:9,after:3});
+  const colWidth=(C-28)/2;
+  function countRows(map,empty){
+    if(!map.size)return plain(empty,colWidth,9);
+    return [...map].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).flatMap(([name,count])=>{
+      const list=plain(name,colWidth-35,10,false,6);
+      list[list.length-1].count=count;return list;
+    });
+  }
+  const counts=[countRows(byType,"No event types recorded."),countRows(byArea,"No areas recorded.")];
+  const offsets=[0,0];let continued=false;
+  while(offsets.some((offset,k)=>offset<counts[k].length)){
+    need(50);const top=y;let bottom=top;
+    counts.forEach((list,k)=>{
+      if(offsets[k]>=list.length)return;
+      const x=L+k*(colWidth+28);
+      style(10,true);doc.text((k?"By Recorded Area":"By Event Type")+(continued?" (continued)":""),x,top+10);
+      let pos=top+25;
+      while(offsets[k]<list.length&&pos+list[offsets[k]].height<=B){
+        const row=list[offsets[k]++];draw(row,x,pos);
+        if(row.count!==undefined){
+          style(10,false);const textWidth=row.runs.reduce((sum,run)=>sum+doc.getTextWidth(run.text),0);
+          const from=x+textWidth+9,to=x+colWidth-26;
+          if(to>from){doc.setDrawColor(205,211,218);doc.setLineWidth(.35);doc.line(from,pos+row.size-3,to,pos+row.size-3);}
+          style(10,true);doc.text(String(row.count),x+colWidth,pos+row.size,{align:"right"});
+        }
+        pos+=row.height;
+      }
+      bottom=Math.max(bottom,pos);
+    });
+    y=bottom+5;
+    if(offsets.some((offset,k)=>offset<counts[k].length)){next();continued=true;}
+  }
+
+  const events=[...data.events].sort((a,b)=>new Date(eventEffectiveTime(a))-new Date(eventEffectiveTime(b)));
+  if(!events.length){section("Chronological Event Log");flow(plain("No events recorded."));}
+  events.forEach((e,index)=>{
+    const number=String(index+1).padStart(3,"0");
+    const heading=rows([{text:number+". "+(e.event_type||"Unspecified Event"),bold:true},{text:"  |  "+timeLabel(eventEffectiveTime(e))}],C,10,5);
+    const body=[];
+    if(e.corrected_event_time)body.push(...labeled("Original timestamp",timeLabel(e.event_time),C,9,4));
+    body.push(...labeled("Investigator",nameById(e.investigator_id),C,10,4));
     const recorder=e.recorded_by||e.investigator_id;
-    if(recorder!==e.investigator_id)text("Recorded by: "+nameById(recorder),{size:9,after:3});
-    if(e.area)text("Area: "+e.area,{size:9,after:3});
-    text("Description: "+(e.notes||"None recorded"),{size:9,after:13});
+    if(recorder!==e.investigator_id)body.push(...labeled("Recorded by",nameById(recorder),C,10,4));
+    if(e.area)body.push(...labeled("Area",e.area,C,10,4));
+    body.push(...labeled("Description",e.notes||"None recorded",C,10,0));
+    const list=[...heading,...body],height=list.reduce((sum,row)=>sum+row.height,0)+13;
+    const minimum=heading.reduce((sum,row)=>sum+row.height,0)+Math.min(45,body.reduce((sum,row)=>sum+row.height,0));
+    if(index===0)section("Chronological Event Log",minimum);
+    else need(height<=B-TOP?height:minimum);
+    for(const row of list){
+      if(y+row.height>B){next();flow(plain(number+". "+(e.event_type||"Unspecified Event")+" (continued)",C,10,true,6));}
+      draw(row,L,y);y+=row.height;
+    }
+    y+=13;
   });
-  section("Report Information");
-  fullDetail("Generated",timeLabel(new Date().toISOString()));
-  text("This report contains documented observations from the investigation. Recorded activity does not independently establish a paranormal cause.",{size:9,color:muted,after:4});
+  need(54);y+=6;
+  doc.setDrawColor(...rule);doc.line(L,y,W-R,y);y+=8;
+  flow(labeled("Generated",timeLabel(new Date().toISOString()),C,8,4));
+  flow(plain("This report contains documented observations from the investigation. Recorded activity does not independently establish a paranormal cause.",C,8,false,0));
+  const pages=doc.getNumberOfPages();
+  for(let page=1;page<=pages;page++){
+    doc.setPage(page);style(8,false,muted);
+    doc.text("Page "+page+" of "+pages,W-R,H-25,{align:"right"});
+  }
   doc.save(reportFileName(data,"pdf"));
 }
 async function downloadReport(type){
