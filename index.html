@@ -1644,11 +1644,11 @@ function renderInvestigations(){
     const actions=document.createElement("div");
     actions.className="actions";
     if(inv.status==="active"){
-      addButton(actions,"Open Investigation",
+      addButton(actions,"Open",
         ()=>openWorkspace(inv),"");
     }
     if(inv.status==="completed"||inv.status==="concluded"){
-      addButton(actions,inv.status==="concluded"?"View Concluded Investigation":"View Completed Investigation",
+      addButton(actions,"View",
         ()=>openWorkspace(inv),"");
     }
     if(role==="admin"){
@@ -1656,6 +1656,16 @@ function renderInvestigations(){
         ()=>openInvestigation(inv));
       addButton(actions,"Assign Members",
         ()=>openAssignments(inv));
+    }
+    if(["active","concluded"].includes(inv.status)){
+      addButton(actions,"Submit Evidence",()=>{
+        cancelEvent();
+        activeInvestigationId=null;
+        ++workspaceRequest;
+        evidenceFeedback("");
+        refreshEvidenceInvestigations(inv.id);
+        setPage("evidencePage");
+      });
     }
     card.append(actions);
     box.append(card);
@@ -3185,10 +3195,10 @@ function evidenceFeedback(text,kind="muted"){
   $("evidenceFeedback").textContent=text;
   $("evidenceFeedback").className=kind;
 }
-function refreshEvidenceInvestigations(){
+function refreshEvidenceInvestigations(selectedId=null){
   const select=$("evidenceInvestigation");
   if(!select)return;
-  const previous=select.value;
+  const previous=selectedId??select.value;
   select.replaceChildren();
   option(select,"","Select an investigation");
   investigations.filter(inv=>["active","concluded"].includes(inv.status))
