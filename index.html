@@ -694,7 +694,6 @@ form {min-width:0}
       </div>
     </div>
   </div>
-  <div id="loggerSyncStatus" class="muted compact" aria-live="polite" style="padding:6px 0;font-size:0.8rem"></div>
   <div id="completedNotice" class="hidden">
     <div class="report-section">
       <h3>Investigation Completed</h3>
@@ -982,7 +981,6 @@ function queueWrite(v){
   if(localStorage.getItem(QUEUE_KEY)!==serialized)throw new Error("Queue storage verification failed");
   renderPending();renderHistory();
   renderSyncOverview();
-  renderLoggerSyncStatus();
 }
 function localOwner(entry){
   return entry.recorded_by||entry.investigator_id;
@@ -1034,21 +1032,6 @@ function renderSyncOverview(){
     });
     box.append(card);
   }
-}
-function renderLoggerSyncStatus(){
-  const el=$("loggerSyncStatus");
-  if(!el)return;
-  const current=currentInvestigation();
-  if(!current||current.status!=="active"){
-    el.classList.add("hidden");
-    return;
-  }
-  el.classList.remove("hidden");
-  const all=queueRead(), inv=activeInvestigationId;
-  const count=all.filter(x=>x.investigation_id===inv && (role==="admin"||localOwner(x)===user?.id)).length;
-  const state=navigator.onLine?"Online":"Offline";
-  el.textContent="Connection: "+state+" | "+count+" pending marker(s) for this investigation on this device | "+(syncing?"Syncing...":syncStatusText);
-  el.className="muted compact "+(navigator.onLine?"good":"warn");
 }
 function eventEffectiveTime(e){return e.corrected_event_time||e.event_time;}
 function formatLocalDateTime(iso){
@@ -1492,7 +1475,6 @@ async function loadData(){
   renderMembers();
   renderPending();
   renderSyncOverview();
-  renderLoggerSyncStatus();
   msg("DocuHub ready.","good");
   return true;
 }
@@ -2052,7 +2034,6 @@ function updateWorkspaceControls(){
   show("closeControls",active&&role==="admin");
   show("concludedControls",concluded&&role==="admin");
   show("reopenControls",completed&&role==="admin");
-  show("loggerSyncStatus",active);
 
   $("workspaceStatus").textContent=statusLabel(inv.status);
   $("workspaceStatus").className=
@@ -2086,7 +2067,6 @@ async function openWorkspace(inv){
   eventAreaOptions();
   renderHistory();
   renderPending();
-  renderLoggerSyncStatus();
   $("weatherDetails").open=false;
   void loadWorkspaceEvidence(inv.id);
   void showWorkspaceWeather(inv.id);
@@ -2342,12 +2322,10 @@ function renderHistory(){
     if(e.notes)addText(body,"p",e.notes);
     const controls=document.createElement("div");
     controls.className="event-inline-controls";
-    addText(controls,"span",e._local?(e._syncFailed?"Not synced: needs attention":"Pending synchronization"):"Synchronized",
-      "event-status "+(e._local?(e._syncFailed?"bad":"warn"):"good"));
     if(canCorrectEvent(e)){
       addButton(controls,"Correct Event",()=>openEventCorrection(e),"event-inline-button");
     }
-    body.append(controls);
+    if(controls.childElementCount)body.append(controls);
     card.append(body);
     box.append(card);
   });
@@ -2356,7 +2334,7 @@ async function syncEvents(forceAll=false){
   if(syncing||!db||!user)return;
   if(!navigator.onLine){msg("Offline: pending markers are safe on this device.","warn");return;}
   const includeOthers=forceAll&&role==="admin";
-  syncing=true;syncStatusText="Syncing";renderLoggerSyncStatus();
+  syncing=true;syncStatusText="Syncing";
   $("syncButton").disabled=true;
   $("adminForceSync").disabled=true;
   try{
@@ -2437,7 +2415,6 @@ async function syncEvents(forceAll=false){
     $("syncButton").disabled=false;
     $("adminForceSync").disabled=false;
     renderSyncOverview();
-    renderLoggerSyncStatus();
   }
 }
 
@@ -2486,7 +2463,6 @@ async function changeInvestigationStatus(nextStatus){
     cancelEvent();
     renderInvestigations();
     updateWorkspaceControls();
-    renderLoggerSyncStatus();
     msg("Investigation status changed to "+statusLabel(nextStatus)+".","good");
   }catch(e){msg("Status change failed: "+e.message,"bad");}
   finally{button.disabled=false;}
@@ -3570,13 +3546,11 @@ $("downloadPDF").addEventListener(
 window.addEventListener("online",()=>{
   if(!user)return;
   $("connectionInfo").textContent="Online";
-  renderLoggerSyncStatus();
   syncEvents();
 });
 window.addEventListener("offline",()=>{
   if(!user)return;
   $("connectionInfo").textContent="Offline";
-  renderLoggerSyncStatus();
 });
 
 async function init(){
