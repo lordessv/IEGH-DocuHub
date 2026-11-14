@@ -502,27 +502,13 @@ form {min-width:0}
 
 <section class="panel hidden page" id="evidencePage">
   <h2>Submit Evidence</h2>
-  <p class="muted">Submit a shareable link to evidence stored in your own cloud account. Evidence submissions are available while an investigation is Active or Concluded.</p>
+  <p class="muted">Select the investigation and paste a shareable folder link. Evidence submissions are available while an investigation is Active or Concluded.</p>
   <form id="evidenceForm">
     <label for="evidenceInvestigation">Investigation</label>
     <select id="evidenceInvestigation" required></select>
-    <label for="evidenceType">Evidence type</label>
-    <select id="evidenceType" required>
-      <option value="video">Video</option>
-      <option value="audio">Audio</option>
-      <option value="photo">Photo</option>
-      <option value="thermal">Thermal</option>
-      <option value="other">Other</option>
-    </select>
-    <label for="evidenceTitle">Title</label>
-    <input id="evidenceTitle" maxlength="200" required placeholder="Brief name for this evidence">
-    <label for="evidenceLink">Shareable evidence link</label>
-    <input id="evidenceLink" type="url" placeholder="https://..." required>
-    <label for="evidenceArea">Area (optional)</label>
-    <input id="evidenceArea" placeholder="Where was this captured?">
-    <label for="evidenceDescription">Description (optional)</label>
-    <textarea id="evidenceDescription" placeholder="What does the evidence show?"></textarea>
-    <div class="actions"><button id="evidenceSubmitButton" type="submit">Submit Evidence Link</button></div>
+    <label for="evidenceLink">Shareable folder link</label>
+    <input id="evidenceLink" type="url" inputmode="url" autocomplete="url" placeholder="https://drive.google.com/drive/folders/..." required>
+    <div class="actions"><button id="evidenceSubmitButton" type="submit">Submit Evidence</button></div>
   </form>
   <p id="evidenceFeedback" class="muted" role="status" aria-live="polite"></p>
   <h3>Submitted Evidence</h3>
@@ -3249,9 +3235,8 @@ async function loadEvidenceList(){
   data.forEach(item=>{
     const card=document.createElement("div");
     card.className="panel";
-    addText(card,"strong",item.title||"Untitled evidence");
-    addText(card,"p",(item.evidence_type||"other").toUpperCase()+
-      " • "+nameById(item.submitted_by)+
+    addText(card,"strong",item.title||"Evidence folder");
+    addText(card,"p",nameById(item.submitted_by)+
       " • "+new Date(item.created_at).toLocaleString(),"muted");
     if(item.area)addText(card,"p","Area: "+item.area);
     if(item.description)addText(card,"p",item.description);
@@ -3297,18 +3282,15 @@ $("evidenceForm").addEventListener("submit",async e=>{
     const {error}=await db.from("investigation_evidence").insert({
       investigation_id:id,
       submitted_by:user.id,
-      evidence_type:$("evidenceType").value,
-      title:$("evidenceTitle").value.trim(),
-      description:$("evidenceDescription").value.trim()||null,
-      area:$("evidenceArea").value.trim()||null,
+      evidence_type:"other",
+      title:"Evidence folder",
+      description:null,
+      area:null,
       external_url,
       review_status:"pending"
     });
     if(error)throw error;
     $("evidenceLink").value="";
-    $("evidenceTitle").value="";
-    $("evidenceDescription").value="";
-    $("evidenceArea").value="";
     evidenceFeedback("Evidence submitted successfully.","good");
     await loadEvidenceList();
   }catch(error){
