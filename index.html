@@ -324,8 +324,8 @@ form {min-width:0}
 /* Tiny synchronization symbols, aligned to the right of each event header */
 #eventsPage #eventHistory summary{display:flex;align-items:center;gap:7px;list-style:none}
 #eventsPage #eventHistory summary::-webkit-details-marker{display:none}
-#eventsPage #eventHistory .event-accordion-triangle{display:inline-block;width:0;height:0;flex:0 0 auto;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:7px solid currentColor;color:#b9d3eb}
-#eventsPage #eventHistory details[open] .event-accordion-triangle{border-bottom:0;border-top:7px solid currentColor}
+#eventsPage #eventHistory .event-accordion-triangle{display:inline-block;width:0;height:0;flex:0 0 auto;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid currentColor;color:#b9d3eb}
+#eventsPage #eventHistory details[open] .event-accordion-triangle{border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:0;border-top:7px solid currentColor}
 #eventsPage #eventHistory .event-summary-label{flex:1;min-width:0}
 .sync-symbol{display:inline-flex;width:12px;height:12px;flex:0 0 12px;align-items:center;justify-content:center;vertical-align:middle}
 .sync-symbol svg{display:block;width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
@@ -651,6 +651,10 @@ form {min-width:0}
     <p id="workspaceTitle" class="marker"></p>
     <p id="workspaceDetails" class="muted"></p>
   </div>
+  <section id="workspaceEvidenceSection" class="panel hidden" aria-label="Submitted Evidence">
+    <h3>Submitted Evidence</h3>
+    <div id="workspaceEvidenceList"></div>
+  </section>
   <div id="loggingRestricted" class="hidden">
     <p class="muted">Event logging is available to assigned investigators only.</p>
   </div>
@@ -2084,6 +2088,7 @@ async function openWorkspace(inv){
   renderPending();
   renderLoggerSyncStatus();
   $("weatherDetails").open=false;
+  void loadWorkspaceEvidence(inv.id);
   void showWorkspaceWeather(inv.id);
   window.scrollTo({top:0,behavior:"smooth"});
   const requestId=++workspaceRequest;
@@ -2341,9 +2346,6 @@ function renderHistory(){
       "event-status "+(e._local?(e._syncFailed?"bad":"warn"):"good"));
     if(canCorrectEvent(e)){
       addButton(controls,"Correct Event",()=>openEventCorrection(e),"event-inline-button");
-      addButton(controls,"View Audit",()=>openEventAudit(e),"event-inline-button");
-    }else if(!e._local){
-      addButton(controls,"View Audit",()=>openEventAudit(e),"event-inline-button");
     }
     body.append(controls);
     card.append(body);
@@ -3219,6 +3221,35 @@ function refreshEvidenceInvestigations(){
   if([...select.options].some(o=>o.value===previous))select.value=previous;
   loadEvidenceList();
 }
+async function loadWorkspaceEvidence(investigationId){
+  const section=$("workspaceEvidenceSection");
+  const target=$("workspaceEvidenceList");
+  section.classList.add("hidden");
+  target.replaceChildren();
+  if(!user || !db)return;
+  const {data,error}=await db.from("investigation_evidence")
+    .select("id,submitted_by,external_url,created_at")
+    .eq("investigation_id",investigationId)
+    .order("created_at",{ascending:false});
+  if(activeInvestigationId!==investigationId || error || !data?.length)return;
+  data.forEach(item=>{
+    const card=document.createElement("div");
+    card.className="item";
+    addText(card,"p",nameById(item.submitted_by)+" • "+
+      new Date(item.created_at).toLocaleString(),"muted");
+    if(item.external_url){
+      const link=document.createElement("a");
+      link.href=item.external_url;
+      link.target="_blank";
+      link.rel="noopener noreferrer";
+      link.textContent="Evidence Link";
+      link.className="evidence-link-button";
+      card.append(link);
+    }
+    target.append(card);
+  });
+  section.classList.remove("hidden");
+}
 async function loadEvidenceList(){
   const target=$("evidenceList");
   if(!target||!user)return;
@@ -3298,6 +3329,7 @@ $("evidenceForm").addEventListener("submit",async e=>{
     $("evidenceLink").value="";
     evidenceFeedback("Evidence submitted successfully.","good");
     await loadEvidenceList();
+    if(activeInvestigationId===id)await loadWorkspaceEvidence(id);
   }catch(error){
     evidenceFeedback("Evidence was not saved: "+error.message,"bad");
   }finally{
