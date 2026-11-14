@@ -2477,10 +2477,10 @@ async function changeInvestigationStatus(nextStatus){
   if(!transitions[previous]?.includes(nextStatus)){
     msg("This status transition is not permitted.","warn");return;
   }
-  if(nextStatus==="concluded"||nextStatus==="completed"){
+  if(nextStatus==="completed"){
     const local=queueRead().filter(x=>x.investigation_id===inv.id);
     if(local.length){
-      msg("Cannot close investigation: "+local.length+" pending local marker(s) on this device. Sync them first.","warn");return;
+      msg("Cannot finalize investigation: "+local.length+" pending local marker(s) on this device. Sync them first.","warn");return;
     }
   }
   const prompts={
