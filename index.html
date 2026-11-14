@@ -2313,7 +2313,6 @@ function renderHistory(){
     const body=document.createElement("div");
     body.style.paddingTop="10px";
     if(e.corrected_event_time)addText(body,"p","Original: "+timeLabel(e.event_time)+" (corrected)","muted");
-    addText(body,"p","Investigator: "+nameById(e.investigator_id),"muted");
     const recorder=e.recorded_by||e.investigator_id;
     if(recorder!==e.investigator_id){
       addText(body,"p","Recorded by: "+nameById(recorder),"muted");
