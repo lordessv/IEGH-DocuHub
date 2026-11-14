@@ -502,12 +502,13 @@ form {min-width:0}
 
 <section class="panel hidden page" id="evidencePage">
   <h2>Submit Evidence</h2>
-  <p class="muted">Select the investigation and paste a shareable folder link. Evidence submissions are available while an investigation is Active or Concluded.</p>
+  <p class="muted">Select the investigation and paste a shared cloud folder link. Evidence submissions are available while an investigation is Active or Concluded.</p>
   <form id="evidenceForm">
     <label for="evidenceInvestigation">Investigation</label>
     <select id="evidenceInvestigation" required></select>
-    <label for="evidenceLink">Shareable folder link</label>
-    <input id="evidenceLink" type="url" inputmode="url" autocomplete="url" placeholder="https://drive.google.com/drive/folders/..." required>
+    <label for="evidenceLink">Shared Cloud Folder Link</label>
+    <input id="evidenceLink" type="url" inputmode="url" autocomplete="url" placeholder="https://" required>
+    <p class="muted" style="font-size:.82rem;margin:6px 0 0;line-height:1.4">Paste a shareable folder link from iCloud Drive, Google Drive, Dropbox, OneDrive, or another cloud storage service.</p>
     <div class="actions"><button id="evidenceSubmitButton" type="submit">Submit Evidence</button></div>
   </form>
   <p id="evidenceFeedback" class="muted" role="status" aria-live="polite"></p>
@@ -3285,7 +3286,7 @@ $("evidenceForm").addEventListener("submit",async e=>{
       evidence_type:"other",
       title:"Evidence folder",
       description:"Shared evidence folder",
-      area:null,
+      area:"Not specified",
       external_url,
       review_status:"pending"
     });
