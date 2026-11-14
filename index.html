@@ -418,6 +418,17 @@ form {min-width:0}
   margin:0;
   line-height:1.35;
 }
+
+/* Compact navigation and admin controls */
+#navigation .tabs {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#navigation .tabs button {width:100%;min-width:0;min-height:44px;padding:9px 6px;font-size:clamp(.72rem,1.5vw,.95rem);line-height:1.2;overflow-wrap:normal}
+#adminPage > .actions {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+#adminPage > .actions button {flex:none;width:100%;min-height:44px;padding:8px 6px;font-size:clamp(.76rem,1.5vw,.94rem);line-height:1.2}
+#adminPage #memberList .item {padding:10px 12px;margin:8px 0}
+#adminPage #memberList .item button {min-height:34px;padding:5px 9px;font-size:.82rem;width:auto;flex:none}
+#investigationList .actions button {min-height:42px;padding:8px 10px;font-size:.92rem}
+@media(max-width:430px){#navigation .tabs{gap:5px}#navigation .tabs button{font-size:.72rem;padding:8px 3px}#adminPage > .actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 </style>
 </head>
 <body>
@@ -484,7 +495,26 @@ form {min-width:0}
     <button data-page="locationsPage">
       Locations
     </button>
+    <button data-page="evidencePage">Submit Evidence</button>
   </div>
+</section>
+
+
+<section class="panel hidden page" id="evidencePage">
+  <h2>Submit Evidence</h2>
+  <p class="muted">Submit a shareable link to evidence stored in your own cloud account. Evidence submissions are available while an investigation is Active or Concluded.</p>
+  <form id="evidenceForm">
+    <label for="evidenceInvestigation">Investigation</label>
+    <select id="evidenceInvestigation" required></select>
+    <label for="evidenceLink">Shareable evidence link</label>
+    <input id="evidenceLink" type="url" placeholder="https://..." required>
+    <label for="evidenceDescription">Description (optional)</label>
+    <textarea id="evidenceDescription" placeholder="What does the evidence show?"></textarea>
+    <div class="actions"><button id="evidenceSubmitButton" type="submit">Submit Evidence Link</button></div>
+  </form>
+  <p id="evidenceFeedback" class="muted" role="status" aria-live="polite"></p>
+  <h3>Submitted Evidence</h3>
+  <div id="evidenceList"></div>
 </section>
 
 <section class="panel hidden page" id="accountPage">
@@ -1448,6 +1478,7 @@ async function loadData(){
   renderAlphabetMenu();
   renderLocations();
   renderInvestigations();
+  refreshEvidenceInvestigations();
   renderMembers();
   renderPending();
   renderSyncOverview();
@@ -3165,6 +3196,24 @@ async function loginWithUsername(username,password){
   return data.session;
 }
 
+
+/* Evidence navigation: submission requires verified backend schema. */
+function refreshEvidenceInvestigations(){
+  const select=$("evidenceInvestigation");
+  if(!select)return;
+  const previous=select.value;
+  select.replaceChildren();
+  option(select,"","Select an investigation");
+  investigations.filter(inv=>["active","concluded"].includes(inv.status))
+    .forEach(inv=>option(select,inv.id,investigationLabel(inv.id)+" ("+statusLabel(inv.status)+")"));
+  if([...select.options].some(o=>o.value===previous))select.value=previous;
+}
+$("evidenceForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  $("evidenceFeedback").textContent="Evidence saving is not yet connected. The existing database column definitions must be verified before submissions can be safely enabled.";
+  $("evidenceFeedback").className="warn";
+});
+
 /* EVENT HANDLERS */
 $("locType").addEventListener("change",updateAreaEditor);
 $("mainMenu").addEventListener("change",async e=>{
@@ -3238,6 +3287,7 @@ $("tabs").addEventListener("click",e=>{
     show("locationProfile",false);
     show("locationEditor",false);
   }
+  if(b.dataset.page==="evidencePage")refreshEvidenceInvestigations();
   setPage(b.dataset.page);
 });
 $("locationForm").addEventListener(
