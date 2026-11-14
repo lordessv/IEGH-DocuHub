@@ -162,6 +162,7 @@ button.selected {
 .status-pill.completed {background:#255b49}
 .status-pill.active {background:#245c83}
 .status-pill.cancelled {background:#703b45}
+.status-pill.concluded {background:#b96516;color:#fff}
 #closeControls {margin:20px 0}
 #reportActions button {min-height:55px}
 form {min-width:0}
@@ -323,8 +324,8 @@ form {min-width:0}
 /* Tiny synchronization symbols, aligned to the right of each event header */
 #eventsPage #eventHistory summary{display:flex;align-items:center;gap:7px;list-style:none}
 #eventsPage #eventHistory summary::-webkit-details-marker{display:none}
-#eventsPage #eventHistory .event-accordion-triangle{display:inline-block;width:0;height:0;flex:0 0 auto;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid currentColor;color:#b9d3eb}
-#eventsPage #eventHistory details[open] .event-accordion-triangle{border-bottom:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid currentColor}
+#eventsPage #eventHistory .event-accordion-triangle{display:inline-block;width:0;height:0;flex:0 0 auto;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:7px solid currentColor;color:#b9d3eb}
+#eventsPage #eventHistory details[open] .event-accordion-triangle{border-bottom:0;border-top:7px solid currentColor}
 #eventsPage #eventHistory .event-summary-label{flex:1;min-width:0}
 .sync-symbol{display:inline-flex;width:12px;height:12px;flex:0 0 12px;align-items:center;justify-content:center;vertical-align:middle}
 .sync-symbol svg{display:block;width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
@@ -417,16 +418,6 @@ form {min-width:0}
   margin:0;
   line-height:1.35;
 }
-
-.investigation-card-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.investigation-card-heading strong{min-width:0;overflow-wrap:anywhere}
-.investigation-card-heading .status-pill{flex-shrink:0}
-.member-title{color:#a9c4df;font-size:.86rem;margin:4px 0}
-.evidence-card{border:1px solid #405b79;border-radius:10px;padding:12px;margin:10px 0;overflow-wrap:anywhere}
-.evidence-card a{color:#9ce8fa}
-.evidence-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-#evidencePage form{max-width:750px}
-#completedNotice{margin:12px 0}
 </style>
 </head>
 <body>
@@ -441,7 +432,6 @@ form {min-width:0}
       <option value="admin" id="adminMenuOption">
         Admin Headquarters
       </option>
-      <option value="evidence">Submit Evidence</option>
       <option value="sync">Sync Events</option>
       <option value="logout">Sign Out</option>
     </select>
@@ -495,24 +485,6 @@ form {min-width:0}
       Locations
     </button>
   </div>
-</section>
-
-<section class="panel hidden page" id="evidencePage">
-  <h2>Submit Evidence</h2>
-  <p class="muted">Upload your file to your own cloud storage, enable appropriate sharing, then submit its link here. DocuHub stores the link, not the file.</p>
-  <form id="evidenceForm">
-    <label for="evidenceInvestigation">Investigation</label>
-    <select id="evidenceInvestigation" required></select>
-    <label for="evidenceURL">Shareable Evidence URL</label>
-    <input id="evidenceURL" type="url" maxlength="2048" placeholder="https://..." required>
-    <label for="evidenceDescription">Description (optional)</label>
-    <textarea id="evidenceDescription" maxlength="2000" placeholder="Describe what the evidence shows"></textarea>
-    <div class="actions"><button id="submitEvidenceButton" type="submit">Submit Evidence</button></div>
-  </form>
-  <h3>Evidence Links</h3><div id="evidenceList"></div>
-  <h3>Investigator Submission Status</h3>
-  <p class="muted compact">Submitted means at least one link was received, not that all evidence has been submitted.</p>
-  <div id="evidenceSubmissionStatus"></div>
 </section>
 
 <section class="panel hidden page" id="accountPage">
@@ -684,7 +656,12 @@ form {min-width:0}
   </div>
   <div id="loggerSyncStatus" class="muted compact" aria-live="polite" style="padding:6px 0;font-size:0.8rem"></div>
   <div id="completedNotice" class="hidden">
-    <p class="muted compact">This investigation is closed. Event logging is disabled. Existing records remain available.</p>
+    <div class="report-section">
+      <h3>Investigation Completed</h3>
+      <p class="muted">
+        <span id="closedNoticeText">This investigation is closed. Event logging is disabled. Existing records remain available.</span>
+      </p>
+    </div>
   </div>
   <div id="reportSection" class="report-section hidden">
     <h3>Investigation Reports</h3>
@@ -701,8 +678,6 @@ form {min-width:0}
       </button>
     </div>
   </div>
-  <h3>Submitted Evidence</h3>
-  <div id="workspaceEvidence"></div>
   <h3>Investigation Event History</h3>
   <div id="eventHistory"></div>
      <div id="eventCorrectionPanel" class="report-section hidden">
@@ -727,6 +702,16 @@ form {min-width:0}
       <button id="endInvestigation" class="danger">
         End Investigation
       </button>
+    </div>
+  </div>
+  <div id="concludedControls" class="hidden">
+    <div class="report-section">
+      <h3>Administrator Controls</h3>
+      <p class="muted">Fieldwork has concluded. Event logging is closed. Evidence submissions remain open until finalization.</p>
+      <div class="actions">
+        <button id="finalizeInvestigation" type="button">Finalize Investigation</button>
+        <button id="reactivateConcluded" class="secondary" type="button">Reactivate Investigation</button>
+      </div>
     </div>
   </div>
   <div id="reopenControls" class="hidden">
@@ -785,6 +770,7 @@ form {min-width:0}
       <select id="invStatus">
         <option value="scheduled">Scheduled</option>
         <option value="active">Active</option>
+        <option value="concluded">Concluded</option>
         <option value="completed">Completed</option>
         <option value="cancelled">Cancelled</option>
       </select>
@@ -1012,13 +998,17 @@ function renderSyncOverview(){
 function renderLoggerSyncStatus(){
   const el=$("loggerSyncStatus");
   if(!el)return;
+  const current=currentInvestigation();
+  if(!current||current.status!=="active"){
+    el.classList.add("hidden");
+    return;
+  }
+  el.classList.remove("hidden");
   const all=queueRead(), inv=activeInvestigationId;
   const count=all.filter(x=>x.investigation_id===inv && (role==="admin"||localOwner(x)===user?.id)).length;
   const state=navigator.onLine?"Online":"Offline";
   el.textContent="Connection: "+state+" | "+count+" pending marker(s) for this investigation on this device | "+(syncing?"Syncing...":syncStatusText);
   el.className="muted compact "+(navigator.onLine?"good":"warn");
-  const current=investigations.find(x=>x.id===inv);
-  show("loggerSyncStatus",current?.status==="active");
 }
 function eventEffectiveTime(e){return e.corrected_event_time||e.event_time;}
 function formatLocalDateTime(iso){
@@ -1445,7 +1435,7 @@ async function loadData(){
     db.from("investigations").select("*")
       .order("investigation_date",{ascending:false}),
     db.from("members")
-      .select("id,display_name,role,organizational_title")
+      .select("id,display_name,role")
   ]);
   if(l.error||i.error||m.error){
     msg("Loading error: "+
@@ -1462,7 +1452,6 @@ async function loadData(){
   renderPending();
   renderSyncOverview();
   renderLoggerSyncStatus();
-  await refreshEvidenceSelector();
   msg("DocuHub ready.","good");
   return true;
 }
@@ -1623,13 +1612,11 @@ function renderInvestigations(){
     const card=document.createElement("div");
     card.className="item";
     const heading=document.createElement("div");
-    heading.className="investigation-card-heading";
+    heading.style.cssText="display:flex;align-items:flex-start;justify-content:space-between;gap:10px";
     addText(heading,"strong",locationName(inv.location_id));
     addText(heading,"span",statusLabel(inv.status),"status-pill "+inv.status);
     card.append(heading);
-    addText(card,"p",
-      formatDate(inv.investigation_date)+" | "+
-      formatTime(inv.start_time),"muted");
+    addText(card,"p",formatDate(inv.investigation_date)+" | "+formatTime(inv.start_time),"muted");
     if(inv.notes)addText(card,"p",inv.notes);
     const actions=document.createElement("div");
     actions.className="actions";
@@ -1637,8 +1624,8 @@ function renderInvestigations(){
       addButton(actions,"Open Investigation",
         ()=>openWorkspace(inv),"");
     }
-    if(inv.status==="completed"){
-      addButton(actions,"View Completed Investigation",
+    if(inv.status==="completed"||inv.status==="concluded"){
+      addButton(actions,inv.status==="concluded"?"View Concluded Investigation":"View Completed Investigation",
         ()=>openWorkspace(inv),"");
     }
     if(role==="admin"){
@@ -1763,7 +1750,6 @@ async function openAssignments(inv){
     const label=document.createElement("label");
     label.htmlFor=input.id;
     label.textContent=memberName(m)+" ("+m.role+")";
-    if(m.organizational_title)addText(label,"div",m.organizational_title,"member-title");
     row.append(input,label);
     box.append(row);
   });
@@ -1820,8 +1806,6 @@ function renderMembers(){
     const div=document.createElement("div");
     div.className="item";
     addText(div,"strong",memberName(m));
-    if(m.organizational_title)addText(div,"p",m.organizational_title,"member-title");
-    if(role==="admin")addButton(div,"Edit Organizational Title",()=>editOrganizationalTitle(m));
     addText(div,"p",
       m.role==="admin"?"Administrator":"Investigator",
       "muted");
@@ -2006,6 +1990,7 @@ function updateWorkspaceControls(){
 
   const active=inv.status==="active";
   const completed=inv.status==="completed";
+  const concluded=inv.status==="concluded";
 
   const canLog=active&&(
     role==="admin"||
@@ -2017,9 +2002,14 @@ function updateWorkspaceControls(){
 
   show("activeWorkspace",canLog);
   show("loggingRestricted",active&&!canLog);
-  show("completedNotice",completed);
+  show("completedNotice",completed||concluded);
+  $("completedNotice").querySelector("h3").textContent=concluded?"Investigation Concluded":"Investigation Completed";
+  $("closedNoticeText").textContent=concluded
+    ?"Fieldwork has concluded. Event logging is disabled. Evidence submissions remain open."
+    :"This investigation is completed. Event logging and evidence submissions are closed. Existing records remain available.";
   show("reportSection",completed);
   show("closeControls",active&&role==="admin");
+  show("concludedControls",concluded&&role==="admin");
   show("reopenControls",completed&&role==="admin");
   show("loggerSyncStatus",active);
 
@@ -2032,7 +2022,7 @@ function updateWorkspaceControls(){
   }
 }
 async function openWorkspace(inv){
-  if(!["active","completed"].includes(inv.status)){
+  if(!["active","concluded","completed"].includes(inv.status)){
     msg("This investigation cannot be opened.","warn");
     return;
   }
@@ -2073,7 +2063,6 @@ async function openWorkspace(inv){
   }
   if(requestId!==workspaceRequest)return;
   await loadEventHistory(inv.id);
-  await loadWorkspaceEvidence(inv.id);
 }
 function closeWorkspace(){
   cancelEvent();
@@ -2418,107 +2407,50 @@ async function syncEvents(forceAll=false){
 
 async function changeInvestigationStatus(nextStatus){
   if(role!=="admin"||!user)return;
-
   const inv=currentInvestigation();
   if(!inv)return;
-
-  const isClosing=nextStatus==="completed";
-
-  if(isClosing&&inv.status!=="active")return;
-  if(!isClosing&&inv.status!=="completed")return;
-
-  if(isClosing){
-    const local=queueRead().filter(x=>
-      x.investigation_id===inv.id
-    );
-
+  const previous=inv.status;
+  const transitions={active:["concluded"],concluded:["active","completed"],completed:["active"]};
+  if(!transitions[previous]?.includes(nextStatus)){
+    msg("This status transition is not permitted.","warn");return;
+  }
+  if(nextStatus==="concluded"||nextStatus==="completed"){
+    const local=queueRead().filter(x=>x.investigation_id===inv.id);
     if(local.length){
-      const byOwner=new Map();
-      local.forEach(x=>{
-        const owner=localOwner(x);
-        byOwner.set(owner,(byOwner.get(owner)||0)+1);
-      });
-      const details=[...byOwner].map(([owner,count])=>
-        nameById(owner)+": "+count).join("; ");
-      msg("Cannot end investigation: "+local.length+
-        " unsynchronized marker(s) on this device. "+details+
-        ". Open Account > Admin Local Sync Dashboard and use Force Sync All Local Markers.","warn");
-      return;
+      msg("Cannot close investigation: "+local.length+" pending local marker(s) on this device. Sync them first.","warn");return;
     }
   }
-
-  let reopeningReason="";
-
-  if(isClosing){
-    if(!confirm(
-      "End this investigation?\n\n" +
-      "Event logging will close. Existing records will remain available."
-    ))return;
-  }else{
-    const answer=prompt(
-      "Reason for reopening this investigation:"
-    );
-
-    if(answer===null)return;
-
-    reopeningReason=answer.trim();
-
-    if(!reopeningReason){
-      msg("A reopening reason is required.","warn");
-      return;
-    }
+  const prompts={
+    concluded:"Conclude fieldwork? Event logging will close, but evidence submissions will remain open.",
+    completed:"Finalize investigation? Evidence submissions will close and records will lock.",
+    active:"Reactivate investigation? Event logging will reopen."
+  };
+  if(!confirm(prompts[nextStatus]))return;
+  const changes={status:nextStatus};
+  if(previous==="completed"){
+    const reason=prompt("Reason for reopening this investigation:");
+    if(reason===null)return;
+    if(!reason.trim()){msg("A reopening reason is required.","warn");return;}
+    changes.reopening_reason=reason.trim();
   }
-
-  const button=isClosing
-    ?$("endInvestigation")
-    :$("reopenInvestigation");
-
+  const button=nextStatus==="concluded"?$("endInvestigation"):
+    nextStatus==="completed"?$("finalizeInvestigation"):
+    previous==="completed"?$("reopenInvestigation"):$("reactivateConcluded");
   button.disabled=true;
-
   try{
-    const changes={status:nextStatus};
-
-    if(!isClosing){
-      changes.reopening_reason=reopeningReason;
-    }
-
-    const {data,error}=await db
-      .from("investigations")
-      .update(changes)
-      .eq("id",inv.id)
-      .eq("status",inv.status)
-      .select("id,status")
-      .single();
-
+    const {data,error}=await db.from("investigations")
+      .update(changes).eq("id",inv.id).eq("status",previous)
+      .select("id,status").single();
     if(error)throw error;
-
-    if(!data||data.status!==nextStatus){
-      throw new Error(
-        "Status change was not confirmed."
-      );
-    }
-
+    if(data?.status!==nextStatus)throw new Error("Status change was not confirmed.");
     inv.status=nextStatus;
-
     cancelEvent();
     renderInvestigations();
     updateWorkspaceControls();
-
-    msg(
-      isClosing
-        ?"Investigation completed successfully."
-        :"Investigation reopened. Reason recorded.",
-      "good"
-    );
-
-  }catch(e){
-    msg(
-      "Status change failed: "+e.message,
-      "bad"
-    );
-  }finally{
-    button.disabled=false;
-  }
+    renderLoggerSyncStatus();
+    msg("Investigation status changed to "+statusLabel(nextStatus)+".","good");
+  }catch(e){msg("Status change failed: "+e.message,"bad");}
+  finally{button.disabled=false;}
 }
 
 /* REPORTS */
@@ -2673,8 +2605,8 @@ async function fetchReportData(){
       "This investigation is no longer completed."
     );
   }
-  const [events,assigned,weather,evidence]=await Promise.all([
-    fetchAllEvents(inv.id),loadAssignments(inv.id),fetchInvestigationWeather(inv.id),fetchEvidence(inv.id)
+  const [events,assigned,weather]=await Promise.all([
+    fetchAllEvents(inv.id),loadAssignments(inv.id),fetchInvestigationWeather(inv.id)
   ]);
   if(events.length===0){
     throw new Error("No synchronized events were returned. Report export stopped to avoid an incomplete report.");
@@ -2694,7 +2626,6 @@ async function fetchReportData(){
     loc:locations.find(x=>x.id===latest.location_id),
     events,
     weather,
-    evidence,
     investigators:members.filter(m=>
       assigned.includes(m.id)
     ).sort((a,b)=>
@@ -2751,7 +2682,7 @@ async function generateExcel(data){
     ["Status",statusLabel(data.inv.status)],
     ["Investigation Notes",data.inv.notes||""],
     ["Investigators",
-      data.investigators.map(memberWithTitle).join(", ")],
+      data.investigators.map(memberName).join(", ")],
     ["Total Events",data.events.length],
     ["Report Generated",
       timeLabel(new Date().toISOString())]
@@ -2803,17 +2734,6 @@ async function generateExcel(data){
   XLSX.utils.book_append_sheet(
     wb,countSheet,"Activity Summary"
   );
-  const evidenceRows=(data.evidence||[]).map(item=>({
-    "Submitted By":nameWithTitleById(item.submitted_by),
-    "Title":item.title||"Evidence Submission",
-    "Description":item.description||"",
-    "Evidence URL":item.external_url||"",
-    "Submitted At":timeLabel(item.created_at),
-    "Review Status":item.review_status||""
-  }));
-  const evidenceSheet=XLSX.utils.json_to_sheet(evidenceRows.length?evidenceRows:[{"Submitted By":"No evidence submitted"}]);
-  evidenceSheet["!cols"]=[{wch:30},{wch:28},{wch:65},{wch:90},{wch:28},{wch:18}];
-  XLSX.utils.book_append_sheet(wb,evidenceSheet,"Evidence Links");
   XLSX.writeFile(wb,reportFileName(data,"xlsx"));
 }
 function safePDFText(value){
@@ -2935,7 +2855,7 @@ async function generatePDF(data){
             ["Scheduled Start",formatTime(data.inv.start_time)]);
   detailRow(["Status",statusLabel(data.inv.status)],
             ["Documented Events",String(data.events.length)]);
-  fullDetail("Participating Investigators",data.investigators.map(memberWithTitle).join(", ")||"None assigned");
+  fullDetail("Participating Investigators",data.investigators.map(memberName).join(", ")||"None assigned");
   if(data.inv.notes)fullDetail("Investigation Notes",data.inv.notes);
   section("Weather & Environmental Conditions");
   if(!data.weather.length)text("No weather snapshot recorded.",{size:9,color:muted});
@@ -2966,16 +2886,6 @@ async function generatePDF(data){
     if(recorder!==e.investigator_id)text("Recorded by: "+nameById(recorder),{size:9,after:3});
     if(e.area)text("Area: "+e.area,{size:9,after:3});
     text("Description: "+(e.notes||"None recorded"),{size:9,after:13});
-  });
-  section("Submitted Evidence");
-  if(!(data.evidence||[]).length)text("No evidence links submitted.",{size:9,color:muted});
-  (data.evidence||[]).forEach((item,index)=>{
-    need(65);
-    text(String(index+1)+". "+(item.title||"Evidence Submission"),{size:10,bold:true,after:4,color:navy});
-    text("Submitted by: "+nameWithTitleById(item.submitted_by),{size:9,after:3});
-    text("Submitted: "+timeLabel(item.created_at),{size:9,after:3});
-    if(item.description)text("Description: "+item.description,{size:9,after:3});
-    text("Link: "+item.external_url,{size:9,after:10});
   });
   section("Report Information");
   fullDetail("Generated",timeLabel(new Date().toISOString()));
@@ -3255,133 +3165,6 @@ async function loginWithUsername(username,password){
   return data.session;
 }
 
-
-/* Evidence and organizational titles: existing database schema */
-function memberWithTitle(m){return memberName(m)+(m.organizational_title?" ("+m.organizational_title+")":"");}
-function nameWithTitleById(id){const m=members.find(x=>x.id===id);return m?memberWithTitle(m):"Unknown member";}
-async function editOrganizationalTitle(m){
-  if(role!=="admin")return;
-  const value=prompt("Organizational title for "+memberName(m)+" (blank removes it):",m.organizational_title||"");
-  if(value===null)return;
-  if(value.trim().length>100){msg("Title cannot exceed 100 characters.","bad");return;}
-  const {error}=await db.rpc("docuhub_set_member_title",{p_member_id:m.id,p_title:value.trim()});
-  if(error){msg("Title update failed: "+error.message,"bad");return;}
-  m.organizational_title=value.trim();renderMembers();msg("Organizational title saved.","good");
-}
-async function fetchEvidence(invId){
-  const {data,error}=await db.from("investigation_evidence")
-    .select("id,investigation_id,submitted_by,title,description,external_url,review_status,created_at")
-    .eq("investigation_id",invId).order("created_at",{ascending:false});
-  if(error)throw error;
-  return data||[];
-}
-async function refreshEvidenceSelector(){
-  const sel=$("evidenceInvestigation");if(!sel||!user)return;
-  const prior=sel.value;
-  sel.replaceChildren();option(sel,"","Select an investigation");
-  // Load only the current member's assignments; admins may access all investigations.
-  let permitted=[];
-  if(role==="admin")permitted=investigations;
-  else{
-    const {data,error}=await db.from("investigation_members")
-      .select("investigation_id").eq("member_id",user.id);
-    if(error){msg("Cannot load evidence investigations: "+error.message,"bad");return;}
-    const ids=new Set((data||[]).map(x=>x.investigation_id));
-    permitted=investigations.filter(x=>ids.has(x.id));
-  }
-  permitted=[...permitted].sort((a,b)=>String(b.investigation_date).localeCompare(String(a.investigation_date)));
-  permitted.forEach(inv=>option(sel,inv.id,locationName(inv.location_id)+" · "+formatDate(inv.investigation_date)));
-  if(permitted.some(x=>x.id===prior))sel.value=prior;
-  else if(permitted.length)sel.value=permitted[0].id;
-  await loadEvidencePage(sel.value);
-}
-function evidenceCard(item,container,editable=false){
-  const card=document.createElement("div");card.className="evidence-card";
-  addText(card,"strong",item.title||"Evidence Submission");
-  addText(card,"p","Submitted by: "+nameWithTitleById(item.submitted_by),"muted compact");
-  addText(card,"p",timeLabel(item.created_at),"muted compact");
-  if(item.description)addText(card,"p",item.description);
-  try{
-    const u=new URL(item.external_url);
-    if(u.protocol==="https:"||u.protocol==="http:"){
-      const a=document.createElement("a");a.href=u.href;a.target="_blank";a.rel="noopener noreferrer";
-      a.textContent="Open Evidence Link";card.append(a);
-    }
-  }catch{}
-  if(editable&&(role==="admin"||item.submitted_by===user?.id)){
-    const actions=document.createElement("div");actions.className="evidence-actions";
-    addButton(actions,"Edit",()=>editEvidence(item));
-    addButton(actions,"Delete",()=>deleteEvidence(item),"danger");card.append(actions);
-  }
-  container.append(card);
-}
-async function loadEvidencePage(invId){
-  const box=$("evidenceList"),status=$("evidenceSubmissionStatus");
-  box.replaceChildren();status.replaceChildren();
-  if(!invId){addText(box,"p","No investigation selected.","muted");return;}
-  try{
-    const [items,assigned]=await Promise.all([fetchEvidence(invId),loadAssignments(invId)]);
-    if($("evidenceInvestigation").value!==invId)return;
-    if(!items.length)addText(box,"p","No evidence links submitted yet.","muted");
-    items.forEach(item=>evidenceCard(item,box,true));
-    members.filter(m=>assigned.includes(m.id)).sort((a,b)=>memberName(a).localeCompare(memberName(b)))
-      .forEach(m=>{
-        const count=items.filter(item=>item.submitted_by===m.id).length;
-        const row=document.createElement("div");row.className="evidence-card";
-        addText(row,"strong",memberName(m));
-        if(m.organizational_title)addText(row,"div",m.organizational_title,"member-title");
-        addText(row,"div",count?count+" link(s) submitted":"No evidence submitted",count?"good":"muted");
-        status.append(row);
-      });
-  }catch(e){addText(box,"p","Evidence unavailable: "+e.message,"bad");}
-}
-async function loadWorkspaceEvidence(invId){
-  const box=$("workspaceEvidence");box.replaceChildren();
-  try{
-    const items=await fetchEvidence(invId);
-    if(activeInvestigationId!==invId)return;
-    if(!items.length)addText(box,"p","No evidence links submitted yet.","muted");
-    items.forEach(item=>evidenceCard(item,box,false));
-  }catch(e){addText(box,"p","Evidence unavailable: "+e.message,"bad");}
-}
-async function submitEvidence(e){
-  e.preventDefault();const invId=$("evidenceInvestigation").value;
-  if(!invId)return;
-  let url;
-  try{url=new URL($("evidenceURL").value.trim());if(url.protocol!=="https:")throw Error("HTTPS required");}
-  catch{msg("Enter a valid HTTPS sharing link.","bad");return;}
-  const button=$("submitEvidenceButton");button.disabled=true;
-  try{
-    const {error}=await db.from("investigation_evidence").insert({
-      investigation_id:invId,submitted_by:user.id,
-      external_url:url.href,description:$("evidenceDescription").value.trim(),
-      title:"Evidence Submission",evidence_type:"other"
-    });
-    if(error)throw error;
-    $("evidenceURL").value="";$("evidenceDescription").value="";
-    await loadEvidencePage(invId);msg("Evidence link submitted.","good");
-  }catch(err){msg("Evidence submission failed: "+err.message,"bad");}
-  finally{button.disabled=false;}
-}
-async function editEvidence(item){
-  const description=prompt("Evidence description:",item.description||"");if(description===null)return;
-  if(description.length>2000){msg("Description too long.","bad");return;}
-  const raw=prompt("Evidence URL:",item.external_url);if(raw===null)return;
-  let url;try{url=new URL(raw.trim());if(url.protocol!=="https:")throw Error();}
-  catch{msg("Enter a valid HTTPS link.","bad");return;}
-  const {error}=await db.from("investigation_evidence").update({description:description.trim(),external_url:url.href}).eq("id",item.id);
-  if(error){msg("Evidence update failed: "+error.message,"bad");return;}
-  await loadEvidencePage(item.investigation_id);msg("Evidence updated.","good");
-}
-async function deleteEvidence(item){
-  if(!confirm("Delete this evidence link from DocuHub?"))return;
-  const {error}=await db.from("investigation_evidence").delete().eq("id",item.id);
-  if(error){msg("Evidence deletion failed: "+error.message,"bad");return;}
-  await loadEvidencePage(item.investigation_id);msg("Evidence link deleted.","good");
-}
-$("evidenceForm").addEventListener("submit",submitEvidence);
-$("evidenceInvestigation").addEventListener("change",e=>loadEvidencePage(e.target.value));
-
 /* EVENT HANDLERS */
 $("locType").addEventListener("change",updateAreaEditor);
 $("mainMenu").addEventListener("change",async e=>{
@@ -3401,7 +3184,6 @@ $("mainMenu").addEventListener("change",async e=>{
   activeInvestigationId=null;
   ++workspaceRequest;
   if(action==="admin")setPage("adminPage");
-  if(action==="evidence"){setPage("evidencePage");await refreshEvidenceSelector();}
   if(action==="account")setPage("accountPage");
 });
 
@@ -3526,8 +3308,10 @@ $("adminForceSync").addEventListener("click",async()=>{
   await syncEvents(true);
 });
 $("endInvestigation").addEventListener(
-  "click",()=>changeInvestigationStatus("completed")
+  "click",()=>changeInvestigationStatus("concluded")
 );
+$("finalizeInvestigation").addEventListener("click",()=>changeInvestigationStatus("completed"));
+$("reactivateConcluded").addEventListener("click",()=>changeInvestigationStatus("active"));
 $("reopenInvestigation").addEventListener(
   "click",()=>changeInvestigationStatus("active")
 );
