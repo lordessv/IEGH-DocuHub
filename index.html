@@ -506,8 +506,20 @@ form {min-width:0}
   <form id="evidenceForm">
     <label for="evidenceInvestigation">Investigation</label>
     <select id="evidenceInvestigation" required></select>
+    <label for="evidenceType">Evidence type</label>
+    <select id="evidenceType" required>
+      <option value="video">Video</option>
+      <option value="audio">Audio</option>
+      <option value="photo">Photo</option>
+      <option value="thermal">Thermal</option>
+      <option value="other">Other</option>
+    </select>
+    <label for="evidenceTitle">Title</label>
+    <input id="evidenceTitle" maxlength="200" required placeholder="Brief name for this evidence">
     <label for="evidenceLink">Shareable evidence link</label>
     <input id="evidenceLink" type="url" placeholder="https://..." required>
+    <label for="evidenceArea">Area (optional)</label>
+    <input id="evidenceArea" placeholder="Where was this captured?">
     <label for="evidenceDescription">Description (optional)</label>
     <textarea id="evidenceDescription" placeholder="What does the evidence show?"></textarea>
     <div class="actions"><button id="evidenceSubmitButton" type="submit">Submit Evidence Link</button></div>
@@ -3197,7 +3209,11 @@ async function loginWithUsername(username,password){
 }
 
 
-/* Evidence navigation: submission requires verified backend schema. */
+/* Evidence submissions use the existing investigation_evidence table. */
+function evidenceFeedback(text,kind="muted"){
+  $("evidenceFeedback").textContent=text;
+  $("evidenceFeedback").className=kind;
+}
 function refreshEvidenceInvestigations(){
   const select=$("evidenceInvestigation");
   if(!select)return;
@@ -3207,11 +3223,99 @@ function refreshEvidenceInvestigations(){
   investigations.filter(inv=>["active","concluded"].includes(inv.status))
     .forEach(inv=>option(select,inv.id,investigationLabel(inv.id)+" ("+statusLabel(inv.status)+")"));
   if([...select.options].some(o=>o.value===previous))select.value=previous;
+  loadEvidenceList();
 }
-$("evidenceForm").addEventListener("submit",e=>{
+async function loadEvidenceList(){
+  const target=$("evidenceList");
+  if(!target||!user)return;
+  target.replaceChildren();
+  const id=$("evidenceInvestigation").value;
+  if(!id){
+    addText(target,"p","Select an investigation to view its evidence.","muted");
+    return;
+  }
+  const {data,error}=await db.from("investigation_evidence")
+    .select("id,submitted_by,evidence_type,title,description,area,external_url,review_status,created_at")
+    .eq("investigation_id",id).order("created_at",{ascending:false});
+  if(id!==$("evidenceInvestigation").value)return;
+  if(error){
+    addText(target,"p","Unable to load evidence: "+error.message,"bad");
+    return;
+  }
+  if(!data?.length){
+    addText(target,"p","No evidence submitted for this investigation yet.","muted");
+    return;
+  }
+  data.forEach(item=>{
+    const card=document.createElement("div");
+    card.className="panel";
+    addText(card,"strong",item.title||"Untitled evidence");
+    addText(card,"p",(item.evidence_type||"other").toUpperCase()+
+      " • "+nameById(item.submitted_by)+
+      " • "+new Date(item.created_at).toLocaleString(),"muted");
+    if(item.area)addText(card,"p","Area: "+item.area);
+    if(item.description)addText(card,"p",item.description);
+    addText(card,"p","Review: "+(item.review_status||"pending"),"muted");
+    if(item.external_url){
+      const link=document.createElement("a");
+      link.href=item.external_url;
+      link.target="_blank";
+      link.rel="noopener noreferrer";
+      link.textContent="Open evidence link";
+      card.append(link);
+    }
+    target.append(card);
+  });
+}
+$("evidenceInvestigation").addEventListener("change",()=>{
+  evidenceFeedback("");
+  loadEvidenceList();
+});
+$("evidenceForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  $("evidenceFeedback").textContent="Evidence saving is not yet connected. The existing database column definitions must be verified before submissions can be safely enabled.";
-  $("evidenceFeedback").className="warn";
+  const button=$("evidenceSubmitButton");
+  const id=$("evidenceInvestigation").value;
+  const inv=investigations.find(x=>x.id===id);
+  if(!user||!inv||!["active","concluded"].includes(inv.status)){
+    evidenceFeedback("Select an Active or Concluded investigation.","bad");
+    return;
+  }
+  const external_url=$("evidenceLink").value.trim();
+  if(!/^https?:\/\//i.test(external_url)){
+    evidenceFeedback("Enter a valid http or https evidence link.","bad");
+    return;
+  }
+  button.disabled=true;
+  evidenceFeedback("Submitting evidence...");
+  try{
+    // Recheck the current status immediately before submission.
+    const {data:current,error:statusError}=await db.from("investigations")
+      .select("status").eq("id",id).single();
+    if(statusError)throw statusError;
+    if(!["active","concluded"].includes(current.status))
+      throw new Error("This investigation is no longer open for evidence submissions.");
+    const {error}=await db.from("investigation_evidence").insert({
+      investigation_id:id,
+      submitted_by:user.id,
+      evidence_type:$("evidenceType").value,
+      title:$("evidenceTitle").value.trim(),
+      description:$("evidenceDescription").value.trim()||null,
+      area:$("evidenceArea").value.trim()||null,
+      external_url,
+      review_status:"pending"
+    });
+    if(error)throw error;
+    $("evidenceLink").value="";
+    $("evidenceTitle").value="";
+    $("evidenceDescription").value="";
+    $("evidenceArea").value="";
+    evidenceFeedback("Evidence submitted successfully.","good");
+    await loadEvidenceList();
+  }catch(error){
+    evidenceFeedback("Evidence was not saved: "+error.message,"bad");
+  }finally{
+    button.disabled=false;
+  }
 });
 
 /* EVENT HANDLERS */
