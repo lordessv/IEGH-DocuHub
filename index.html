@@ -436,6 +436,11 @@ form {min-width:0}
     font-weight:650;margin-top:8px;
   }
   .evidence-link-button:focus-visible {outline:3px solid #9de8ff;outline-offset:3px}
+
+#faqPage .faq-item {border-bottom:1px solid var(--border);padding:8px 0;}
+#faqPage .faq-item summary {cursor:pointer;font-weight:600;padding:10px 0;line-height:1.5;}
+#faqPage .faq-item p,#faqPage .faq-item li {line-height:1.6;}
+#faqPage h3 {margin-top:24px;}
 </style>
 </head>
 <body>
@@ -450,7 +455,7 @@ form {min-width:0}
       <option value="admin" id="adminMenuOption">
         Admin Headquarters
       </option>
-      <option value="sync">Sync Events</option>
+      <option value="faq">FAQ</option>
       <option value="logout">Sign Out</option>
     </select>
   </div>
@@ -782,6 +787,38 @@ form {min-width:0}
   </div>
 </section>
 
+<section class="panel hidden page" id="faqPage">
+  <h2>FAQ</h2>
+  <h3>Investigations</h3>
+  <details class="faq-item"><summary>What do the investigation statuses mean?</summary><div><ul><li><strong>Scheduled:</strong> Planned but not yet open for event logging.</li><li><strong>Active:</strong> Event logging and evidence submissions are open.</li><li><strong>Concluded:</strong> Fieldwork has ended. Event logging is closed, but evidence submissions remain open.</li><li><strong>Completed:</strong> The investigation is finalized. Event records and evidence submissions are locked.</li><li><strong>Cancelled:</strong> The investigation is not proceeding.</li></ul></div></details>
+  <h3>Logging events</h3>
+  <details class="faq-item"><summary>How do I log an event?</summary><div><p>Open an Active investigation and tap the appropriate event button. The app captures the time when you tap it. Add any relevant details, then save the event.</p></div></details>
+  <details class="faq-item"><summary>Do I need to write a description?</summary><div><p>No. You can save a marker without a detailed description.</p></div></details>
+  <details class="faq-item"><summary>Can an administrator log an event for someone else?</summary><div><p>Yes. The event can identify the investigator involved while separately preserving who recorded it.</p></div></details>
+  <h3>Connection and synchronization</h3>
+  <details class="faq-item"><summary>Can I log events without an internet connection?</summary><div><p>Once the investigation is loaded and available on your device, event markers can be saved locally during a connection loss. They need to synchronize before other members can see them.</p></div></details>
+  <details class="faq-item"><summary>How do I know whether an event has synchronized?</summary><div><ul><li><strong>Green checkmark:</strong> Saved to the shared database.</li><li><strong>Orange Clock:</strong> Waiting to synchronize.</li><li><strong>Red Exclamation:</strong> Synchronization needs attention.</li></ul><p>The footer shows the app’s connection and sync status.</p></div></details>
+  <details class="faq-item"><summary>What should I do if markers are not synchronizing?</summary><div><p>Reconnect to the internet and keep DocuHub open. If markers remain pending, contact an administrator. Keep using the same device and browser where you logged them.</p></div></details>
+  <details class="faq-item"><summary>Are pending markers available on my other devices?</summary><div><p>No. Unsynchronized markers are stored in the browser on the device that recorded them.</p></div></details>
+  <details class="faq-item"><summary>Can an administrator retrieve pending markers from my device remotely?</summary><div><p>No. An administrator’s sync controls cannot inspect another device’s local storage.</p></div></details>
+  <details class="faq-item"><summary>How do I protect unsynchronized markers?</summary><div><p>Use <strong>Backup Pending Markers</strong> to save a backup. Do not clear browser data or uninstall the app while markers remain pending.</p></div></details>
+  <h3>Submitting evidence</h3>
+  <details class="faq-item"><summary>How do I submit evidence?</summary><div><p>Choose <strong>Submit Evidence</strong> on the investigation, or use the main Submit Evidence tab. Select the investigation, paste your shared cloud folder link, and submit.</p></div></details>
+  <details class="faq-item"><summary>Which cloud services can I use?</summary><div><p>You can use a shared folder from Google Drive, iCloud Drive, Dropbox, OneDrive, or another cloud storage service.</p></div></details>
+  <details class="faq-item"><summary>Do I need to submit each file separately?</summary><div><p>No. One shared folder can contain your photos, videos, audio, and other evidence for that investigation.</p></div></details>
+  <details class="faq-item"><summary>Does DocuHub upload or store my evidence files?</summary><div><p>No. DocuHub stores the folder link. Your files remain with your cloud storage provider.</p></div></details>
+  <details class="faq-item"><summary>What sharing permissions should my folder have?</summary><div><p>Give the intended IEGH reviewers permission to open the folder and its files. A link alone does not grant access. Check the sharing settings before submitting.</p></div></details>
+  <details class="faq-item"><summary>Who is credited for a submission?</summary><div><p>DocuHub automatically records the signed-in member and submission date.</p></div></details>
+  <details class="faq-item"><summary>Where can I find submitted evidence?</summary><div><p>Open the investigation’s <strong>Submitted Evidence</strong> section. Each submission identifies the member and provides an <strong>Evidence Link</strong> button.</p></div></details>
+  <details class="faq-item"><summary>When can I submit evidence?</summary><div><p>Evidence submissions are available while an investigation is Active or Concluded. Completed investigations are closed to submissions.</p></div></details>
+  <details class="faq-item"><summary>What if I need to submit evidence after an investigation is Completed?</summary><div><p>Contact an administrator. Finalized investigations must be reopened before evidence can be added.</p></div></details>
+  <details class="faq-item"><summary>What happens if I delete or stop sharing my cloud folder?</summary><div><p>The saved link may stop working. Keep submitted folders available to the group, and notify an administrator if a link changes.</p></div></details>
+  <h3>Administration and help</h3>
+  <details class="faq-item"><summary>What is the difference between concluding and finalizing an investigation?</summary><div><p>Concluding ends field logging while allowing members to submit evidence. Finalizing closes evidence submissions and locks the investigation’s records.</p></div></details>
+  <details class="faq-item"><summary>Who can reopen a Completed investigation?</summary><div><p>An administrator can reopen it.</p></div></details>
+  <details class="faq-item"><summary>What should I include when reporting a problem?</summary><div><p>Send an administrator the investigation name, what you were trying to do, and the exact error message or a screenshot. Include your device and browser. Never share your password.</p></div></details>
+</section>
+
 <section class="panel hidden page" id="adminPage">
   <h2>Admin Headquarters</h2>
   <p class="muted">
@@ -793,6 +830,7 @@ form {min-width:0}
       Schedule Investigation
     </button>
     <button type="button" onclick="window.location.href='investigators.html'">Manage Investigators</button>
+    <button type="button" id="adminSyncEvents">Sync Events</button>
   </div>
   <div id="investigationEditor" class="hidden">
     <h3 id="investigationEditorTitle">
@@ -3331,17 +3369,13 @@ $("mainMenu").addEventListener("change",async e=>{
   if(action==="logout"){
     await confirmSignOut();return;
   }
-  if(action==="sync"){
-    setPage("accountPage");
-    renderSyncOverview();
-    return;
-  }
   if(action==="admin"&&role!=="admin")return;
   cancelEvent();
   activeInvestigationId=null;
   ++workspaceRequest;
   if(action==="admin")setPage("adminPage");
   if(action==="account")setPage("accountPage");
+  if(action==="faq")setPage("faqPage");
 });
 
 $("loginForm").addEventListener("submit",async e=>{
@@ -3448,6 +3482,12 @@ $("saveEvent").addEventListener("click",saveEvent);
 $("cancelEvent").addEventListener("click",cancelEvent);
 $("submitCorrection").addEventListener("click",submitEventCorrection);
 $("cancelCorrection").addEventListener("click",closeEventCorrection);
+$("adminSyncEvents").addEventListener("click",()=>{
+  if(role!=="admin")return;
+  setPage("accountPage");
+  renderSyncOverview();
+  $("syncOverview").scrollIntoView({behavior:"smooth",block:"start"});
+});
 $("syncButton").addEventListener("click",()=>syncEvents(false));
 $("backupQueue").addEventListener("click",()=>{
   const queue=queueRead().filter(x=>role==="admin"||localOwner(x)===user?.id);
