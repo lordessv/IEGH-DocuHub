@@ -429,6 +429,13 @@ form {min-width:0}
 #investigationList .actions button {min-height:42px;padding:8px 10px;font-size:.92rem}
 @media(max-width:430px){#navigation .tabs{gap:5px}#navigation .tabs button{font-size:.72rem;padding:8px 3px}#adminPage > .actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
+  .evidence-link-button {
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 18px;border-radius:9px;
+    background:#396caa;color:#fff;text-decoration:none;
+    font-weight:650;margin-top:8px;
+  }
+  .evidence-link-button:focus-visible {outline:3px solid #9de8ff;outline-offset:3px}
 </style>
 </head>
 <body>
@@ -3236,18 +3243,15 @@ async function loadEvidenceList(){
   data.forEach(item=>{
     const card=document.createElement("div");
     card.className="panel";
-    addText(card,"strong",item.title||"Evidence folder");
     addText(card,"p",nameById(item.submitted_by)+
       " • "+new Date(item.created_at).toLocaleString(),"muted");
-    if(item.area)addText(card,"p","Area: "+item.area);
-    if(item.description)addText(card,"p",item.description);
-    addText(card,"p","Review: "+(item.review_status||"pending"),"muted");
     if(item.external_url){
       const link=document.createElement("a");
       link.href=item.external_url;
       link.target="_blank";
       link.rel="noopener noreferrer";
-      link.textContent="Open evidence link";
+      link.textContent="Evidence Link";
+      link.className="evidence-link-button";
       card.append(link);
     }
     target.append(card);
