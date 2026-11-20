@@ -3658,7 +3658,7 @@ window.addEventListener("load", init, {once:true});
     if (parent) parent.append(node);
     return node;
   };
-  const permitted = kind => !!user && titles.get(user.id)?.[kind] === true;
+  const permitted = kind => !!user && (role === 'admin' || titles.get(user.id)?.[kind] === true);
   const inboxAllowed = () => !!user && (role === 'admin' || permitted('lead_investigator'));
   const feedback = (text, bad = false) => {
     el('researchFeedback').textContent = text;
@@ -3679,7 +3679,7 @@ window.addEventListener("load", init, {once:true});
       <input id="researchTitle" maxlength="200" required>
       <label for="researchBody">Research and Source Links</label>
       <textarea id="researchBody" maxlength="100000" rows="10" style="min-height:240px"></textarea>
-      <p class="muted">Drafts are private. Submit to share with all Lead Investigators and administrators.</p>
+      <p class="muted">Drafts are visible to their author and administrators. Submit to share with all Lead Investigators and administrators.</p>
       <div class="actions">
         <button type="submit" id="researchSave">Save Draft</button>
         <button type="button" id="researchSubmit">Submit Research</button>
@@ -3789,6 +3789,8 @@ window.addEventListener("load", init, {once:true});
     }
     select.value=row?.investigation_id||'';
     el('researchTitle').value=row?.title||''; el('researchBody').value=row?.body||'';
+    el('researchSave').textContent=row?.status==='submitted'?'Save Correction':'Save Draft';
+    el('researchSubmit').hidden=row?.status==='submitted';
     savedForm=formValue(); form.classList.remove('hidden'); feedback('');
     form.scrollIntoView({block:'start'});
   }
@@ -3810,7 +3812,7 @@ window.addEventListener("load", init, {once:true});
       const rows=[];
       for (let start=0;;start+=200) {
         let query=db.from('docuhub_research').select('*').order('updated_at',{ascending:false}).order('id');
-        query=view==='researchInbox'?query.eq('status','submitted'):query.eq('author_id',who);
+        if (role!=='admin') query=view==='researchInbox'?query.eq('status','submitted'):query.eq('author_id',who);
         const {data,error}=await query.range(start,start+199);
         if (epoch!==generation || who!==user?.id || ticket!==request) return;
         if (error) throw error;
@@ -3823,14 +3825,44 @@ window.addEventListener("load", init, {once:true});
         make('p',investigationLabel(row.investigation_id),card);
         make('p','By '+nameById(row.author_id)+' | '+timeLabel(row.submitted_at||row.updated_at),card);
         bodyWithLinks(card,row.body);
-        if (row.status==='draft' && row.author_id===user.id && permitted('researcher')) {
-          const button=make('button','Edit Draft',card); button.type='button';
+        if (role==='admin' || (row.status==='draft' && row.author_id===user.id && permitted('researcher'))) {
+          const button=make('button',row.status==='submitted'?'Correct Research':'Edit Draft',card); button.type='button';
           button.addEventListener('click',()=>editor(row));
+          if(role==='admin') {
+            const history=make('button','History / Restore',card); history.type='button';
+            history.addEventListener('click',()=>historyView(row,card));
+          }
         }
       });
     } catch(e) {
       if (epoch===generation && ticket===request) feedback('Unable to load research: '+e.message,true);
     }
+  }
+  async function historyView(row,card) {
+    const who=user?.id, epoch=generation;
+    try {
+      const {data,error}=await db.from('docuhub_research_history').select('*').eq('research_id',row.id).order('changed_at',{ascending:false});
+      if(error) throw error;
+      if(generation!==epoch || user?.id!==who || role!=='admin') return;
+      card.querySelector('.research-history')?.remove();
+      const box=make('div',undefined,card);box.className='research-history';
+      if(!data?.length) make('p','No previous changes recorded.',box);
+      for(const version of data||[]) {
+        const detail=make('details',undefined,box);
+        make('summary',timeLabel(version.changed_at)+' | '+nameById(version.changed_by),detail);
+        make('p','Reason: '+version.reason,detail);
+        make('p','Previous title: '+version.old_values.title,detail);
+        bodyWithLinks(detail,version.old_values.body);
+        const restore=make('button','Restore This Content',detail);restore.type='button';
+        restore.addEventListener('click',()=>{
+          editor(row);
+          if(draft?.id!==row.id) return;
+          el('researchTitle').value=version.old_values.title;
+          el('researchBody').value=version.old_values.body;
+          feedback('Previous content loaded. Save it with a reason to restore it.');
+        });
+      }
+    } catch(e) {feedback(e.message,true);}
   }
   async function save(submit) {
     if (busy || !draft || !permitted('researcher') || !form.reportValidity()) return;
@@ -3841,21 +3873,26 @@ window.addEventListener("load", init, {once:true});
     const who=user.id, epoch=generation, id=draft.id;
     const payload={investigation_id:el('researchInvestigation').value,
       title:el('researchTitle').value.trim(),body:el('researchBody').value,
-      status:submit?'submitted':'draft'};
+      status:submit||draft.status==='submitted'?'submitted':'draft'};
+    if(role==='admin' && draft.updated_at) {
+      const reason=prompt('Reason for this research change or restoration:');
+      if(!reason?.trim()) return feedback('A change reason is required.',true);
+      payload.change_reason=reason.trim();
+    }
     busy=true;
     form.querySelectorAll('input,select,textarea,button').forEach(n=>n.disabled=true);
     feedback(submit?'Submitting...':'Saving draft...');
     try {
       let query=draft.updated_at
-        ? db.from('docuhub_research').update(payload).eq('id',id).eq('author_id',who)
-          .eq('status','draft').eq('updated_at',draft.updated_at)
+        ? db.from('docuhub_research').update(payload).eq('id',id).eq('author_id',draft.author_id)
+          .eq('status',draft.status).eq('updated_at',draft.updated_at)
         : db.from('docuhub_research').insert({...payload,id,author_id:who});
       const {data,error}=await query.select('*').single();
       if (epoch!==generation || who!==user?.id) return;
       if (error || !data) throw new Error(error?.message||'Save was not confirmed. Refresh the list before retrying.');
       draft=data; savedForm=formValue();
       if (submit) { form.classList.add('hidden'); draft=null; }
-      await list(); feedback(submit?'Submitted to all Lead Investigators.':'Draft saved privately.');
+      await list(); feedback(submit?'Submitted to all Lead Investigators.':payload.status==='submitted'?'Research correction saved.':'Draft saved.');
     } catch(e) {
       if (epoch===generation) feedback('Not confirmed: '+e.message+' Your text remains here. Refresh the list to check before retrying.',true);
     } finally {
