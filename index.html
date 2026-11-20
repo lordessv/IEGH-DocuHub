@@ -3646,5 +3646,252 @@ window.addEventListener("load", init, {once:true});
 </script>
 <script src="investigation-details.js"></script>
 <script src="password-controls.js"></script>
+<script>
+/* Additive DocuHub research extension. Load after the existing app scripts. */
+(() => {
+  'use strict';
+  let titles = new Map(), draft = null, busy = false, generation = 0, request = 0;
+  const el = id => document.getElementById(id);
+  const make = (tag, text, parent) => {
+    const node = document.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (parent) parent.append(node);
+    return node;
+  };
+  const permitted = kind => !!user && titles.get(user.id)?.[kind] === true;
+  const inboxAllowed = () => !!user && (role === 'admin' || permitted('lead_investigator'));
+  const feedback = (text, bad = false) => {
+    el('researchFeedback').textContent = text;
+    el('researchFeedback').className = bad ? 'bad' : 'muted';
+  };
+  const page = make('section');
+  page.id = 'researchPage'; page.className = 'page panel hidden';
+  page.innerHTML = `
+    <h2 id="researchHeading">Research</h2>
+    <div class="actions">
+      <button type="button" id="researchNew">New Research</button>
+      <button type="button" id="researchRefresh" class="secondary">Refresh List</button>
+    </div>
+    <form id="researchForm" class="panel hidden">
+      <label for="researchInvestigation">Investigation</label>
+      <select id="researchInvestigation" required></select>
+      <label for="researchTitle">Title</label>
+      <input id="researchTitle" maxlength="200" required>
+      <label for="researchBody">Research and Source Links</label>
+      <textarea id="researchBody" maxlength="100000" rows="10" style="min-height:240px"></textarea>
+      <p class="muted">Drafts are private. Submit to share with all Lead Investigators and administrators.</p>
+      <div class="actions">
+        <button type="submit" id="researchSave">Save Draft</button>
+        <button type="button" id="researchSubmit">Submit Research</button>
+        <button type="button" id="researchClose" class="secondary">Close</button>
+      </div>
+    </form>
+    <p id="researchFeedback" class="muted" role="status" aria-live="polite"></p>
+    <div id="researchList"></div>`;
+  document.querySelector('main').append(page);
+  const menu = el('mainMenu');
+  for (const [value, label] of [['research','Research'],['researchInbox','Research Inbox']]) {
+    const item = make('option', label); item.value = value;
+    item.id = value + 'MenuOption'; item.hidden = true; item.disabled = true;
+    menu.append(item);
+  }
+  let mode = 'research';
+  const form = el('researchForm');
+  const fields = ['researchInvestigation','researchTitle','researchBody'];
+  let savedForm = '';
+  const formValue = () => JSON.stringify(fields.map(id => el(id).value));
+  const dirty = () => !form.classList.contains('hidden') && formValue() !== savedForm;
+  function leaveEditor() {
+    if (busy) { feedback('Please wait for the save to finish.', true); return false; }
+    if (dirty() && !confirm('Discard unsaved research changes?')) return false;
+    form.classList.add('hidden'); draft = null; return true;
+  }
+  function visibility() {
+    for (const [id, allowed] of [['research',permitted('researcher')],['researchInbox',inboxAllowed()]]) {
+      el(id+'MenuOption').hidden = !allowed;
+      el(id+'MenuOption').disabled = !allowed;
+    }
+    const me = members.find(m => m.id === user?.id);
+    if (me) el('accountInfo').textContent = memberName(me)+' | Member'+(role==='admin'?' | Administrator':'');
+  }
+  async function refreshTitles() {
+    const who = user?.id, epoch = generation;
+    if (!who) return;
+    const {data,error} = await db.from('docuhub_member_titles').select('*');
+    if (epoch !== generation || user?.id !== who) return;
+    if (error) throw error;
+    titles = new Map((data||[]).map(row => [row.member_id,row]));
+    visibility(); renderMembers();
+  }
+  const originalRenderMembers = renderMembers;
+  renderMembers = function () {
+    originalRenderMembers();
+    const sorted = [...members].sort((a,b) => memberName(a).localeCompare(memberName(b)));
+    [...el('memberList').children].forEach((card,index) => {
+      const member = sorted[index]; if (!member) return;
+      const label = card.querySelector('p');
+      if (label) label.textContent = 'Member'+(member.role==='admin'?' | Administrator':'');
+      const current = titles.get(member.id)||{};
+      if (role !== 'admin') return;
+      const controls = make('div', undefined, card);
+      const check = (key, label) => {
+        const row = make('label', undefined, controls);
+        row.style.cssText = 'display:flex;align-items:center;gap:10px';
+        const input = make('input', undefined, row); input.type = 'checkbox';
+        input.style.cssText = 'width:22px;height:22px;min-height:22px';
+        input.checked = current[key] === true;
+        row.append(document.createTextNode(label)); return input;
+      };
+      const lead = check('lead_investigator','Lead Investigator');
+      const researcher = check('researcher','Researcher');
+      const button = make('button','Save Titles',controls); button.type = 'button';
+      const status = make('p','',controls); status.setAttribute('role','status');
+      button.addEventListener('click',async () => {
+        const who=user?.id, epoch=generation;
+        button.disabled=true; lead.disabled=true; researcher.disabled=true;
+        try {
+          if (!navigator.onLine) throw new Error('Connect to save member titles.');
+          const result=await db.rpc('docuhub_set_member_titles',{
+            p_member_id:member.id,p_lead:lead.checked,p_researcher:researcher.checked
+          });
+          if (result.error) throw result.error;
+          if (epoch!==generation || user?.id!==who) return;
+          titles.set(member.id,{member_id:member.id,lead_investigator:lead.checked,researcher:researcher.checked});
+          visibility(); status.textContent='Titles saved.'; status.className='good';
+        } catch(e) { status.textContent=e.message; status.className='bad'; }
+        finally { button.disabled=false; lead.disabled=false; researcher.disabled=false; }
+      });
+    });
+  };
+  const originalLoadData=loadData;
+  loadData=async function (...args) {
+    const result=await originalLoadData.apply(this,args);
+    if (result!==false && user) {
+      try { await refreshTitles(); }
+      catch(e) { msg('Research controls unavailable: '+e.message,'warn'); }
+    }
+    return result;
+  };
+  const originalSignedOut=signedOut;
+  signedOut=async function (...args) {
+    generation++; request++; titles.clear(); draft=null;
+    form.reset(); form.classList.add('hidden'); el('researchList').replaceChildren();
+    feedback(''); const result=await originalSignedOut.apply(this,args); visibility(); return result;
+  };
+  function editor(row=null) {
+    if (!permitted('researcher') || !leaveEditor()) return;
+    draft=row ? {...row} : {id:crypto.randomUUID()};
+    const select=el('researchInvestigation'); select.replaceChildren();
+    const placeholder=make('option','Select an investigation',select); placeholder.value='';
+    for (const inv of investigations) {
+      const item=make('option',investigationLabel(inv.id)+' ('+statusLabel(inv.status)+')',select);
+      item.value=inv.id;
+    }
+    select.value=row?.investigation_id||'';
+    el('researchTitle').value=row?.title||''; el('researchBody').value=row?.body||'';
+    savedForm=formValue(); form.classList.remove('hidden'); feedback('');
+    form.scrollIntoView({block:'start'});
+  }
+  function bodyWithLinks(parent,text) {
+    const p=make('p',undefined,parent); p.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere';
+    const pieces=String(text).split(/(https?:\/\/[^\s<>]+)/g);
+    pieces.forEach(piece => {
+      if (/^https?:\/\//i.test(piece)) {
+        const a=make('a',piece,p); a.href=piece; a.target='_blank'; a.rel='noopener noreferrer';
+      } else p.append(document.createTextNode(piece));
+    });
+  }
+  async function list() {
+    const who=user?.id, epoch=generation, ticket=++request, view=mode;
+    el('researchList').replaceChildren();
+    if (!who || (view==='researchInbox' ? !inboxAllowed() : !permitted('researcher'))) return;
+    feedback('Loading research...');
+    try {
+      const rows=[];
+      for (let start=0;;start+=200) {
+        let query=db.from('docuhub_research').select('*').order('updated_at',{ascending:false}).order('id');
+        query=view==='researchInbox'?query.eq('status','submitted'):query.eq('author_id',who);
+        const {data,error}=await query.range(start,start+199);
+        if (epoch!==generation || who!==user?.id || ticket!==request) return;
+        if (error) throw error;
+        rows.push(...(data||[])); if ((data||[]).length<200) break;
+      }
+      feedback(rows.length?'':'No research here yet.');
+      rows.forEach(row => {
+        const card=make('details',undefined,el('researchList')); card.className='item';
+        make('summary',row.title+' | '+(row.status==='draft'?'Draft':'Submitted'),card);
+        make('p',investigationLabel(row.investigation_id),card);
+        make('p','By '+nameById(row.author_id)+' | '+timeLabel(row.submitted_at||row.updated_at),card);
+        bodyWithLinks(card,row.body);
+        if (row.status==='draft' && row.author_id===user.id && permitted('researcher')) {
+          const button=make('button','Edit Draft',card); button.type='button';
+          button.addEventListener('click',()=>editor(row));
+        }
+      });
+    } catch(e) {
+      if (epoch===generation && ticket===request) feedback('Unable to load research: '+e.message,true);
+    }
+  }
+  async function save(submit) {
+    if (busy || !draft || !permitted('researcher') || !form.reportValidity()) return;
+    if (!el('researchTitle').value.trim()) return feedback('Enter a title.',true);
+    if (submit && !el('researchBody').value.trim()) return feedback('Add research before submitting.',true);
+    if (!navigator.onLine) return feedback('Connect to save or submit. Your text remains in the form.',true);
+    if (submit && !confirm('Submit to all Lead Investigators? This submission will be read-only.')) return;
+    const who=user.id, epoch=generation, id=draft.id;
+    const payload={investigation_id:el('researchInvestigation').value,
+      title:el('researchTitle').value.trim(),body:el('researchBody').value,
+      status:submit?'submitted':'draft'};
+    busy=true;
+    form.querySelectorAll('input,select,textarea,button').forEach(n=>n.disabled=true);
+    feedback(submit?'Submitting...':'Saving draft...');
+    try {
+      let query=draft.updated_at
+        ? db.from('docuhub_research').update(payload).eq('id',id).eq('author_id',who)
+          .eq('status','draft').eq('updated_at',draft.updated_at)
+        : db.from('docuhub_research').insert({...payload,id,author_id:who});
+      const {data,error}=await query.select('*').single();
+      if (epoch!==generation || who!==user?.id) return;
+      if (error || !data) throw new Error(error?.message||'Save was not confirmed. Refresh the list before retrying.');
+      draft=data; savedForm=formValue();
+      if (submit) { form.classList.add('hidden'); draft=null; }
+      await list(); feedback(submit?'Submitted to all Lead Investigators.':'Draft saved privately.');
+    } catch(e) {
+      if (epoch===generation) feedback('Not confirmed: '+e.message+' Your text remains here. Refresh the list to check before retrying.',true);
+    } finally {
+      busy=false; form.querySelectorAll('input,select,textarea,button').forEach(n=>n.disabled=false);
+    }
+  }
+  menu.addEventListener('change',event => {
+    const action=menu.value;
+    if (!['research','researchInbox'].includes(action)) {
+      if (!page.classList.contains('hidden') && !leaveEditor()) {
+        event.stopImmediatePropagation(); menu.value='';
+      }
+      return;
+    }
+    event.stopImmediatePropagation(); menu.value='';
+    if (!user || (action==='research'? !permitted('researcher'):!inboxAllowed()) || !leaveEditor()) return;
+    mode=action; cancelEvent(); activeInvestigationId=null; ++workspaceRequest;
+    el('researchHeading').textContent=mode==='research'?'Research':'Research Inbox';
+    el('researchNew').hidden=mode!=='research';
+    setPage('researchPage'); window.scrollTo({top:0,behavior:'instant'}); void list();
+  },true);
+  el('tabs').addEventListener('click',event => {
+    if (!page.classList.contains('hidden') && !leaveEditor()) event.stopImmediatePropagation();
+  },true);
+  window.addEventListener('beforeunload',event => {
+    if (dirty()||busy) { event.preventDefault(); event.returnValue=''; }
+  });
+  el('researchNew').addEventListener('click',()=>editor());
+  el('researchClose').addEventListener('click',leaveEditor);
+  el('researchRefresh').addEventListener('click',async () => {
+    try { await refreshTitles(); await list(); } catch(e) { feedback(e.message,true); }
+  });
+  form.addEventListener('submit',event => {event.preventDefault(); void save(false);});
+  el('researchSubmit').addEventListener('click',()=>save(true));
+})();
+
+</script>
 </body>
 </html>
