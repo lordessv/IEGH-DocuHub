@@ -3660,10 +3660,7 @@ window.addEventListener("load", init, {once:true});
   };
   const permitted = kind => !!user && (role === 'admin' || titles.get(user.id)?.[kind] === true);
   const inboxAllowed = () => !!user && (role === 'admin' || permitted('lead_investigator'));
-  const feedback = (text, bad = false) => {
-    el('researchFeedback').textContent = text;
-    el('researchFeedback').className = bad ? 'bad' : 'muted';
-  };
+  const feedback = (text, bad = false) => msg(text, bad ? 'bad' : 'muted');
   const page = make('section');
   page.id = 'researchPage'; page.className = 'page panel hidden';
   page.innerHTML = `
@@ -3686,14 +3683,13 @@ window.addEventListener("load", init, {once:true});
         <button type="button" id="researchClose" class="secondary">Close</button>
       </div>
     </form>
-    <p id="researchFeedback" class="muted" role="status" aria-live="polite"></p>
     <div id="researchList"></div>`;
-  document.querySelector('main').append(page);
+  el('message').parentElement.before(page);
   const menu = el('mainMenu');
   for (const [value, label] of [['research','Research'],['researchInbox','Research Inbox']]) {
     const item = make('option', label); item.value = value;
     item.id = value + 'MenuOption'; item.hidden = true; item.disabled = true;
-    menu.append(item);
+    menu.insertBefore(item, menu.querySelector('option[value="logout"]'));
   }
   let mode = 'research';
   const form = el('researchForm');
